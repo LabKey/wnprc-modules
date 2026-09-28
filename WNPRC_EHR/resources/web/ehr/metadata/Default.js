@@ -145,8 +145,8 @@ EHR.Metadata.registerMetadata('Default', {
                 dateFormat: LABKEY.extDefaultDateFormat,
                 timeFormat: 'H:i'
             }
-        }
-        ,cage: {
+        },
+        cage: {
             editorConfig: {
                 listeners: {
                     change: function(field, val){

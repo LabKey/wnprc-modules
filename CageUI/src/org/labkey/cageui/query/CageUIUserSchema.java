@@ -41,6 +41,7 @@ public class CageUIUserSchema extends SimpleUserSchema
     public static final String RACKS_TABLE = "racks";
     public static final String CAGE_MODIFICATIONS_TABLE = "cage_modifications";
     public static final String CAGE_MODIFICATIONS_HISTORY_TABLE = "cage_modifications_history";
+    public static final String HOUSING_CONDITION_RECORDS_TABLE = "housing_condition_records";
 
     public CageUIUserSchema(User user, Container container, DbSchema dbschema)
     {
@@ -127,6 +128,14 @@ public class CageUIUserSchema extends SimpleUserSchema
                     public TableInfo createTable(CageUIUserSchema schema, ContainerFilter cf)
                     {
                         return new CageModificationsTable(schema, CageUISchema.getInstance().getCageModificationsTable(), cf).init();
+                    }
+                },
+        housing_condition_records
+                {
+                    @Override
+                    public TableInfo createTable(CageUIUserSchema schema, ContainerFilter cf)
+                    {
+                        return new HousingConditionRecordsTable(schema, CageUISchema.getInstance().getHousingConditionRecordsTable(), cf).init();
                     }
                 };
 

@@ -42,6 +42,7 @@ export interface ExtraContext {
 export interface LayoutSaveResult {
     success: boolean;
     roomName: string; // redirect room
+    historyid?: string;
     reason?: string[];
 }
 

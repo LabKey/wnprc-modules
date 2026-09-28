@@ -23,8 +23,8 @@ import { SelectedPage } from '../types/homeTypes';
 import { Cage, Rack, RackGroup, Room, RoomMods } from '../types/typings';
 import { findCageInGroup, findRackInGroup } from '../utils/LayoutEditorHelpers';
 import { buildNewLocalRoom, fetchRoomData } from '../utils/helpers';
-import _ from 'lodash';
 import { ActionURL, Security } from '@labkey/api';
+import * as lodash from 'lodash';
 
 interface HomeNavigationContextProps {
     user: Security.GetUserPermissionsResponse;
@@ -207,7 +207,7 @@ export const HomeNavigationContextProvider: FC<HomeNavigationContextProps> = ({u
                 if (newLocalRoom) {
                     newLocalRoom.layoutData = roomData.prevRoomData.layoutData;
                     // Ensure they don't share the same reference (using lodash to clone)
-                    setSelectedRoomMods(_.cloneDeep(newLocalRoom.mods));
+                    setSelectedRoomMods(lodash.cloneDeep(newLocalRoom.mods));
                     setSelectedRoom({...newLocalRoom, objects: [...newLocalRoom.objects]});
                 }
                 return newLocalRoom;

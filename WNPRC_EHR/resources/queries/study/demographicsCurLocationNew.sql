@@ -16,33 +16,36 @@
  *
  */
 
-package org.labkey.cageui.action;
+SELECT
 
-import java.util.ArrayList;
-import java.util.Map;
+    d2.id,
 
-public class CagesFormWithContext
-{
-    private ArrayList<CagesForm> _cagesForm;
-    private Map<String,Map<String, Object>> _extraContext;
+    CASE
+        WHEN d2.cageNew is null then d2.room
+        ELSE (d2.room || '-' || d2.cageNew.cage_number)
+        END AS Location,
 
-    public ArrayList<CagesForm> getCagesForm()
-    {
-        return _cagesForm;
-    }
+    d2.room.area,
 
-    public void setCagesForm(ArrayList<CagesForm> cagesForm)
-    {
-        _cagesForm = cagesForm;
-    }
+    d2.room,
 
-    public Map<String,Map<String, Object>> getExtraContext()
-    {
-        return _extraContext;
-    }
+    d2.cageNew as cage,
 
-    public void setExtraContext(Map<String,Map<String, Object>> extraContext)
-    {
-        _extraContext = extraContext;
-    }
-}
+    d2.condNew as cond,
+
+    d2.date,
+
+    d2.reason,
+
+    d2.remark,
+
+    coalesce(d2.room, '') as room_order,
+    d2.room_sortValue @hidden,
+
+    coalesce(d2.cageNew, '') as cage_order,
+    d2.cage_sortValue @hidden
+
+FROM study.housing_test d2
+
+WHERE d2.enddate IS NULL
+  AND d2.qcstate.publicdata = true

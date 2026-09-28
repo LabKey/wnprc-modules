@@ -22,14 +22,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import org.apache.commons.lang3.SerializationUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.json.JSONString;
+import org.labkey.api.action.ApiResponse;
 import org.labkey.api.action.ApiSimpleResponse;
-import org.labkey.api.action.BaseApiAction;
-import org.labkey.api.action.Marshal;
-import org.labkey.api.action.Marshaller;
 import org.labkey.api.action.MutatingApiAction;
 import org.labkey.api.action.ReadOnlyApiAction;
 import org.labkey.api.action.SimpleApiJsonForm;
@@ -37,8 +34,6 @@ import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.TableInfo;
-import org.labkey.api.module.ModuleHtmlView;
-import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.DuplicateKeyException;
 import org.labkey.api.query.QueryService;
@@ -47,11 +42,10 @@ import org.labkey.api.query.QueryUpdateServiceException;
 import org.labkey.api.query.UserSchema;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.RequiresAnyOf;
-import org.labkey.api.security.RequiresLogin;
 import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.util.JsonUtil;
-import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.util.PageFlowUtil;
@@ -59,18 +53,24 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.UnauthorizedException;
 import org.labkey.cageui.action.AdoptionDataForm;
 import org.labkey.cageui.action.BundledForms;
+import org.labkey.cageui.action.CageUIRecordDeleteForm;
 import org.labkey.cageui.action.CagesForm;
+import org.labkey.cageui.action.HousingConditionRecordsForm;
 import org.labkey.cageui.action.RackTypesForm;
+import org.labkey.cageui.action.HousingForm;
+import org.labkey.cageui.dataentry.CageUIRecordDeleteRunner;
+import org.labkey.cageui.model.ConditionCode;
+import org.labkey.cageui.model.ConditionType;
+import org.labkey.cageui.model.HousingTransferData;
 import org.labkey.cageui.action.RacksForm;
 import org.labkey.cageui.model.AdoptionData;
 import org.labkey.cageui.model.AdoptionType;
 import org.labkey.cageui.model.Cage;
 import org.labkey.cageui.model.Manufacturer;
 import org.labkey.cageui.model.ModData;
-import org.labkey.cageui.model.ModLocations;
+import org.labkey.cageui.model.Option;
 import org.labkey.cageui.model.Rack;
 import org.labkey.cageui.model.RackCondition;
-import org.labkey.cageui.model.RackGroup;
 import org.labkey.cageui.model.RackSwitchOption;
 import org.labkey.cageui.model.RackTypes;
 import org.labkey.cageui.model.Room;
@@ -78,7 +78,6 @@ import org.labkey.cageui.model.SessionLog;
 import org.labkey.cageui.security.permissions.CageUIAdoptionsPermission;
 import org.labkey.cageui.security.permissions.CageUIAnimalEditorPermission;
 import org.labkey.cageui.security.permissions.CageUILayoutEditorAccessPermission;
-import org.labkey.cageui.security.permissions.CageUIModificationEditorPermission;
 import org.labkey.cageui.security.permissions.CageUIRoomCreatorPermission;
 import org.labkey.cageui.security.permissions.CageUIRoomModifierPermission;
 import org.labkey.cageui.security.permissions.CageUITemplateCreatorPermission;
@@ -87,10 +86,12 @@ import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.sql.SQLException;
+import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
+import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -125,6 +126,75 @@ public class CageUIController extends SpringActionController
         @Override
         public void addNavTrail(NavTree root)
         {
+        }
+    }
+
+    @RequiresPermission(AdminPermission.class)
+    public static class SetRecordDeleteSettingsAction extends MutatingApiAction<SimpleApiJsonForm>
+    {
+        private CageUIRecordDeleteForm _recordDeleteForm;
+
+        public CageUIRecordDeleteForm getRecordDeleteForm()
+        {
+            return _recordDeleteForm;
+        }
+
+        public void setRecordDeleteForm(CageUIRecordDeleteForm recordDeleteForm)
+        {
+            _recordDeleteForm = recordDeleteForm;
+        }
+
+        @Override
+        public void validateForm(SimpleApiJsonForm form, Errors errors)
+        {
+            JSONObject json = form.getJsonObject();
+            if (json == null)
+            {
+                errors.reject(ERROR_MSG, "Missing json parameter.");
+                return;
+            }
+
+            ObjectMapper mapper = JsonUtil.createDefaultMapper();
+            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            try
+            {
+                CageUIRecordDeleteForm deleteForm = mapper.readValue(json.toString(), CageUIRecordDeleteForm.class);
+                if (deleteForm != null)
+                {
+                    setRecordDeleteForm(deleteForm);
+                }
+                else
+                {
+                    errors.reject(ERROR_MSG, "Invalid record delete settings format.");
+                }
+            }
+            catch (JsonProcessingException e)
+            {
+                errors.reject(ERROR_MSG, e.getMessage());
+            }
+        }
+
+        @Override
+        public ApiResponse execute(SimpleApiJsonForm form, BindException errors)
+        {
+            CageUIRecordDeleteRunner.setProperties(getContainer(), getRecordDeleteForm().isEnabled());
+
+            return new ApiSimpleResponse("success", true);
+        }
+    }
+
+    @RequiresPermission(AdminPermission.class)
+    public static class GetRecordDeleteSettingsAction extends ReadOnlyApiAction<Object>
+    {
+        @Override
+        public ApiResponse execute(Object form, BindException errors)
+        {
+            Map<String, Object> ret = new HashMap<>();
+
+            ret.put("enabled", CageUIRecordDeleteRunner.isEnabled(getContainer()));
+            ret.put("success", true);
+
+            return new ApiSimpleResponse(ret);
         }
     }
 
@@ -315,6 +385,213 @@ public class CageUIController extends SpringActionController
                 throw new ValidationException(e.getMessage());
             }
             return response;
+        }
+    }
+
+    @RequiresPermission(CageUIAnimalEditorPermission.class)
+    public static class PrepareHousingTransferAction extends MutatingApiAction<SimpleApiJsonForm>
+    {
+        ArrayList<HousingTransferData> housingTransferData;
+
+        String prevFormLsid = null;
+        String layoutChangeId = null;
+
+        public String getPrevFormLsid(){
+            return this.prevFormLsid;
+        }
+        public void setPrevFormLsid(String lsid) {
+            this.prevFormLsid = lsid;
+        }
+        public String getLayoutChangeId(){
+            return this.layoutChangeId;
+        }
+        public void setLayoutChangeId(String layoutChangeId) {
+            this.layoutChangeId = layoutChangeId;
+        }
+        public ArrayList<HousingTransferData>  getHousingTransferData()
+        {
+            return this.housingTransferData;
+        }
+
+        public void setHousingTransferData(ArrayList<HousingTransferData>  housingTransferData)
+        {
+            this.housingTransferData = housingTransferData;
+        }
+
+        public static String convertOptionArrayToString(Option<String>[] options) {
+            if (options == null) {
+                return "";
+            }
+
+            return Arrays.stream(options)
+                    .map(option -> option != null ? option.getValue() : null)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.joining(","));
+        }
+
+        public static HousingConditionRecordsForm populateHousingConditionsStream(ConditionCode[] conditions) {
+            HousingConditionRecordsForm form = new HousingConditionRecordsForm();
+
+            // Group conditions by type
+            Map<ConditionType, List<ConditionCode>> conditionsByType = Arrays.stream(conditions)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.groupingBy(ConditionCode::getType));
+
+            // Set values using stream operations
+            conditionsByType.forEach((type, conditionList) -> {
+                if (conditionList.size() == 1) {
+                    String value = conditionList.getFirst().getValue();
+                    switch (type) {
+                        case SPECIAL:
+                            form.setSpecialCondition(value);
+                            break;
+                        case PAIR:
+                            form.setPairCondition(value);
+                            break;
+                        case CAGE:
+                            form.setCageCondition(value);
+                            break;
+                        case SOCIAL:
+                            form.setSocialCondition(value);
+                            break;
+                    }
+                }
+            });
+
+            return form;
+        }
+
+
+
+        @Override
+        public void validateForm(SimpleApiJsonForm form, Errors errors)
+        {
+            JSONObject json = form.getJsonObject();
+            if (json == null)
+            {
+                errors.reject(ERROR_MSG, "Missing json parameter.");
+                return;
+            }
+
+            JSONArray jsonTransferData = json.getJSONArray("transferData");
+            String prevFormLsid = null;
+            if (json.has("prevFormLsid")) {
+                prevFormLsid = json.getString("prevFormLsid");
+                setPrevFormLsid(prevFormLsid);
+            }
+            String layoutChangeId = null;
+            if (json.has("layoutChangeId")) {
+                layoutChangeId = json.getString("layoutChangeId");
+                setLayoutChangeId(layoutChangeId);
+            }
+            ObjectMapper mapper = JsonUtil.createDefaultMapper();
+            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+            try
+            {
+                TypeReference<ArrayList<HousingTransferData>> typeRef = new TypeReference<ArrayList<HousingTransferData>>()
+                {
+                };
+                ArrayList<HousingTransferData> transferDataList = mapper.readValue(jsonTransferData.toString(), typeRef);
+                setHousingTransferData(transferDataList);
+            }catch (JsonProcessingException e)
+            {
+                errors.reject(ERROR_MSG, e.getMessage());
+            }
+
+        }
+
+        @Override
+        public Object execute(SimpleApiJsonForm form, BindException errors) throws Exception
+        {
+            ArrayList<HousingForm> housingRecords = new ArrayList<>();
+            ArrayList<HousingConditionRecordsForm> housingConditionRecords = new ArrayList<>();
+            String taskId = UUID.randomUUID().toString();
+            Map<String, Object> taskRecord = new HashMap<>();
+
+            boolean isUpdate = getPrevFormLsid() != null;
+
+            if (!isUpdate) {
+                taskRecord = CageUIManager.get().createHousingTaskRecord(taskId, getUser());
+            } else {
+                taskId = null;
+            }
+
+            for (HousingTransferData record : getHousingTransferData()) {
+                HousingForm newTransferRecord = new HousingForm();
+                HousingConditionRecordsForm newConditionRecord = new HousingConditionRecordsForm();
+
+                if (isUpdate) {
+                    HousingForm prevTransferRecord = CageUIManager.getPreviousHousingForm(getPrevFormLsid(), getUser(), getContainer());
+                    HousingConditionRecordsForm prevConditionRecordForm = CageUIManager.getPreviousHousingConditionRecordForm(prevTransferRecord.getCondNew(), getUser(), getContainer());
+                    if (prevTransferRecord == null) {
+                        errors.reject(ERROR_MSG, "Previous housing form not found for lsid: " + getPrevFormLsid());
+                        return null;
+                    }
+                    if (prevConditionRecordForm == null) {
+                        errors.reject(ERROR_MSG, "Previous housing condition record form not found for objectId: " + prevTransferRecord.getCondNew());
+                        return null;
+                    }
+                    taskId = prevTransferRecord.getTaskId();
+                    newTransferRecord.setLsid(prevTransferRecord.getLsid());
+                    newTransferRecord.setCondNew(prevConditionRecordForm.getObjectId());
+                    newConditionRecord.setObjectId(prevConditionRecordForm.getObjectId());
+                } else {
+                    String recordObjectId = UUID.randomUUID().toString();
+                    newConditionRecord.setObjectId(recordObjectId);
+                    newTransferRecord.setCondNew(recordObjectId);
+                }
+
+                newTransferRecord.setId(record.getId());
+                newTransferRecord.setTaskId(taskId);
+                newTransferRecord.setDate(Date.from(record.getInDate().atZone(ZoneId.systemDefault()).toInstant()));
+                if(record.getOutDate() != null){
+                    newTransferRecord.setEndDate(Date.from(record.getOutDate().atZone(ZoneId.systemDefault()).toInstant()));
+                }
+                newTransferRecord.setQcState(1);
+                newTransferRecord.setReason(convertOptionArrayToString(record.getReasonForMove()));
+                newTransferRecord.setRemark(record.getRemarks());
+                newTransferRecord.setProject(record.getProject());
+                newTransferRecord.setPerformedBy(record.getPerformedBy());
+                newTransferRecord.setEjacConfirmed(record.isEjacConfirmed());
+
+                boolean isSpecialHousing = (record.getDestinationRoom() != null && "Special Housing".equals(record.getDestinationRoom().getValue()))
+                        || (record.getDestinationRoom() != null && "Special Housing".equals(record.getDestinationRoom().getLabel()))
+                        || (record.getDestinationCage() != null && "Special Housing".equals(record.getDestinationCage().getLabel()))
+                        || (record.getDestinationCage() != null && "Special Housing".equals(record.getDestinationCage().getValue()))
+                        || (record.getDestinationCage() != null && "-1".equals(record.getDestinationCage().getValue()));
+
+                boolean inTransit = (record.getDestinationRoom() != null && "In Transit".equals(record.getDestinationRoom().getValue()))
+                        || (record.getDestinationRoom() != null && "In Transit".equals(record.getDestinationRoom().getLabel()))
+                        || (record.getDestinationCage() != null && "In Transit".equals(record.getDestinationCage().getLabel()))
+                        || (record.getDestinationCage() != null && "In Transit".equals(record.getDestinationCage().getValue()));
+
+                if (record.getDestinationRoom() != null && "No Change".equals(record.getDestinationRoom().getValue())) { // No change (animal stays same room and cage)
+                    newTransferRecord.setRoom(record.getCurrentRoom() != null ? record.getCurrentRoom().getLabel() : null);
+                    newTransferRecord.setCageNew(record.getCurrentCage() != null ? record.getCurrentCage().getValue() : null);
+                } else if (isSpecialHousing) { // Special housing
+                    newTransferRecord.setRoom(record.getDestinationRoom() != null ? record.getDestinationRoom().getLabel() : null);
+                    newTransferRecord.setCageNew(null);
+                }else if(inTransit){
+                    newTransferRecord.setRoom(record.getDestinationRoom() != null ? record.getDestinationRoom().getLabel() : null);
+                    newTransferRecord.setCageNew(null);
+                }else {
+                    newTransferRecord.setRoom(record.getDestinationRoom() != null ? record.getDestinationRoom().getLabel() : null);
+                    newTransferRecord.setCageNew(record.getDestinationCage() != null ? record.getDestinationCage().getValue() : null);
+                }
+
+                HousingConditionRecordsForm populatedConditions = populateHousingConditionsStream(record.getCondition());
+                newConditionRecord.setSpecialCondition(populatedConditions.getSpecialCondition());
+                newConditionRecord.setPairCondition(populatedConditions.getPairCondition());
+                newConditionRecord.setCageCondition(populatedConditions.getCageCondition());
+                newConditionRecord.setSocialCondition(populatedConditions.getSocialCondition());
+                housingConditionRecords.add(newConditionRecord);
+
+
+                housingRecords.add(newTransferRecord);
+            }
+
+            return CageUIManager.get().submitHousingTransfer(housingRecords, housingConditionRecords, taskRecord, getUser(), getContainer(), layoutChangeId);
         }
     }
 
@@ -632,7 +909,6 @@ public class CageUIController extends SpringActionController
             JSONObject jsonRoom = json.getJSONObject("room");
             JSONArray jsonModsArray = json.getJSONArray("mods");
             JSONObject jsonSessionLog = json.getJSONObject("sessionLog");
-            String prevRoomName = json.get("prevRoomName").toString();
 
             ObjectMapper mapper = JsonUtil.createDefaultMapper();
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -715,13 +991,18 @@ public class CageUIController extends SpringActionController
             boolean isDefaultSave = json.get("isDefault").toString().equals("true");
             boolean isTemplateSave = savingTemplate || isDefaultSave;
             RackCondition prevRackCondition = null;
+            Integer status = 1; // Completed
 
-            if (json.has("prevRackCondition") && json.get("prevRackCondition") != null) {
+            if (json.has("prevRackCondition") && !json.isNull("prevRackCondition")) {
                 JSONObject prevRackConditionJson = json.getJSONObject("prevRackCondition");
                 prevRackCondition = new RackCondition(
                         prevRackConditionJson.getInt("value"),
                         prevRackConditionJson.getString("label")
                 );
+            }
+
+            if(json.has("status") && !json.isNull("status")){
+                status = json.getInt("status");
             }
 
             CageUIManager.RoomSubmissionService submissionService = new CageUIManager.RoomSubmissionService(
@@ -731,7 +1012,8 @@ public class CageUIController extends SpringActionController
                 prevRoomName,
                 getRoom(),
                 getRoomDefaultMods(),
-                prevRackCondition
+                prevRackCondition,
+                status
             );
             BundledForms newSubmissionForms = submissionService.submitRoom();
 

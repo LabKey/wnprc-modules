@@ -5,7 +5,9 @@
         <column name="enddate"/>
         <column name="room"/>
         <column name="cage"/>
+        <column name="cageNew"/>
         <column name="cond"/>
+        <column name="condNew"/>
         <column name="reason"/>
         <!--<column name="isTemp"/>-->
         <!--<column name="restraintType"/>-->

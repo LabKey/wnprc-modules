@@ -84,6 +84,10 @@ import { cageModLookup } from '../api/popularQueries';
 import { ConnectedCages, ConnectedRacks } from '../types/homeTypes';
 
 
+export const zeroPadName = (num, places) => {
+    return(String(num).padStart(places, '0'));
+};
+
 export const isTemplateCreator = (user: Security.GetUserPermissionsResponse) => {
     return Security.hasEffectivePermission(user.container.effectivePermissions, 'org.labkey.cageui.security.permissions.CageUITemplateCreatorPermission');
 };
@@ -596,8 +600,42 @@ export const addPrevRoomSvgs = async (
                 });
             });
         });
-
     };
+
+    /*
+        This function creates a container for the selected animal ID and returns it to be appended to the cage element.
+     */
+    const createAnimalContainer = (id: string, shape: d3.Selection<SVGElement, unknown, null, undefined>, idIdx: number) => {
+        const factor = 20;
+        // Create the SVG group element
+        const group = shape.append("g")
+            .attr("id", `animal-id-${id}`)
+
+        // Add the rectangle
+        group.append("rect")
+            .attr("id", "animal-id-container")
+            .attr("x", "3")
+            .attr("y", `${3 + (idIdx * factor)}`)
+            .attr("width", `${id.length * 6.8}`)
+            .attr("height", "16.23")
+            .attr("rx", "2.44")
+            .attr("ry", "2.44")
+            .style("fill", "#c5050c")
+            .style("stroke", "#c5050c")
+            .style("stroke-miterlimit", "10");
+
+        // Add the text element
+        group.append("text")
+            .attr("id", "animal-id")
+            .attr("transform", `translate(6.94 ${15.29 + (idIdx * factor)})`)
+            .style("fill", "#fff")
+            .style("font-family", "MyriadPro-Regular, 'Myriad Pro'")
+            .style("font-size", "12px")
+            .append("tspan")
+            .attr("x", "0")
+            .attr("y", "0")
+            .text(id);
+    }
 
     // this function renders the actual visible svg in some groups
     const createRackGroup = (parentGroup, rack: Rack, isSingleRack, groupRotation: GroupRotation) => {
@@ -635,6 +673,17 @@ export const addPrevRoomSvgs = async (
                     shape.select('[id=cageRect]')
                         .style("fill", '#878787')
                         .style("opacity", '0.7');
+                }
+                if(cage.animals){
+                    if(cage.animals.length > 3){
+                        // If animals in cage is more than 4 display a count of the animals in the cage
+                        createAnimalContainer(`${cage.animals.length} animals`, shape, 0)
+                    }else{
+                        // Display animal ids if count is less than 4
+                        cage.animals.forEach((animal, idx) => {
+                            createAnimalContainer(animal.id, shape, idx)
+                        })
+                    }
                 }
             }
 
@@ -940,6 +989,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
             y: rackItem.yCoord - rack.y - group.y,
             size: svgSize,
             mods: cageMods,
+            animals: rackItem.animals
         };
 
         newUnitLocs[cageNumType].push({
@@ -1407,7 +1457,16 @@ export const findConnectedRacks = (group: RackGroup, currRack: Rack, cage?: Cage
     return connections;
 };
 
-export const saveRoomHelper = async (room: Room, sessionLog: SessionLog, oldTemplateName?: string, prevRackCondition?: RackConditionOption): Promise<LayoutSaveResult> => {
+/*
+    Helper to prepare data before saving the room layout.
+
+    @param room The room layout to save
+    @param sessionLog Session log metadata to save to session log table
+    @param status QCState of the layout being submitted. Defaults to Completed (1). Used by mod changes paired with animal transfers.
+    @param oldTemplateName Previous template name to overwrite. Used when saving templates with updated names
+    @param prevRackCondition The condition of the previous rack to save. Used when changing racks within a room.
+ */
+export const saveRoomHelper = async (room: Room, sessionLog: SessionLog, oldTemplateName?: string, prevRackCondition?: RackConditionOption, status?: number): Promise<LayoutSaveResult> => {
     const newModData: CageMods[] = [];
 
     const roomName = room.name;
@@ -1500,12 +1559,12 @@ export const saveRoomHelper = async (room: Room, sessionLog: SessionLog, oldTemp
     let result: LayoutSaveResult;
 
     try {
-        const layoutSave = await saveRoomLayout(room, newModData, oldRoomName,sessionLog, prevRackCondition);
+        const layoutSave = await saveRoomLayout(room, newModData, oldRoomName,sessionLog, prevRackCondition, status);
         let errors;
         if (layoutSave.success === false) {
             errors = Array.isArray(layoutSave.errors) ? layoutSave.errors : [layoutSave.errors];
         }
-        result = {success: layoutSave.success, roomName: roomName, reason: errors};
+        result = {success: layoutSave.success, roomName: roomName, reason: errors, historyid: layoutSave.historyid};
     }
     catch (e) {
         const errors = Array.isArray(e.errors) ? e.errors : [e.errors];

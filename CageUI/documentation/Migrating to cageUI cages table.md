@@ -17,7 +17,7 @@ For the WNPRC this change needed to be done in the following files.
 8. >WNPRC_EHR/resources/web/wnprc_ehr/wnprcOverRides.js
 
 #### B.
-After changing these files, go into the table definition editor in EHR and rename the cage column to cageOld.
+After changing these files, go into the table definition editor in EHR and rename the cageNew column to cage.
 Then add a new column named cage. This will rename the previous cage column while preserving the data and 
 allowing us to work with the new cage column under the old name.
 

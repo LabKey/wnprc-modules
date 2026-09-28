@@ -42,6 +42,15 @@ module.exports = {
             path: './src/client/pages/updateRackStatus'
         },
         {
+            name: "housingTransfer",
+            title: "Housing Transfer",
+            permissionClasses: [
+                'org.labkey.api.security.permissions.ReadPermission',
+                'org.labkey.cageui.security.permissions.CageUIAnimalEditorPermission'
+            ],
+            path: './src/client/pages/housingTransfer'
+        },
+        {
             name: "adoptionDataEntry",
             title: "Adoption Form",
             permissionClasses: [
@@ -49,6 +58,14 @@ module.exports = {
                 'org.labkey.cageui.security.permissions.CageUIAdoptionsPermission'
             ],
             path: './src/client/pages/adoptionDataEntry'
+        },
+        {
+            name: "cageUIAdmin",
+            title: "CageUI Admin Settings",
+            permissionClasses: [
+                'org.labkey.api.security.permissions.AdminPermission',
+            ],
+            path: './src/client/pages/cageUIAdmin'
         }
     ]
 };

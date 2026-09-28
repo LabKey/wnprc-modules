@@ -38,6 +38,7 @@ import {
     parseRoomItemNum,
     parseRoomItemType
 } from './helpers';
+import { ConnectedModType } from '../types/homeTypes';
 
 
 // Returns true if the obj is in the list of available room objects that have a popup.
@@ -55,6 +56,10 @@ export const canEditLayout = (user: Security.GetUserPermissionsResponse) => {
     }
     return false;
 }
+
+export const canEditConditionPermission = (user: Security.GetUserPermissionsResponse) => {
+    return Security.hasEffectivePermission(user.container.effectivePermissions, 'org.labkey.cageui.security.permissions.CageUIRoomCreatorPermission');
+};
 
 // takes a cage number and returns it in a display friendly format, ex: cage-1 -> Cage 1
 export const getCageNumDisplay = (cageNum: CageNumber) => {

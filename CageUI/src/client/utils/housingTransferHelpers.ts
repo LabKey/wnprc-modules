@@ -1,0 +1,320 @@
+/*
+ *
+ *  * Copyright (c) 2026 Board of Regents of the University of Wisconsin System
+ *  *
+ *  * Licensed under the Apache License, Version 2.0 (the "License");
+ *  * you may not use this file except in compliance with the License.
+ *  * You may obtain a copy of the License at
+ *  *
+ *  *     http://www.apache.org/licenses/LICENSE-2.0
+ *  *
+ *  * Unless required by applicable law or agreed to in writing, software
+ *  * distributed under the License is distributed on an "AS IS" BASIS,
+ *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  * See the License for the specific language governing permissions and
+ *  * limitations under the License.
+ *
+ */
+
+
+import { Option } from '@labkey/components';
+import { fetchCurrentCageMods, fetchHousingForm } from '../api/popularQueries';
+import { ModTypes } from '../types/typings';
+import { Filter, Query } from '@labkey/api';
+import { labkeyActionSelectWithPromise } from '../api/labkeyActions';
+import { ConditionCode, HousingTransferData } from '../types/housingFormTypes';
+import dayjs from 'dayjs';
+
+export const getCode = (code: string, options: ConditionCode[]): ConditionCode => {
+    return options.find(opt => opt.value === code);
+}
+
+export const getCagingCodes = async (id: string): Promise<string[]> => {
+    const cagingCodes: string[] = [];
+    const mods = await fetchCurrentCageMods(id);
+
+    if(mods.find(m => m === ModTypes.PCDivider)){
+        cagingCodes.push("pc");
+    }
+
+    if(mods.find(m => m === ModTypes.VCDivider)){
+        cagingCodes.push("vc");
+    }
+
+    return cagingCodes;
+}
+
+export const checkIsMarm = async (id: string): Promise<boolean> => {
+    const config: Query.SelectRowsOptions = {
+        schemaName: 'study',
+        queryName: 'demographics',
+        columns: ['species'],
+        filterArray: [
+            Filter.create('Id', id, Filter.Types.EQUALS)
+        ]
+    };
+
+    try {
+        const res = await labkeyActionSelectWithPromise(config);
+        if(res.rows[0].species === 'Marmoset'){
+            return true;
+        }else{
+            return false;
+        }
+    } catch (e) {
+        console.error('Error fetching animal species:', e);
+        return false;
+    }
+
+}
+
+export const checkIsInfant = async (id: string): Promise<boolean> => {
+    const config: Query.SelectRowsOptions = {
+        schemaName: 'cageui',
+        queryName: 'demographicsInfants',
+        columns: ['isInfant'],
+        filterArray: [
+            Filter.create('Id', id, Filter.Types.EQUALS)
+        ]
+    };
+
+    try {
+        const res = await labkeyActionSelectWithPromise(config);
+        return res.rows[0].isInfant;
+    } catch (e) {
+        console.error('Error fetching infant status', e);
+        return false;
+    }
+
+}
+
+export const infantInDestination = async (ids: string[]): Promise<string | null> => {
+
+    for (const id of ids) {
+        if (await checkIsInfant(id)) {
+            return id;
+        }
+    }
+
+    return null;
+}
+
+export const checkIsAdopted = async (parentId: string, infantId: string): Promise<boolean> => {
+    const config: Query.SelectRowsOptions = {
+        schemaName: 'study',
+        queryName: 'demographicsOffspring',
+        columns: ['Offspring/parents/sire', 'Offspring/parents/dam'],
+        filterArray: [
+            Filter.create('Offspring', infantId, Filter.Types.EQUALS)
+        ]
+    };
+
+    try {
+        const res = await labkeyActionSelectWithPromise(config);
+        if(res.rows[0]['Offspring/parents/sire'] !== parentId && res.rows[0]['Offspring/parents/dam'] !== parentId){
+            return true;
+        }
+        return false;
+    } catch (e) {
+        console.error('Error fetching adoption status', e);
+        return false;
+    }
+}
+
+export const checkIsMale = async (id: string): Promise<boolean> => {
+    const config: Query.SelectRowsOptions = {
+        schemaName: 'study',
+        queryName: 'demographics',
+        viewName: 'Alive, At Center',
+        columns: ['gender'],
+        filterArray: [
+            Filter.create('Id', id, Filter.Types.EQUALS)
+        ]
+    };
+
+    try {
+        const res = await labkeyActionSelectWithPromise(config);
+        if(res.rows[0].gender === 'm'){
+            return true;
+        }
+        return false;
+    } catch (e) {
+        console.error('Error fetching adoption status', e);
+        return false;
+    }
+}
+
+// TODO finish this
+/*
+    This function determines the social code for the following codes (M, F, AM, AF)
+ */
+export const getSocialCode = async (animalId: string, animalsInCage: string[]): Promise<string | null> => {
+
+    return null;
+}
+
+/*
+    This function determines if the mother is in the destination animal list
+ */
+export const checkIsMotherInDest = async (infantId: string, animalsInCage: string[]): Promise<boolean> => {
+    const config: Query.SelectRowsOptions = {
+        schemaName: 'study',
+        queryName: 'demographicsOffspring',
+        columns: ['Offspring/parents/dam'],
+        filterArray: [
+            Filter.create('Offspring', infantId, Filter.Types.EQUALS)
+        ]
+    };
+
+    try {
+        const res = await labkeyActionSelectWithPromise(config);
+        const damId: string = res.rows[0]['Offspring/parents/dam'];
+
+        if(animalsInCage.find(id => id === damId)){
+            return true;
+        }
+        return false;
+    } catch (e) {
+        console.error('Error fetching mother status', e);
+        return false;
+    }
+}
+
+/*
+    This function determines if the father is in the destination animal list
+ */
+export const checkIsFatherInDest = async (infantId: string, animalsInCage: string[]): Promise<boolean> => {
+    const config: Query.SelectRowsOptions = {
+        schemaName: 'study',
+        queryName: 'demographicsOffspring',
+        columns: ['Offspring/parents/sire'],
+        filterArray: [
+            Filter.create('Offspring', infantId, Filter.Types.EQUALS)
+        ]
+    };
+
+    try {
+        const res = await labkeyActionSelectWithPromise(config);
+        const sireId: string = res.rows[0]['Offspring/parents/sire'];
+
+        if(animalsInCage.find(id => id === sireId)){
+            return true;
+        }
+        return false;
+    } catch (e) {
+        console.error('Error fetching father status', e);
+        return false;
+    }
+}
+
+/*
+    This function determines if the adopted mother is in the destination animal list
+ */
+export const checkIsAdoptedMotherInDest = async (infantId: string, animalsInCage: string[]): Promise<boolean> => {
+    const config: Query.SelectRowsOptions = {
+        schemaName: 'study',
+        queryName: 'adoptionsOngoing',
+        filterArray: [
+            Filter.create('Id', infantId, Filter.Types.EQUALS)
+        ]
+    };
+
+    try {
+        const res = await labkeyActionSelectWithPromise(config);;
+        const damId: string = res.rows[0]['dam'];
+
+        if(animalsInCage.find(id => id === damId)){
+            return true;
+        }
+        return false;
+    } catch (e) {
+        console.error('Error fetching adopted mother status', e);
+        return false;
+    }
+}
+
+/*
+    This function determines if the adopted father is in the destination animal list
+ */
+export const checkIsAdoptedFatherInDest = async (infantId: string, animalsInCage: string[]): Promise<boolean> => {
+    const config: Query.SelectRowsOptions = {
+        schemaName: 'study',
+        queryName: 'adoptionsOngoing',
+        filterArray: [
+            Filter.create('Id', infantId, Filter.Types.EQUALS)
+        ]
+    };
+
+    try {
+        const res = await labkeyActionSelectWithPromise(config);;
+        const sireId: string = res.rows[0]['sire'];
+
+        if(animalsInCage.find(id => id === sireId)){
+            return true;
+        }
+        return false;
+    } catch (e) {
+        console.error('Error fetching adopted mother status', e);
+        return false;
+    }
+}
+
+export const createPrevHousingForm = async (prevFormId: string): Promise<Record<string, HousingTransferData[]>> => {
+    const prevForm = await fetchHousingForm(prevFormId);
+    const conditions: ConditionCode[] = [];
+
+    if(prevForm['condNew/special_condition']){
+        conditions.push({
+            value: prevForm['condNew/special_condition'],
+            label: prevForm['condNew/special_condition/title'],
+            type: prevForm['condNew/special_condition/category']
+        });
+    }
+
+    if(prevForm['condNew/pair_condition']){
+        conditions.push({
+            value: prevForm['condNew/pair_condition'],
+            label: prevForm['condNew/pair_condition/title'],
+            type: prevForm['condNew/pair_condition/category']
+        });
+    }
+
+    if(prevForm['condNew/cage_condition']){
+        conditions.push({
+            value: prevForm['condNew/cage_condition'],
+            label: prevForm['condNew/cage_condition/title'],
+            type: prevForm['condNew/cage_condition/category']
+        });
+    }
+
+    if(prevForm['condNew/social_condition']){
+        conditions.push({
+            value: prevForm['condNew/social_condition'],
+            label: prevForm['condNew/social_condition/title'],
+            type: prevForm['condNew/social_condition/category']
+        });
+    }
+
+    const isSpecial = prevForm['condNew/special_condition'] === 'x';
+    const inTransit = prevForm['condNew/special_condition'] === 'it';
+    const destCageOption = isSpecial
+        ? { value: 'Special Housing', label: 'Special Housing' } :
+        inTransit ? {value: 'In Transit', label: 'In Transit'}
+        : { value: prevForm.cageNew, label: prevForm['cageNew/cage_number'] };
+
+    const data: HousingTransferData = {
+        id: prevForm.Id,
+        inDate: dayjs(prevForm.date),
+        outDate: prevForm.enddate ? dayjs(prevForm.enddate) : null,
+        destinationRoom: { value: prevForm['room/rowid'] || prevForm.room, label: prevForm.room },
+        destinationCage: destCageOption,
+        condition: conditions,
+        reasonForMove: prevForm.reason ? prevForm.reason.split(',').map(item => ({value: item.trim(), label: item.trim()})) : [],
+        project: prevForm.project,
+        ejacConfirmed: prevForm.ejacConfirmed,
+        remarks: prevForm.remark,
+        performedBy: prevForm.performedby,
+        alert: false,
+    }
+    return {[prevForm.room]: [data]};
+}

@@ -19,6 +19,7 @@ import { ActionURL, Ajax, Query, Security, Utils } from '@labkey/api';
 import { CageMods, Rack, RackConditionOption, Room, SessionLog } from '../types/typings';
 import { buildURL } from '@labkey/components';
 import { RackSwitchOption } from '../types/homeTypes';
+import { HousingTransferData } from '../types/housingFormTypes';
 import { AdoptionData } from '../types/adoptionFormTypes';
 
 export function labkeyActionSelectWithPromise(
@@ -137,9 +138,10 @@ export const labkeyGetUserPermissions = (config?: Security.GetUserPermissionsOpt
     });
 };
 
-export function saveRoomLayout(room: Room, mods: CageMods[], prevRoomName: string, sessionLog: SessionLog, prevRackCondition?: RackConditionOption): Promise<{
+export function saveRoomLayout(room: Room, mods: CageMods[], prevRoomName: string, sessionLog: SessionLog, prevRackCondition?: RackConditionOption, status?: number): Promise<{
     success: boolean,
-    errors: any[]
+    errors: any[],
+    historyid?: string
 }> {
     const newPrevRoomName = prevRoomName || room.name;
     let isDefault = false;
@@ -159,7 +161,7 @@ export function saveRoomLayout(room: Room, mods: CageMods[], prevRoomName: strin
             method: 'POST',
             success: (res) => resolve(JSON.parse(res.response)),
             failure: Utils.getCallbackWrapper((error) => reject(error)),
-            jsonData: {mods: mods, room: room, prevRoomName: newPrevRoomName, isDefault: isDefault, prevRackCondition: prevRackCondition, sessionLog: sessionLog},
+            jsonData: {mods: mods, room: room, prevRoomName: newPrevRoomName, isDefault: isDefault, prevRackCondition: prevRackCondition, sessionLog: sessionLog, status: status},
         });
     });
 }
@@ -208,6 +210,61 @@ export function startAdoptionSubmission(animals: AdoptionData[]): Promise<{
             success: (res) => resolve(JSON.parse(res.response)),
             failure: Utils.getCallbackWrapper((error) => reject(error)),
             jsonData: {adoptionData: animals},
+        });
+    });
+}
+
+// This function is for submitting a housing transfer.
+export function startHousingTransfer(animals: HousingTransferData[], prevFormLsid?: string, layoutChangeId?: string): Promise<{
+    success: boolean,
+    errors: any[]
+}> {
+    return new Promise((resolve, reject) => {
+        Ajax.request({
+            url: buildURL('cageui', 'prepareHousingTransfer.api'),
+            method: 'POST',
+            success: (res) => resolve(JSON.parse(res.response)),
+            failure: Utils.getCallbackWrapper((error) => reject(error)),
+            jsonData: {
+                transferData: animals.map(a => ({
+                    ...a,
+                    inDate: a.inDate.format('YYYY-MM-DD HH:mm:ss'),
+                    outDate: a?.outDate?.format('YYYY-MM-DD HH:mm:ss')
+                })),
+                prevFormLsid: prevFormLsid,
+                layoutChangeId: layoutChangeId
+            },
+        });
+    });
+}
+
+// This function fetches the record cleanup admin settings.
+export function getRecordDeleteSettings(): Promise<{
+    enabled: boolean,
+    success?: boolean
+}> {
+    return new Promise((resolve, reject) => {
+        Ajax.request({
+            url: buildURL('cageui', 'getRecordDeleteSettings.api'),
+            method: 'GET',
+            success: (res) => resolve(JSON.parse(res.response)),
+            failure: Utils.getCallbackWrapper((error) => reject(error)),
+        });
+    });
+}
+
+// This function submits the updated record cleanup admin settings.
+export function setRecordDeleteSettings(enabled: boolean): Promise<{
+    success: boolean,
+    errors?: any[]
+}> {
+    return new Promise((resolve, reject) => {
+        Ajax.request({
+            url: buildURL('cageui', 'setRecordDeleteSettings.api'),
+            method: 'POST',
+            success: (res) => resolve(JSON.parse(res.response)),
+            failure: Utils.getCallbackWrapper((error) => reject(error)),
+            jsonData: { enabled: enabled, isEnabled: enabled },
         });
     });
 }

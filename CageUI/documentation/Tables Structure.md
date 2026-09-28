@@ -119,6 +119,30 @@ A subsection is a line within the svg file that follows the path of left -> righ
  referenced exactly by id when changing modifications, so the system knows what line to edit when changing mods. Take a look
 at the pen svg file to gain an understanding of this.
 
+### Ghost Cages
+
+| cage_objectid                                | positionid          | rack_group                | rack_objectid                      | group_rotation     | cage        |
+|----------------------------------------------|---------------------|---------------------------|------------------------------------|--------------------|-------------|
+| objectid for ghost cage (not in cages table) | positionid for cage | rack group the cage is in | rack objectid (not in racks table) | rotation for group | cage number |
+
+Ghost cages/racks are able to be placed inside **real** rooms without actually existing in the room itself. These are intended
+as in-room rack placeholders to show users that a rack *can* go there without *currently* being there. When users change
+a rack to a ghost rack (all cages inside become ghost cages), the room will autocorrect the cage numbering for the remaining cages and
+submit a housing transfer in the background for all animals in the room if their cage number was updated. The reason for the 
+housing transfer will be (Colony Management Relocation).
+
+### Housing Condition Records
+
+| housing             | special_condition      | pair_condition      | cage_condition      | social_condition      |
+|---------------------|------------------------|---------------------|---------------------|-----------------------|
+| housing record lsid | special condition code | pair condition code | cage condition code | social condition code |
+
+This table is a replacement and improvement of the housing condition codes within ehr_lookups. One record here will corrispond 
+to one record in the housing table and houses the condition codes for that housing record. This table allows animals to have multiple
+codes instead of just one. They are additionally split into categories following the flowchat diagram.
+
+https://app.smartdraw.com/share.aspx/?pubDocShare=813067F26319A4E9C902D40BAF974D23A1E
+
 
 ## EHR Lookups Schema Tables
 Below are the tables added to ehr_lookups to provide available options for certain columns within the cageui schema tables.

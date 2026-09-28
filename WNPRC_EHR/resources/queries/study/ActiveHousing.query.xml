@@ -38,7 +38,7 @@
                     <column columnName="room">
                         <nullable>false</nullable>
                         <columnTitle>Room</columnTitle>
-                        <!--<url>/EHR/cageDetails.view?-->
+                        <!--<url>/wnprc_ehr/cageDetails.view?-->
                             <!--room=${room}&amp;-->
                             <!--cage=${cage}&amp;-->
                         <!--</url>-->
@@ -47,6 +47,14 @@
                             <fkTable>rooms</fkTable>
                             <fkColumnName>room</fkColumnName>
                         </fk>
+                    </column>
+                    <column columnName="cageNew">
+                        <!--<nullable>false</nullable>-->
+                        <columnTitle>Cage New</columnTitle>
+                        <url>/wnprc_ehr/cageDetails.view?
+                            room=${room}&amp;
+                            cage=${cageNew}&amp;
+                        </url>
                     </column>
                     <column columnName="cage">
                         <!--<nullable>false</nullable>-->

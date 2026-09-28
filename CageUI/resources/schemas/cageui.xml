@@ -153,6 +153,7 @@
             <column columnName="start_date"/>
             <column columnName="end_date"/>
             <column columnName="historyid"/>
+            <column columnName="QCState"/>
             <column columnName="container"/>
             <column columnName="createdby"/>
             <column columnName="created"/>
@@ -191,6 +192,21 @@
             <column columnName="width"/>
             <column columnName="height"/>
             <column columnName="sqft"/>
+            <column columnName="container"/>
+            <column columnName="createdby"/>
+            <column columnName="created"/>
+            <column columnName="modified"/>
+            <column columnName="modifiedby"/>
+        </columns>
+    </table>
+    <table tableName="housing_condition_records" tableDbType="TABLE">
+        <columns>
+            <column columnName="rowid"/>
+            <column columnName="objectid"/>
+            <column columnName="special_condition"/>
+            <column columnName="pair_condition"/>
+            <column columnName="cage_condition"/>
+            <column columnName="social_condition"/>
             <column columnName="container"/>
             <column columnName="createdby"/>
             <column columnName="created"/>

@@ -44,6 +44,7 @@
                 <property name="columnTitle" value="Cage"/>
             </properties>
         </column>
+
         <column name="Id/curLocation/cond">
             <properties>
                 <property name="columnTitle" value="Condition"/>

@@ -18,7 +18,11 @@
 import { Filter, Query } from '@labkey/api';
 import { labkeyActionSelectWithPromise } from './labkeyActions';
 import { EHRCageMods } from '../types/homeTypes';
-import { CageData, CageHistoryData, GhostCageData, RackData } from '../types/typings';
+import { AnimalInCage, CageData, CageHistoryData, CageNumber, GhostCageData, RackData } from '../types/typings';
+import { parseRoomItemNum, zeroPadName } from '../utils/helpers';
+import { Option } from '@labkey/components';
+import { ConditionCode, ConditionTypes, HousingFormData, HousingTransferData } from '../types/housingFormTypes';
+import dayjs, { Dayjs } from 'dayjs';
 
 export const cageModLookup = async (columns: string[], filterArray: Filter.IFilter[]): Promise<EHRCageMods[]> => {
     const config: Query.SelectRowsOptions = {
@@ -156,3 +160,112 @@ export const fetchRack = async (objectId: string): Promise<RackData> => {
         throw new Error('Error fetching cage history data: ' + (e as Error).message);
     }
 };
+
+// TODO update this query with cageNew
+export const findAnimalsInCage = async (cage: string): Promise<AnimalInCage[]> => {
+    const config: Query.SelectRowsOptions = {
+        schemaName: 'study',
+        queryName: 'demographicsCurLocationNew',
+        filterArray: [
+            Filter.create('cage', cage, Filter.Types.EQUAL)]
+    };
+
+    try {
+        const res = await labkeyActionSelectWithPromise(config);
+        const animalsInCage: AnimalInCage[] = [];
+        if (res.rows.length > 0) {
+            res.rows.forEach(r => {
+                animalsInCage.push({
+                    id: r.id,
+                })
+            });
+        }
+        return animalsInCage;
+    }
+    catch (e) {
+        throw new Error('Error fetching animals in cage: ' + (e as Error).message);
+    }
+}
+
+export const fetchConditionCodes = async (): Promise<ConditionCode[]> => {
+    const config: Query.SelectRowsOptions = {
+        schemaName: 'ehr_lookups',
+        queryName: 'housing_condition_codes',
+        filterArray: [
+            Filter.create('date_disabled', null, Filter.Types.ISBLANK)
+        ]
+    };
+
+    try {
+        const res = await labkeyActionSelectWithPromise(config);
+        const codes: ConditionCode[] = res.rows.map(row => {
+            const isIT = row.value?.toString().toLowerCase() === 'it';
+            return {
+                label: isIT ? 'In Transit' : `${row.value} - ${row.category}`,
+                value: row.value.toString(),
+                type: row.category || (isIT ? ConditionTypes.special : undefined)
+            };
+        });
+        if (!codes.some(c => c.value === 'it')) {
+            codes.push({
+                label: 'In Transit',
+                value: 'it',
+                type: ConditionTypes.special
+            });
+        }
+        return codes;
+    } catch (e) {
+        console.error('Error fetching condition codes:', e);
+        return [
+            {
+                label: 'In Transit',
+                value: 'it',
+                type: ConditionTypes.special
+            }
+        ];
+    }
+};
+
+export const fetchCurrentCageMods = async (cageId: string): Promise<string[]> => {
+    const config: Query.SelectRowsOptions = {
+        schemaName: 'cageui',
+        queryName: 'currentCageMods',
+        filterArray: [
+            Filter.create('cage', cageId, Filter.Types.EQUALS)
+        ]
+    };
+
+    try {
+        const res = await labkeyActionSelectWithPromise(config);
+        return res.rows.map(row => (row.modification));
+    } catch (e) {
+        console.error('Error fetching condition codes:', e);
+        return [];
+    }
+};
+
+export const fetchHousingForm = async (lsid: string): Promise<any> => {
+    const config: Query.SelectRowsOptions = {
+        schemaName: 'study',
+        queryName: 'housing_test',
+        columns: ['Id', 'date', 'enddate', 'room','room/rowid', 'cageNew', 'cageNew/cage_number',
+            'condNew', 'condNew/special_condition','condNew/pair_condition','condNew/cage_condition','condNew/social_condition',
+            'condNew/special_condition/title','condNew/pair_condition/title','condNew/cage_condition/title','condNew/social_condition/title',
+            'condNew/special_condition/category','condNew/pair_condition/category','condNew/cage_condition/category','condNew/social_condition/category',
+            'reason', 'project', 'remark', 'performedby', 'ejacConfirmed'],
+        filterArray: [
+            Filter.create('lsid', lsid, Filter.Types.EQUAL)
+        ]
+    };
+
+    try {
+        const res = await labkeyActionSelectWithPromise(config);
+        console.log("Housing Res: ", res);
+        if(res.rowCount === 1){
+            return res.rows[0];
+        }
+    } catch (e) {
+        console.error('Error fetching condition codes:', e);
+        return null;
+    }
+}

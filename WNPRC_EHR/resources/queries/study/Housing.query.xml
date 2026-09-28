@@ -33,6 +33,17 @@
                         <columnTitle>Cage</columnTitle>
                         <url>/EHR/cageDetails.view?room=${room}&amp;cage=${cage}&amp;</url>
                     </column>
+                    <column columnName="cageNew">
+                        <!--<nullable>false</nullable>-->
+                        <columnTitle>Cage New</columnTitle>
+                        <fk>
+                            <fkDbSchema>cageui</fkDbSchema>
+                            <fkTable>cages</fkTable>
+                            <fkColumnName>objectid</fkColumnName>
+                            <fkDisplayColumnName>cage_number</fkDisplayColumnName>
+                        </fk>
+                        <url>/EHR/cageDetails.view?room=${room}&amp;cage=${cageNew}&amp;</url>
+                    </column>
                     <column columnName="cond">
                         <nullable>true</nullable>
                         <columnTitle>Condition</columnTitle>
@@ -40,6 +51,16 @@
                             <fkDbSchema>ehr_lookups</fkDbSchema>
                             <fkTable>housing_condition_codes</fkTable>
                             <fkColumnName>value</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="condNew">
+                        <nullable>true</nullable>
+                        <columnTitle>Condition New</columnTitle>
+                        <fk>
+                            <fkDbSchema>cageui</fkDbSchema>
+                            <fkTable>housing_condition_records</fkTable>
+                            <fkColumnName>housing</fkColumnName>
+                            <fkDisplayColumnName>final_condition</fkDisplayColumnName>
                         </fk>
                     </column>
                     <column columnName="divider">

@@ -48,8 +48,6 @@ function onInit(event, helper){
                 var chargeCategoryId = row["chargeCategoryId"]["value"];
                 var chargeCategoryAssoc = chargeGroupName + ", " + chargeCategoryId;
                 groupCategoryAssociations[chargeCategoryAssoc] = chargeCategoryAssoc;
-
-                console.log("groupCategoryAssociations[chargeCategoryAssoc] = " + groupCategoryAssociations[chargeCategoryAssoc]);
             }
         },
         failure: function (error) {

@@ -17,18 +17,24 @@
  */
 
 import * as React from 'react';
-import { FC } from 'react';
+import { FC, useEffect } from 'react';
 import '../../../cageui.scss';
-import { CageDimensions, RackTypes } from '../../../types/typings';
+import { CageDimensions, CageWeightResult, RackTypes } from '../../../types/typings';
 import { useHomeNavigationContext } from '../../../context/HomeNavigationContextManager';
 
 interface CageDetailsProps {
     cageDimensions: CageDimensions;
+    cageWeights: CageWeightResult;
 }
 
 export const CageDetails: FC<CageDetailsProps> = (props) => {
     const {selectedRack} = useHomeNavigationContext();
-    const {cageDimensions} = props;
+    const {cageDimensions, cageWeights} = props;
+
+    useEffect(() => {
+        if(!cageWeights) return;
+        console.log("Weights: ", cageWeights)
+    }, [cageWeights]);
 
     return (
         <div className="cage-display">
@@ -72,6 +78,22 @@ export const CageDetails: FC<CageDetailsProps> = (props) => {
                                     {Math.round((cageDimensions.sqft) * 100) / 100}
                                     <span className="unit-with-squared"> ft</span>
                                 </span>
+                            </div>
+                        </div>
+                        <div className="dimension-item">
+                            <span className="dimension-label">Current Weight:</span>
+                            <div className="dimension-value-container">
+                                <div className="dimension-value-container">
+                                    <span className="dimension-value-text">{cageWeights?.actualWeight} lbs</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="dimension-item">
+                            <span className="dimension-label">Available Weight:</span>
+                            <div className="dimension-value-container">
+                                <div className="dimension-value-container">
+                                    <span className="dimension-value-text">{Math.round((cageWeights?.allowedWeight - cageWeights?.actualWeight) * 100) / 100} lbs</span>
+                                </div>
                             </div>
                         </div>
                     </div>

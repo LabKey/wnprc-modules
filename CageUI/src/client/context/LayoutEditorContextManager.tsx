@@ -40,7 +40,7 @@ import {
     RoomObjectTypes,
     UnitLocations,
     UnitType,
-    SessionLog
+    SessionLog, SvgSizes
 } from '../types/typings';
 import {
     CellKey,
@@ -306,7 +306,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
     const addRack = async (id: number, x: number, y: number, newScale: number, rackType: RackTypes): Promise<Rack | null> => {
         const newCageNum: CageNumber = `${roomItemToString(rackType) as RackStringType}-${getNextCageNum(roomItemToString(rackType) as RackStringType)}`;
 
-        const svgSize = await getSvgSize(rackType);
+        const svgSize = await getSvgSize(rackType) as SvgSizes;
         if (!svgSize) {
             await showLayoutEditorError('No size found for cage');
             return null;
@@ -322,7 +322,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
             cageNum: newCageNum,
             x: 0,
             y: 0,
-            size: svgSize,
+            size: parseInt(svgSize.description),
         };
 
         // First cage in rack is always at rack starting position as well

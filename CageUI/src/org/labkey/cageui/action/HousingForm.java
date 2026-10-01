@@ -21,12 +21,8 @@ package org.labkey.cageui.action;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.labkey.cageui.model.ConditionCode;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.Optional;
 
 public class HousingForm
 {
@@ -40,10 +36,10 @@ public class HousingForm
     private Date endDate;
     private Integer qcState;
     private String room;
-    @JsonProperty("cagenew")
-    private String cageNew;
-    @JsonProperty("condnew")
-    private String condNew;
+    @JsonProperty("cage")
+    private String cage;
+    @JsonProperty("cond")
+    private String cond;
     private String reason;
     private String remark;
     private Integer project;
@@ -165,24 +161,24 @@ public class HousingForm
         this.ejacConfirmed = ejacConfirmed;
     }
 
-    public String getCageNew()
+    public String getCage()
     {
-        return this.cageNew;
+        return this.cage;
     }
 
-    public void setCageNew(String cageNew)
+    public void setCage(String cage)
     {
-        this.cageNew = cageNew;
+        this.cage = cage;
     }
 
-    public String getCondNew()
+    public String getCond()
     {
-        return condNew;
+        return cond;
     }
 
-    public void setCondNew(String condNew)
+    public void setCond(String cond)
     {
-        this.condNew = condNew;
+        this.cond = cond;
     }
 
     public String getLsid()

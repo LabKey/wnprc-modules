@@ -70,6 +70,9 @@
     <dataset name="ActiveHousing" id="5010" showByDefault="false" category="ColonyManagement" demographicData="true" type="Standard">
       <tags/>
     </dataset>
+    <dataset name="ActiveHousingTest" id="5018" showByDefault="false" category="ColonyManagement" demographicData="true" type="Standard">
+      <tags/>
+    </dataset>
     <dataset name="birth" id="1007" category="Clinical" demographicData="true" type="Standard">
       <tags/>
     </dataset>
@@ -185,6 +188,9 @@
       <tags/>
     </dataset>
     <dataset name="housing" id="1018" category="ColonyManagement" type="Standard">
+      <tags/>
+    </dataset>
+    <dataset name="housing_test" id="1019" category="ColonyManagement" type="Standard">
       <tags/>
     </dataset>
     <dataset name="inbreeding" id="5001" category="ColonyManagement" type="Standard">

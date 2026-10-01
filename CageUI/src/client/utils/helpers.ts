@@ -19,17 +19,20 @@ import * as d3 from 'd3';
 import { zoomTransform } from 'd3';
 import { MutableRefObject } from 'react';
 import { ActionURL, Filter, Query, Security, Utils } from '@labkey/api';
-import { selectDistinctRows } from '@labkey/components';
+import { selectDistinctRows, selectRows } from '@labkey/components';
 
 import {
     AllHistoryData,
+    AnimalWeightInfo,
     Cage,
+    CageClassRecord,
     CageDirection,
     CageModification,
     CageModificationsType,
     CageMods,
     CageNumber,
     CageSvgId,
+    CageWeightResult,
     DefaultRackStringType,
     DefaultRackTypes,
     FetchRoomData,
@@ -59,7 +62,7 @@ import {
     RoomObject,
     RoomObjectStringType,
     RoomObjectTypes,
-    SessionLog,
+    SessionLog, SvgSizes,
     TemplateHistoryData,
     UnitLocations,
     UnitType
@@ -80,7 +83,12 @@ import {
 import { CELL_SIZE, Modifications, roomSizeOptions, SVG_HEIGHT, SVG_WIDTH } from './constants';
 import { ExtraContext, LayoutSaveResult } from '../types/layoutEditorTypes';
 import { labkeyActionSelectWithPromise, saveRoomLayout } from '../api/labkeyActions';
-import { cageModLookup } from '../api/popularQueries';
+import {
+    cageModLookup,
+    fetchAnimalsInActiveHousingCage,
+    fetchCageDimensions,
+    fetchCageSizeReq, fetchDemographicsWeights
+} from '../api/popularQueries';
 import { ConnectedCages, ConnectedRacks } from '../types/homeTypes';
 
 
@@ -145,21 +153,21 @@ export const changeStyleProperty = (element: Element, property: string, newValue
     }
 };
 
-export const getSvgSize = async (type: RackTypes) => {
-    const config: Query.SelectDistinctOptions = {
+export const getSvgSize = async (type?: RackTypes): Promise<SvgSizes | SvgSizes[]> => {
+    const config: Query.SelectRowsOptions = {
         schemaName: 'ehr_lookups',
         queryName: 'cageui_item_types',
-        column: 'description',
-        filterArray: [Filter.create('value', type, Filter.Types.EQUAL)]
+        columns: ['description', 'value'],
+        filterArray: type ? [Filter.create('value', type, Filter.Types.EQUAL)] : []
     };
 
-    const res = await selectDistinctRows(config);
+    const res = await labkeyActionSelectWithPromise(config);
 
-    if (res.values.length === 1) {
-        return res.values[0];
+    if (res.rows.length === 1) {
+        return res.rows[0];
+    }else{
+        return res.rows;
     }
-
-    return;
 };
 
 // matches "string-number", if a match return the number
@@ -802,6 +810,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
     let newMods: RoomMods = {};
     let roomObjNum = 1;
     const loadMods: boolean = !!prevRoom.modData;
+    const svgSizes: SvgSizes[] = await getSvgSize() as SvgSizes[];
     //check if a group exists for the groupId, if it does return, else create new group for the room
     const findOrAddGroup = (rackItem: FullObjectHistoryData): RackGroup => {
         // groupId is a single number so check if the GroupId string contains it
@@ -939,7 +948,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
         if (rackItem.extraContext) {
             extraContext = JSON.parse(rackItem.extraContext);
         }
-        const svgSize = await getSvgSize(rack.type.type);
+        const svgSize = parseInt(svgSizes.find(size => parseInt(size.value) === rack.type.type).description);
 
         // This is where mods are loaded into state for the room
         if (loadMods && !rack.type.isDefault && rack.type.type !== RackTypes.GhostCage) {
@@ -1573,3 +1582,105 @@ export const saveRoomHelper = async (room: Room, sessionLog: SessionLog, oldTemp
     // Determine success or failure
     return result;
 }
+
+
+/**
+ * Helper function that fetches cage size requirements from ehr_lookups.cageclass,
+ * retrieves the animals currently in a room + cage from study.housing_test,
+ * looks up their current weights in study.demographicsWeightChange
+ * and determines if the cage is over or under its weight limit.
+ *
+ * @param room Room name
+ * @param cage Cage objectId in housing_test and cageui.cages
+ * @param abortSignal Optional AbortSignal for query cancellation
+ * @returns CageWeightResult containing allowedWeight, actualWeight, status ('over' | 'under' | 'equal'), isOverWeight, and details.
+ */
+export const checkCageWeightLimit = async (
+    room: string,
+    cage: string,
+    abortSignal?: AbortSignal
+): Promise<CageWeightResult> => {
+    // 1. Fetch cageclass data, cage dimensions, and current occupants in parallel
+    const [cageClassList, cageDimensions, animalIds] = await Promise.all([
+        fetchCageSizeReq(abortSignal),
+        fetchCageDimensions(cage, abortSignal),
+        fetchAnimalsInActiveHousingCage(room, cage, abortSignal)
+    ]);
+
+    // 2. Fetch current weights for the animals in the cage
+    const animals = await fetchDemographicsWeights(animalIds, abortSignal);
+
+    // 3. Compute actual total weight of animals currently in the cage
+    const actualWeight = animals.reduce((sum, a) => sum + (a.weight || 0), 0);
+
+    // 4. Calculate required SQFT and height for all animals based on cageclass
+    let requiredSqft = 0;
+    let requiredHeight = 0;
+    animals.forEach(a => {
+        if (a.weight !== null && a.weight !== undefined) {
+            const matchingTier = cageClassList.find(c =>
+                (c.low <= a.weight && a.weight < c.high) ||
+                (c.low < a.weight && a.weight <= c.high) ||
+                (c.low <= a.weight && a.weight <= c.high)
+            );
+            if (matchingTier) {
+                requiredSqft += matchingTier.sqft;
+                if (matchingTier.height > requiredHeight) {
+                    requiredHeight = matchingTier.height;
+                }
+            }
+        }
+    });
+
+    // 5. Determine allowed weight for the cage based on cage SQFT and cageclass
+    let allowedWeight: number | null = null;
+    const cageSqft = cageDimensions.sqft;
+    const cageHeight = cageDimensions.height;
+
+    if (cageSqft !== null && cageSqft !== undefined && cageClassList.length > 0) {
+        // Find all tiers whose SQFT requirement fits within the cage SQFT
+        const fittingTiers = cageClassList.filter(c => {
+            const fitsSqft = c.sqft <= cageSqft;
+            const fitsHeight = cageHeight !== null && cageHeight !== undefined ? c.height <= cageHeight : true;
+            return fitsSqft && fitsHeight;
+        });
+
+        if (fittingTiers.length > 0) {
+            allowedWeight = Math.max(...fittingTiers.map(t => t.high));
+        } else {
+            // If cage SQFT is smaller than the lowest tier requirement
+            allowedWeight = cageClassList[0]?.high ?? null;
+        }
+    }
+
+    // 6. Determine if the weight limit is over, under, or equal
+    let isOverWeight = false;
+    let status: 'over' | 'under' | 'equal' = 'under';
+
+    if (allowedWeight !== null) {
+        if (actualWeight > allowedWeight) {
+            isOverWeight = true;
+            status = 'over';
+        } else if (actualWeight === allowedWeight && actualWeight > 0) {
+            isOverWeight = false;
+            status = 'equal';
+        } else {
+            isOverWeight = false;
+            status = 'under';
+        }
+    }
+
+    return {
+        room,
+        cage,
+        allowedWeight,
+        actualWeight: Math.round(actualWeight * 100) / 100,
+        isOverWeight,
+        status,
+        cageSqft,
+        cageHeight,
+        requiredSqft: Math.round(requiredSqft * 100) / 100,
+        requiredHeight,
+        animals
+    };
+};

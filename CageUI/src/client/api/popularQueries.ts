@@ -18,7 +18,15 @@
 import { Filter, Query } from '@labkey/api';
 import { labkeyActionSelectWithPromise } from './labkeyActions';
 import { EHRCageMods } from '../types/homeTypes';
-import { AnimalInCage, CageData, CageHistoryData, CageNumber, GhostCageData, RackData } from '../types/typings';
+import {
+    AnimalInCage,
+    AnimalWeightInfo, CageClassRecord,
+    CageData,
+    CageHistoryData,
+    CageNumber,
+    GhostCageData,
+    RackData
+} from '../types/typings';
 import { parseRoomItemNum, zeroPadName } from '../utils/helpers';
 import { Option } from '@labkey/components';
 import { ConditionCode, ConditionTypes, HousingFormData, HousingTransferData } from '../types/housingFormTypes';
@@ -248,10 +256,10 @@ export const fetchHousingForm = async (lsid: string): Promise<any> => {
     const config: Query.SelectRowsOptions = {
         schemaName: 'study',
         queryName: 'housing_test',
-        columns: ['Id', 'date', 'enddate', 'room','room/rowid', 'cageNew', 'cageNew/cage_number',
-            'condNew', 'condNew/special_condition','condNew/pair_condition','condNew/cage_condition','condNew/social_condition',
-            'condNew/special_condition/title','condNew/pair_condition/title','condNew/cage_condition/title','condNew/social_condition/title',
-            'condNew/special_condition/category','condNew/pair_condition/category','condNew/cage_condition/category','condNew/social_condition/category',
+        columns: ['Id', 'date', 'enddate', 'room','room/rowid', 'cage', 'cage/cage_number',
+            'cond', 'cond/special_condition','cond/pair_condition','cond/cage_condition','cond/social_condition',
+            'cond/special_condition/title','cond/pair_condition/title','cond/cage_condition/title','cond/social_condition/title',
+            'cond/special_condition/category','cond/pair_condition/category','cond/cage_condition/category','cond/social_condition/category',
             'reason', 'project', 'remark', 'performedby', 'ejacConfirmed'],
         filterArray: [
             Filter.create('lsid', lsid, Filter.Types.EQUAL)
@@ -269,3 +277,139 @@ export const fetchHousingForm = async (lsid: string): Promise<any> => {
         return null;
     }
 }
+
+/**
+ * Fetches cage size requirements by weight from ehr_lookups.cageclass.
+ * Columns: low (Min weight), high (Max weight), sqft (Required SQFT), height (Required height).
+ *
+ * @param abortSignal Optional AbortSignal for query cancellation
+ */
+export const fetchCageSizeReq = async (abortSignal?: AbortSignal): Promise<CageClassRecord[]> => {
+    const config: Query.SelectRowsOptions = {
+        schemaName: 'ehr_lookups',
+        queryName: 'cageclass',
+        columns: ['low', 'high', 'sqft', 'height'],
+        sort: 'low'
+    };
+
+    try {
+        const res = await labkeyActionSelectWithPromise(config, abortSignal);
+        if (res.rows && res.rows.length > 0) {
+            return res.rows.map(row => ({
+                low: row.low !== null && row.low !== undefined ? parseFloat(row.low) : 0,
+                high: row.high !== null && row.high !== undefined ? parseFloat(row.high) : 0,
+                sqft: row.sqft !== null && row.sqft !== undefined ? parseFloat(row.sqft) : 0,
+                height: row.height !== null && row.height !== undefined ? parseFloat(row.height) : 0
+            }));
+        }
+        return [];
+    } catch (e) {
+        console.error('Error fetching cageclass data:', e);
+        return [];
+    }
+};
+
+/**
+ * Fetches cage dimensions (SQFT and height) from cageui.cages table via 'rack/rack_type/sqft' and 'rack/rack_type/height'.
+ * Falls back to cage sqft and height if lookup is unavailable.
+ *
+ * @param cageObjectId The objectId of the cage in cageui.cages
+ * @param abortSignal Optional AbortSignal for query cancellation
+ */
+export const fetchCageDimensions = async (cageObjectId: string, abortSignal?: AbortSignal): Promise<{ sqft: number | null; height: number | null }> => {
+    const config: Query.SelectRowsOptions = {
+        schemaName: 'cageui',
+        queryName: 'cages',
+        columns: ['objectid', 'cage_number', 'sqft', 'height'],
+        filterArray: [
+            Filter.create('objectid', cageObjectId, Filter.Types.EQUAL)
+        ]
+    };
+
+    try {
+        const res = await labkeyActionSelectWithPromise(config, abortSignal);
+        if (res.rows && res.rows.length > 0) {
+            const row = res.rows[0];
+            return {
+                sqft: row.sqft ?? null,
+                height: row.height ?? null
+            };
+        }
+        return { sqft: null, height: null };
+    } catch (e) {
+        console.error('Error fetching cage dimensions:', e);
+        return { sqft: null, height: null };
+    }
+};
+
+/**
+ * Fetches the IDs of animals currently in a room and cage from study.housing_test.
+ *
+ * @param room The room identifier/name
+ * @param cageObjectId The cage objectId in housing_test (cage column)
+ * @param abortSignal Optional AbortSignal for query cancellation
+ */
+export const fetchAnimalsInActiveHousingCage = async (room: string, cageObjectId: string, abortSignal?: AbortSignal): Promise<string[]> => {
+    const config: Query.SelectRowsOptions = {
+        schemaName: 'study',
+        queryName: 'housing_test',
+        columns: ['Id', 'room', 'cage', 'enddate'],
+        filterArray: [
+            Filter.create('room', room, Filter.Types.EQUAL),
+            Filter.create('cage', cageObjectId, Filter.Types.EQUAL),
+            Filter.create('enddate', null, Filter.Types.ISBLANK)
+        ]
+    };
+
+    try {
+        const res = await labkeyActionSelectWithPromise(config, abortSignal);
+        if (res.rows && res.rows.length > 0) {
+            return res.rows.map(row => row.Id || row.id).filter(Boolean);
+        }
+        return [];
+    } catch (e) {
+        console.error('Error fetching animals in ActiveHousingTest cage:', e);
+        return [];
+    }
+};
+
+/**
+ * Fetches current weights for a list of animals from study.demographics view "Alive, at center".
+ *
+ * @param animalIds Array of animal IDs
+ * @param abortSignal Optional AbortSignal for query cancellation
+ */
+export const fetchDemographicsWeights = async (animalIds: string[], abortSignal?: AbortSignal): Promise<AnimalWeightInfo[]> => {
+    if (!animalIds || animalIds.length === 0) {
+        return [];
+    }
+
+    const config: Query.SelectRowsOptions = {
+        schemaName: 'study',
+        queryName: 'demographicsWeightChange',
+        columns: ['Id', 'MostRecentWeight'],
+        filterArray: [
+            Filter.create('Id', animalIds, Filter.Types.IN)
+        ]
+    };
+
+    try {
+        const res = await labkeyActionSelectWithPromise(config, abortSignal);
+        const weightMap = new Map<string, number | null>();
+        if (res.rows && res.rows.length > 0) {
+            res.rows.forEach(row => {
+                const id = row.Id || row.id;
+                const w = row.MostRecentWeight !== null && row.MostRecentWeight !== undefined ? parseFloat(row.MostRecentWeight) : null;
+                weightMap.set(id, w);
+            });
+        }
+
+        return animalIds.map(id => ({
+            id: id,
+            weight: weightMap.has(id) ? weightMap.get(id) : null
+        }));
+    } catch (e) {
+        console.error('Error fetching demographics weights:', e);
+        return animalIds.map(id => ({ id, weight: null }));
+    }
+};

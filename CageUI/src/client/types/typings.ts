@@ -477,3 +477,34 @@ export interface SessionLog {
     schemaName: string;
     queryName: string;
 }
+
+export interface CageClassRecord {
+    low: number;
+    high: number;
+    sqft: number;
+    height: number;
+}
+
+export interface AnimalWeightInfo {
+    id: string;
+    weight: number | null;
+}
+
+export interface CageWeightResult {
+    room: string;
+    cage: string;
+    allowedWeight: number | null;
+    actualWeight: number;
+    isOverWeight: boolean;
+    status: 'over' | 'under' | 'equal';
+    cageSqft: number | null;
+    cageHeight: number | null;
+    requiredSqft: number;
+    requiredHeight: number;
+    animals: AnimalWeightInfo[];
+}
+
+export interface SvgSizes {
+    value: string;
+    description: string;
+}

@@ -49,8 +49,12 @@ import {
     getCode,
     infantInDestination,
     checkIsAdopted, checkIsMale, getSocialCode, checkIsMotherInDest, checkIsFatherInDest, checkIsAdoptedMotherInDest,
-    checkIsAdoptedFatherInDest
+    checkIsAdoptedFatherInDest,
+    getEffectiveCageId,
+    getOriginalCageId,
+    getPlannedOccupantsForCage
 } from '../../utils/housingTransferHelpers';
+import { checkCageWeightLimit } from '../../utils/helpers';
 
 interface HousingDataGridProps {
     prevData: boolean;
@@ -67,10 +71,11 @@ interface HousingDataGridProps {
     roomAnimals?: string[];
     animalLocations?: Record<string, { room: Option<string>, cage: Option<string> }>;
     conditionCodes: ConditionCode[];
+    setFormErrors?: (errors: string[]) => void;
 }
 
 export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
-    const {prevData, autoConditions, user, roomLabel, animals, allAnimals, onAnimalsChange, onAnimalsFound, roomOptions, reasonOptions, centerAnimals, roomAnimals, animalLocations, conditionCodes } = props;
+    const {prevData, autoConditions, user, roomLabel, animals, allAnimals, onAnimalsChange, onAnimalsFound, roomOptions, reasonOptions, centerAnimals, roomAnimals, animalLocations, conditionCodes, setFormErrors } = props;
     const [rowMetadata, setRowMetadata] = useState<Record<string, HousingRowMetadata>>({});
     const [canEditCondition, setCanEditCondition] = useState<boolean>(false);
     const [newAnimalId, setNewAnimalId] = useState<string>(null);
@@ -342,24 +347,6 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
         const cageGroups: Record<string, string[]> = {};
         const newRowMetadata: Record<string, Partial<HousingRowMetadata>> = {};
 
-        const getEffectiveCageId = (animal: HousingTransferData): string | null => {
-            if (isSpecialHousing(animal) || isInTransit(animal)) {
-                return null;
-            }
-            if (animal.destinationRoom?.label === 'No Change') {
-                return animal.currentCage?.value || null;
-            }
-            return animal.destinationCage?.value || null;
-        };
-
-        const getOriginalCageId = (animal: HousingTransferData): string | null => {
-            return animal.currentCage?.value || null;
-        };
-
-        const getOriginalRoomLabel = (animal: HousingTransferData): string | null => {
-            return animal.currentRoom?.label || null;
-        };
-
         // Determine all cages that might have changed occupants
         const affectedCageIds = new Set<string>();
         currentAnimals.forEach(a => {
@@ -371,32 +358,7 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
 
         // For each affected cage, calculate the TRUE set of future occupants
         for (const cageId of affectedCageIds) {
-            // 1. Start with physical occupants
-            const physicalAnimals = await findAnimalsInCage(cageId);
-            let occupants = physicalAnimals.map(a => a.id);
-
-            // 2. Remove any that are in the form (any room) and moving AWAY from this cage
-            const leavingAnimals = allAnimals.filter(a => {
-                const orig = getOriginalCageId(a);
-                const dest = getEffectiveCageId(a);
-                return orig === cageId && dest !== cageId;
-            });
-            const leavingIds = new Set(leavingAnimals.map(a => a.id));
-            occupants = occupants.filter(id => !leavingIds.has(id));
-
-            // 3. Add any that are in the form (any room) and moving INTO this cage
-            const enteringAnimals = allAnimals.filter(a => {
-                const orig = getOriginalCageId(a);
-                const dest = getEffectiveCageId(a);
-                return dest === cageId && orig !== cageId;
-            });
-            enteringAnimals.forEach(a => {
-                if (!occupants.includes(a.id)) {
-                    occupants.push(a.id);
-                }
-            });
-
-            cageGroups[cageId] = occupants;
+            cageGroups[cageId] = await getPlannedOccupantsForCage(cageId, allAnimals);
         }
 
         const updatedAnimals = await Promise.all(currentAnimals.map(async (a) => {
@@ -668,6 +630,30 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
                 newRow.destinationCage.label !== 'In Transit' && 
                 newRow.destinationCage.value !== '0' && 
                 newRow.destinationCage.value !== '-1') {
+                
+                const destCageId = newRow.destinationCage.value;
+                const destRoomName = newRow.destinationRoom.label;
+                const plannedOccupants = await getPlannedOccupantsForCage(destCageId, allAnimals, newRow.id);
+                const weightResult = await checkCageWeightLimit(destRoomName, destCageId, plannedOccupants);
+
+                if (weightResult.isOverWeight) {
+                    const errorMsg = `Cannot move animal ${newRow.id} to Room ${destRoomName}, Cage ${newRow.destinationCage.label}: Cage weight limit exceeded (Total Weight: ${weightResult.actualWeight} lbs, Allowed: ${weightResult.allowedWeight} lbs${weightResult.cageSqft ? `, Required SQFT: ${weightResult.requiredSqft}, Cage SQFT: ${weightResult.cageSqft}` : ''}).`;
+                    if (setFormErrors) {
+                        setFormErrors([errorMsg]);
+                    }
+                    finalRow = {
+                        ...newRow,
+                        destinationCage: { value: '', label: '' }
+                    };
+                    updatedAnimals = animals.map((row) => (row.id === newRow.id ? finalRow : row));
+                    onAnimalsChange(updatedAnimals);
+                    return finalRow;
+                } else {
+                    if (setFormErrors) {
+                        setFormErrors([]);
+                    }
+                }
+
                 fetchAnimalsInCage(newRow.destinationRoom.label, newRow.destinationCage, newRow.id);
             }
         }

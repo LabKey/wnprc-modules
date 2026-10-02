@@ -1598,17 +1598,20 @@ export const saveRoomHelper = async (room: Room, sessionLog: SessionLog, oldTemp
 export const checkCageWeightLimit = async (
     room: string,
     cage: string,
+    animalIds?: string[],
     abortSignal?: AbortSignal
 ): Promise<CageWeightResult> => {
     // 1. Fetch cageclass data, cage dimensions, and current occupants in parallel
-    const [cageClassList, cageDimensions, animalIds] = await Promise.all([
+    const [cageClassList, cageDimensions, defaultAnimalIds] = await Promise.all([
         fetchCageSizeReq(abortSignal),
         fetchCageDimensions(cage, abortSignal),
-        fetchAnimalsInActiveHousingCage(room, cage, abortSignal)
+        animalIds ? Promise.resolve(animalIds) : fetchAnimalsInActiveHousingCage(room, cage, abortSignal)
     ]);
 
+    const targetAnimalIds = animalIds || defaultAnimalIds;
+
     // 2. Fetch current weights for the animals in the cage
-    const animals = await fetchDemographicsWeights(animalIds, abortSignal);
+    const animals = await fetchDemographicsWeights(targetAnimalIds, abortSignal);
 
     // 3. Compute actual total weight of animals currently in the cage
     const actualWeight = animals.reduce((sum, a) => sum + (a.weight || 0), 0);
@@ -1658,7 +1661,7 @@ export const checkCageWeightLimit = async (
     let status: 'over' | 'under' | 'equal' = 'under';
 
     if (allowedWeight !== null) {
-        if (actualWeight > allowedWeight) {
+        if (actualWeight > allowedWeight || (cageSqft !== null && requiredSqft > cageSqft) || (cageHeight !== null && requiredHeight > cageHeight)) {
             isOverWeight = true;
             status = 'over';
         } else if (actualWeight === allowedWeight && actualWeight > 0) {

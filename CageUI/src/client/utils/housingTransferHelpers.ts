@@ -18,7 +18,7 @@
 
 
 import { Option } from '@labkey/components';
-import { fetchCurrentCageMods, fetchHousingForm } from '../api/popularQueries';
+import { fetchCurrentCageMods, fetchHousingForm, findAnimalsInCage } from '../api/popularQueries';
 import { ModTypes } from '../types/typings';
 import { Filter, Query } from '@labkey/api';
 import { labkeyActionSelectWithPromise } from '../api/labkeyActions';
@@ -318,3 +318,65 @@ export const createPrevHousingForm = async (prevFormId: string): Promise<Record<
     }
     return {[prevForm.room]: [data]};
 }
+
+export const getEffectiveCageId = (animal: HousingTransferData): string | null => {
+    if (!animal) return null;
+    if (animal.destinationCage?.label === 'Special Housing' || 
+        animal.destinationCage?.value === 'Special Housing' || 
+        animal.destinationRoom?.label === 'Special Housing' || 
+        animal.destinationRoom?.value === 'Special Housing' ||
+        (animal.condition && animal.condition.some(c => c.value === 'x')) ||
+        animal.destinationCage?.label === 'In Transit' || 
+        animal.destinationCage?.value === 'In Transit' || 
+        animal.destinationRoom?.label === 'In Transit' || 
+        animal.destinationRoom?.value === 'In Transit' ||
+        (animal.condition && animal.condition.some(c => c.value === 'it'))) {
+        return null;
+    }
+    if (animal.destinationRoom?.label === 'No Change' || animal.destinationRoom?.value === 'No Change') {
+        return animal.currentCage?.value || null;
+    }
+    return animal.destinationCage?.value || null;
+};
+
+export const getOriginalCageId = (animal: HousingTransferData): string | null => {
+    return animal?.currentCage?.value || null;
+};
+
+export const getPlannedOccupantsForCage = async (
+    cageId: string,
+    allAnimals: HousingTransferData[],
+    candidateAnimalId?: string
+): Promise<string[]> => {
+    // 1. Physical occupants currently in cage
+    const physicalAnimals = await findAnimalsInCage(cageId);
+    let occupants = physicalAnimals.map(a => a.id);
+
+    // 2. Remove any moving away from this cage
+    const leavingAnimals = allAnimals.filter(a => {
+        const orig = getOriginalCageId(a);
+        const dest = getEffectiveCageId(a);
+        return orig === cageId && dest !== cageId;
+    });
+    const leavingIds = new Set(leavingAnimals.map(a => a.id));
+    occupants = occupants.filter(id => !leavingIds.has(id));
+
+    // 3. Add any moving into this cage
+    const enteringAnimals = allAnimals.filter(a => {
+        const orig = getOriginalCageId(a);
+        const dest = getEffectiveCageId(a);
+        return dest === cageId && orig !== cageId;
+    });
+    enteringAnimals.forEach(a => {
+        if (!occupants.includes(a.id)) {
+            occupants.push(a.id);
+        }
+    });
+
+    // 4. Ensure candidate animal is included if specified
+    if (candidateAnimalId && !occupants.includes(candidateAnimalId)) {
+        occupants.push(candidateAnimalId);
+    }
+
+    return occupants;
+};

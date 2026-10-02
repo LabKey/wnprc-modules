@@ -29,6 +29,8 @@ import { LoadingScreen } from '../LoadingScreen';
 import { fetchConditionCodes } from '../../api/popularQueries';
 import { canEditConditionPermission } from '../../utils/homeHelpers';
 import { LayoutErrors } from '../LayoutErrors';
+import { checkCageWeightLimit } from '../../utils/helpers';
+import { getPlannedOccupantsForCage } from '../../utils/housingTransferHelpers';
 
 interface HousingFormProps {
     user: Security.GetUserPermissionsResponse;
@@ -365,14 +367,95 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
         });
     }, [allAnimals]);
 
-    const handleValidate = useCallback(() => {
-        console.log('Validating form...', allAnimals);
-        alert('Validation triggered (see console)');
-    }, [allAnimals]);
+    const validateAllCages = useCallback(async (): Promise<{ valid: boolean; errors: string[] }> => {
+        const validationErrors: string[] = [];
 
-    const handleSubmit = useCallback(() => {
+        // 1. Check required fields for all animals
+        allAnimals.forEach(animal => {
+            if (!animal.destinationRoom || animal.destinationRoom.value === null || animal.destinationRoom.value === '') {
+                validationErrors.push(`Animal ${animal.id} is missing destination Room.`);
+            }
+            if (!animal.destinationCage || (animal.destinationCage.value === '' && animal.destinationCage.label === '')) {
+                validationErrors.push(`Animal ${animal.id} is missing destination Cage.`);
+            }
+            if (!animal.condition || animal.condition.length === 0) {
+                validationErrors.push(`Animal ${animal.id} is missing Condition.`);
+            }
+            if (!animal.reasonForMove || animal.reasonForMove.length === 0) {
+                validationErrors.push(`Animal ${animal.id} is missing Reason for Move.`);
+            }
+            const reasonValues = (animal.reasonForMove || []).map(r => r.value);
+            if (reasonValues.includes('Breeding') && !animal.project) {
+                validationErrors.push(`Animal ${animal.id} is moving for Breeding and requires a Project.`);
+            }
+            const isSpecial = animal.destinationCage?.label === 'Special Housing' || 
+                              animal.destinationCage?.value === 'Special Housing' || 
+                              animal.destinationRoom?.label === 'Special Housing' || 
+                              animal.destinationRoom?.value === 'Special Housing' ||
+                              (animal.condition && animal.condition.some(c => c.value === 'x'));
+            if ((reasonValues.includes('Other (write reason in remarks section)') || reasonValues.includes('Behavior') || isSpecial) &&
+                (!animal.remarks || animal.remarks.trim() === '')) {
+                validationErrors.push(`Animal ${animal.id} requires Remarks.`);
+            }
+            if (!animal.performedBy || animal.performedBy.trim() === '') {
+                validationErrors.push(`Animal ${animal.id} is missing Performed By.`);
+            }
+        });
+
+        // 2. Check cage weight limits for all assigned destination cages
+        const checkedCages = new Set<string>();
+        for (const animal of allAnimals) {
+            const destCage = animal.destinationCage;
+            const destRoom = animal.destinationRoom;
+            if (destCage && destCage.value && 
+                destCage.value !== 'Special Housing' && 
+                destCage.label !== 'Special Housing' && 
+                destCage.value !== 'In Transit' && 
+                destCage.label !== 'In Transit' && 
+                destCage.value !== '0' && 
+                destCage.value !== '-1' &&
+                !checkedCages.has(destCage.value)) {
+                
+                checkedCages.add(destCage.value);
+                const roomName = destRoom?.label || currRoom || 'Unassigned';
+                const plannedOccupants = await getPlannedOccupantsForCage(destCage.value, allAnimals);
+                const weightResult = await checkCageWeightLimit(roomName, destCage.value, plannedOccupants);
+
+                if (weightResult.isOverWeight) {
+                    validationErrors.push(`Cage ${destCage.label} in Room ${roomName} exceeds weight limit (Total Weight: ${weightResult.actualWeight} lbs, Allowed: ${weightResult.allowedWeight} lbs${weightResult.cageSqft ? `, Required SQFT: ${weightResult.requiredSqft}, Cage SQFT: ${weightResult.cageSqft}` : ''}). Move cannot be completed.`);
+                }
+            }
+        }
+
+        return {
+            valid: validationErrors.length === 0,
+            errors: validationErrors
+        };
+    }, [allAnimals, currRoom]);
+
+    const handleValidate = useCallback(async () => {
+        setIsSaving(true);
+        const { valid, errors: validationErrors } = await validateAllCages();
+        setIsSaving(false);
+        if (valid) {
+            setErrors([]);
+            alert('Validation successful: All fields and cage weight limits are compliant.');
+        } else {
+            setErrors(validationErrors);
+        }
+    }, [validateAllCages]);
+
+    const handleSubmit = useCallback(async () => {
         setErrors([]);
         setIsSaving(true);
+
+        const { valid, errors: validationErrors } = await validateAllCages();
+        if (!valid) {
+            setErrors(validationErrors);
+            setIsSaving(false);
+            return;
+        }
+
         let prevFormId;
         if(prevForm){
              prevFormId = ActionURL.getParameter('lsid');
@@ -412,7 +495,7 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
             }
             setIsSaving(false);
         });
-    }, [allAnimals, prevForm, layoutChangeId]);
+    }, [allAnimals, prevForm, layoutChangeId, validateAllCages]);
 
     const availableCenterAnimals = useMemo(() => {
         const addedAnimalIds = new Set(allAnimals.map(a => a.id));
@@ -502,6 +585,7 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
                     roomAnimals={animalsByCurRoom[roomLabel] || []}
                     animalLocations={animalLocations}
                     conditionCodes={conditionCodes}
+                    setFormErrors={setErrors}
                 />
             ))}
 
@@ -519,7 +603,7 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
                     <button
                         className="btn btn-success"
                         disabled={!isFormValid || isSaving}
-                        onClick={() => {setErrors([]); setIsSaving(true); handleSubmit();}}
+                        onClick={handleSubmit}
                     >
                         Submit
                     </button>

@@ -5,11 +5,12 @@ on the labkey server UI and not through code.
 
 
 1. Create housing_test table with cageNew and condNew
-   2. Ensure permissions are copied from the original housing table as well
-2. Update old housing condition code PC to PCP 
-3. Import data from current housing table for active housing. No need to do past records.
+   1. Ensure permissions are copied from the original housing table as well
+   2. cage and cond fields will be named cageOld and condOld. The new fields will replace them. If anything breaks because
+      of this we will need to fix it. Then when we make the switch to the real housing table all we have to do is rename + add the new cage and cond fields
+2. Update old housing condition code PC to PCP
 
-
+Run this script to update the old housing condition code pc to pcp.
 ``` 
 <button id="executeButton"> Execute JavaScript </button>
 <div id="js-content"/>
@@ -98,8 +99,11 @@ on the labkey server UI and not through code.
 
 </script>
 ```
+
+3. Import data from current housing table to housing_test for active housing. No need to do past records.
+
 4. Add new housing condition in ehr_lookups for PC
-5. Update cageNew in housing_test
+5. Update cage in housing_test
 
 ```
 <button id="executeButton"> Update cageNew in housing_test </button>
@@ -112,7 +116,7 @@ on the labkey server UI and not through code.
         LABKEY.Query.selectRows({
             schemaName: 'study',
             queryName: 'housing_test',
-            columns: 'room,cage,lsid,cageNew', // ensure cageNew is selected
+            columns: 'room,cageOld,lsid,cage', // ensure cageOld is selected
             success: function(housingData) {
                 housingData = housingData || {};
                 housingData.rows = housingData.rows || [];
@@ -136,13 +140,13 @@ on the labkey server UI and not through code.
                         // Prepare rows to update
                         let rowsToUpdate = [];
                         for (let h of housingData.rows) {
-                            let key = h.room + '|' + parseInt(h.cage);
+                            let key = h.room + '|' + parseInt(h.cageOld);
                             let newCageObjId = cageLookup[key];
 
                             if (newCageObjId) {
                                 rowsToUpdate.push({
                                     lsid: h.lsid,
-                                    cageNew: newCageObjId
+                                    cage: newCageObjId
                                 });
                             }
                         }
@@ -162,8 +166,8 @@ on the labkey server UI and not through code.
                                     $('<tr/>')
                                         .append($('<th/>').text('#'))
                                         .append($('<th/>').text('room'))
-                                        .append($('<th/>').text('cage'))
-                                        .append($('<th/>').text('new cageNew (cage_object_id)'))
+                                        .append($('<th/>').text('cageOld'))
+                                        .append($('<th/>').text('new cage (cage_object_id)'))
                                 ))
                         );
 
@@ -176,8 +180,8 @@ on the labkey server UI and not through code.
                                 $('<tr/>')
                                     .append($('<td/>').text(i + 1))
                                     .append($('<td/>').text(origRow ? origRow.room : 'N/A'))
-                                    .append($('<td/>').text(origRow ? origRow.cage : 'N/A'))
-                                    .append($('<td/>').text(row.cageNew))
+                                    .append($('<td/>').text(origRow ? origRow.cageOld : 'N/A'))
+                                    .append($('<td/>').text(row.cage))
                             );
                         }
                         $content.find('table').append($tbody);
@@ -239,7 +243,7 @@ on the labkey server UI and not through code.
 6. Update condNew and add current conditions to cageui.housing_condition_records.
 
 ```
-<button id="executeButton"> Update housing_condition_records & condNew </button>
+<button id="executeButton"> Update housing_condition_records & cond </button>
 <div id="js-content" style="margin-top: 1rem;"></div>
 
 <script type="text/javascript" nonce="<%=scriptNonce%>">
@@ -247,7 +251,7 @@ on the labkey server UI and not through code.
 
     // Condition category definitions
     const CONDITIONS = {
-        special: ['x'],
+        special: ['x', 'it'],
         pair:    ['s', 'g', 'p', 'c'],
         cage:    ['pc', 'vc'],
         social:  ['af', 'am', 'amf', 'b', 'bi', 'f', 'i', 'ia', 'm', 'mafa', 'mf', 'mfa']
@@ -316,7 +320,7 @@ on the labkey server UI and not through code.
         LABKEY.Query.selectRows({
             schemaName: 'study',
             queryName: 'housing_test',
-            columns: 'objectid,cond,lsid',
+            columns: 'objectid,condOld,lsid',
             success: function(housingData) {
                 housingData = housingData || {};
                 housingData.rows = housingData.rows || [];
@@ -326,7 +330,7 @@ on the labkey server UI and not through code.
                 let housingUpdates = [];
 
                 for (let h of housingData.rows) {
-                    let decoded = decodeCond(h.cond);
+                    let decoded = decodeCond(h.condOld);
                     let hasCondition = Object.values(decoded).some(v => v !== null);
 
                     if (!hasCondition) {
@@ -351,7 +355,7 @@ on the labkey server UI and not through code.
                     housingUpdates.push({
                         objectid: h.objectid,
                         lsid: h.lsid,
-                        condNew: newObjId // placeholder
+                        cond: newObjId // placeholder
                     });
                 }
 
@@ -378,13 +382,13 @@ on the labkey server UI and not through code.
                 let $tbody = $('<tbody/>');
                 for (let i = 0; i < newRows.length; i++) {
                     let row = newRows[i];
-                    let orig = housingUpdates.find(r => r.condNew === row.objectid);
-                    let d = decodeCond(orig.cond);
+                    let orig = housingUpdates.find(r => r.cond === row.objectid);
+                    let d = decodeCond(orig.condOld);
                     $tbody.append(
                             $('<tr/>')
                                     .append($('<td/>').text(i + 1))
                                     .append($('<td/>').text(row.objectid))
-                                    .append($('<td/>').text(orig.cond || '(null)'))
+                                    .append($('<td/>').text(orig.condOld || '(null)'))
                                     .append($('<td/>').text(
                                             [d.special, d.pair, d.cage, d.social].join('/')
                                     ))
@@ -415,7 +419,7 @@ on the labkey server UI and not through code.
                                                 return;
                                             }
 
-                                            // Now update housing_test.condNew
+                                            // Now update housing_test.cond
                                             LABKEY.Query.updateRows({
                                                 schemaName: 'study',
                                                 queryName: 'housing_test',
@@ -426,14 +430,14 @@ on the labkey server UI and not through code.
                                                             $('<div/>')
                                                                     .append($('<h4/>').text('✅ Success!'))
                                                                     .append($('<p/>').text('Inserted ' + insertData.rows.length + ' condition records into housing_condition_records'))
-                                                                    .append($('<p/>').text('Updated condNew in ' + updateData.rows.length + ' housing_test rows'))
+                                                                    .append($('<p/>').text('Updated cond in ' + updateData.rows.length + ' housing_test rows'))
                                                     );
                                                 },
                                                 failure: function(error) {
                                                     console.error('Update failed:', error);
                                                     $content.append(
                                                             $('<span/>', { style: 'color: red;' })
-                                                                    .text('❌ Update of housing_test.condNew failed. See console.')
+                                                                    .text('❌ Update of housing_test.cond failed. See console.')
                                                     );
                                                 }
                                             });

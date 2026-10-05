@@ -35,8 +35,7 @@
                     </column>
 
                     <column columnName="recoveryReason">
-                        <required>true</required>
-                        <nullable>false</nullable>
+                        <columnTitle>Recovery Reason</columnTitle>
                     </column>
 
                     <column columnName="submitterInitials">

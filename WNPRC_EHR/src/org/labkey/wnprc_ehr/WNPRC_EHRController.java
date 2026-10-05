@@ -2520,6 +2520,7 @@ public class WNPRC_EHRController extends SpringActionController
             List<Map<String, Object>> rowsToDelete = new ArrayList<>();
             List<Map<String, Object>> tasksToInsert = new ArrayList<>();
             List<Map<String, Object>> tasksToUpdate = new ArrayList<>();
+            List<Map<String, Object>> tasksToDelete = new ArrayList<>();
 
 
             // 4. Loops through each row and validates them.
@@ -2703,8 +2704,9 @@ public class WNPRC_EHRController extends SpringActionController
                     tasksToUpdate.add(taskRecord);
                 }
                 else if (observation.equals("Deleted")) {
-                    taskRecord.put("qcstate", EHRService.QCSTATES.DeleteRequested.getQCState(getContainer()).getRowId());
-                    tasksToUpdate.add(taskRecord);
+                    Map<String, Object> taskKey = new HashMap<>();
+                    taskKey.put("taskid", recoveryId);
+                    tasksToDelete.add(taskKey);
                 }
                 else if (observation.equals("Unfinalized")) {
                     taskRecord.put("qcstate", EHRService.QCSTATES.Scheduled.getQCState(getContainer()).getRowId());
@@ -2749,6 +2751,7 @@ public class WNPRC_EHRController extends SpringActionController
                 List<Map<String, Object>> anesthesiaRowsToDelete = anesthesiaTableService.deleteRows(getUser(), getContainer(), rowsToDelete, null, null);
                 tasksTableService.insertRows(getUser(), getContainer(), tasksToInsert, dbErrors, null, null);
                 tasksTableService.updateRows(getUser(), getContainer(), tasksToUpdate, tasksToUpdate, dbErrors, null, null);
+                tasksTableService.deleteRows(getUser(), getContainer(), tasksToDelete, null, null);
 
                 // 7c. Checks for errors in any row and aborts the insert.
                 if (dbErrors.hasErrors()) {

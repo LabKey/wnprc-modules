@@ -2811,7 +2811,8 @@ public class TriggerScriptHelper {
                     sort.appendSortColumn(FieldKey.fromString("date"), Sort.SortDirection.ASC, false);
 
                     TableSelector ts = new TableSelector(waterAmount, filter,sort);
-                    final List<Map<String, Object>> rowTobeUpdated = new ArrayList<>();
+                    // OLD WAY:
+//                    final List<Map<String, Object>> rowTobeUpdated = new ArrayList<>();
                     final List<Map<String,Object>> oldKeys = new ArrayList<>();
 
                     ts.forEach(new Selector.ForEachBlock<ResultSet>()
@@ -2830,22 +2831,36 @@ public class TriggerScriptHelper {
                             if (errorArray != null){
                                 errorArray.put(returnErrors);
                             }
-                            String objectid =rs.getString("objectId");
-                            Map<String, Object> toUpdate = new CaseInsensitiveHashMap<>();
-                            Map<String,Object> keyMap = new CaseInsensitiveHashMap<>();
-                            toUpdate.put("qcstate", EHRService.QCSTATES.DeleteRequested.getQCState(getContainer()).getRowId());
-                            toUpdate.put("objectid",objectid);
-                            rowTobeUpdated.add(toUpdate);
 
+                            // OLD WAY:
+//                            String objectid =rs.getString("objectId");
+//                            Map<String, Object> toUpdate = new CaseInsensitiveHashMap<>();
+//                            Map<String,Object> keyMap = new CaseInsensitiveHashMap<>();
+//                            toUpdate.put("qcstate", EHRService.QCSTATES.DeleteRequested.getQCState(getContainer()).getRowId());
+//                            toUpdate.put("objectid",objectid);
+//                            rowTobeUpdated.add(toUpdate);
+//
+//                            keyMap.put("objectid", objectid);
+//                            oldKeys.add(keyMap);
+
+                            // NEW WAY:
+                            String objectid = rs.getString("objectId");
+                            Map<String,Object> keyMap = new CaseInsensitiveHashMap<>();
                             keyMap.put("objectid", objectid);
                             oldKeys.add(keyMap);
-
                         }
                     });
                     //Table.update(getUser(),waterAmount,toUpdate, objectid);
-                    if (waterAmount.getUpdateService()!=null){
-                        BatchValidationException errors = new BatchValidationException();
-                        waterAmount.getUpdateService().updateRows(user, container,rowTobeUpdated,oldKeys,errors,null,null);
+
+                    // OLD WAY:
+//                    if (waterAmount.getUpdateService()!=null){
+//                        BatchValidationException errors = new BatchValidationException();
+//                        waterAmount.getUpdateService().updateRows(user, container,rowTobeUpdated,oldKeys,errors,null,null);
+//                    }
+
+                    // NEW WAY:
+                    if (waterAmount.getUpdateService() != null) {
+                        waterAmount.getUpdateService().deleteRows(user, container, oldKeys, null, null);
                     }
                 }
             }

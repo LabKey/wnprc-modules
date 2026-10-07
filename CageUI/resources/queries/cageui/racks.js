@@ -21,17 +21,5 @@ var console = require('console');
 var CageUI = require("cageui/CageUI").CageUI;
 
 function onUpsert(helper, scriptErrors, row){
-
-    if (this.extraContext['cagesExtraContext'][row.cage] && this.extraContext['QCState'] === 1) {
-
-        //add any errors that are returned to the page
-        let javaErrors = CageUI.Utils.getJavaHelper().updateCages(row, this.extraContext['cagesExtraContext'][row.cage]);
-        if (javaErrors) {
-            for (let i = 0; i < javaErrors.length; i++) {
-                let error = javaErrors[i];
-                console.log('Field: ' + error.field + ', Message: ' + error.message + ', Severity: ' + error.severity);
-                EHR.Server.Utils.addError(scriptErrors, error.field, error.message, error.severity);
-            }
-        }
-    }
+    row.objectid = row.objectid || LABKEY.Utils.generateUUID().toUpperCase();
 }

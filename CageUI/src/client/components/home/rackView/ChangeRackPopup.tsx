@@ -29,6 +29,7 @@ import { LayoutErrors } from '../../LayoutErrors';
 import { LoadingScreen } from '../../LoadingScreen';
 import { useHomeNavigationContext } from '../../../context/HomeNavigationContextManager';
 import { generateUUID } from '../../../utils/helpers';
+import { GHOST_TYPE_ID } from '../../../utils/constants';
 
 interface ChangeRackPopupProps {
     showChangeRackPopup: React.Dispatch<React.SetStateAction<boolean>>;
@@ -105,7 +106,7 @@ export const ChangeRackPopup: FC<ChangeRackPopupProps> = (props) => {
                     value: {
                         objectId: generateUUID(),
                         rackId: 0,
-                        typeRowId: 0
+                        typeRowId: GHOST_TYPE_ID
                     },
                     label: "Ghost Rack"
                 }

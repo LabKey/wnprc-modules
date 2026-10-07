@@ -58,6 +58,7 @@ import org.labkey.cageui.action.CageHistoryFormWithContext;
 import org.labkey.cageui.action.CageModificationHistoryForm;
 import org.labkey.cageui.action.CagesForm;
 import org.labkey.cageui.action.GhostCagesForm;
+import org.labkey.cageui.action.GhostRacksForm;
 import org.labkey.cageui.action.HousingConditionRecordsForm;
 import org.labkey.cageui.action.HousingForm;
 import org.labkey.cageui.action.LayoutHistoryForm;
@@ -446,6 +447,13 @@ public class CageUIManager
             throw new IllegalStateException(ghostCagesTable.getName() + " query update service");
         }
 
+        TableInfo ghostRacksTable = cageUISchema.getTable("ghost_racks");
+        QueryUpdateService ghostRacksQus = ghostRacksTable.getUpdateService();
+        if (ghostRacksQus == null)
+        {
+            throw new IllegalStateException(ghostRacksTable.getName() + " query update service");
+        }
+
         try (DbScope.Transaction tx = CageUISchema.getInstance().getSchema().getScope().ensureTransaction())
         {
 
@@ -495,31 +503,14 @@ public class CageUIManager
                 rackHistoryQus.insertRows(user, container, convertToMapList(newForms.getRackHistoryFormWithContext().getRackHistoryForms()), batchErrors, null, racksExtraContext);
             }
 
-/*            if (newForms.getNewCagesForm() != null)
-            {
-                extraContext.put("cagesExtraContext", newForms.getNewCagesForm().getExtraContext());
-                cagesQus.insertRows(user, container, convertToMapList(newForms.getNewCagesForm().getCagesForm()), batchErrors, null, extraContext);
-            }
-
-            if (newForms.getPrevCagesForm() != null)
-            {
-                extraContext.put("cagesExtraContext", newForms.getPrevCagesForm().getExtraContext());
-                cagesQus.updateRows(user, container, convertToMapList(newForms.getPrevCagesForm().getCagesForm()), null, batchErrors, null, extraContext);
-            }
-
-            if (newForms.getNewRacksForm() != null)
-            {
-                racksQus.insertRows(user, container, convertToMapList(newForms.getNewRacksForm()), batchErrors, null, extraContext);
-            }
-
-            if (newForms.getPrevRacksForm() != null)
-            {
-                racksQus.updateRows(user, container, convertToMapList(newForms.getPrevRacksForm()), null, batchErrors, null, extraContext);
-            }*/
-
             if (newForms.getNewGhostCagesForm() != null)
             {
                 ghostCagesQus.insertRows(user, container, convertToMapList(newForms.getNewGhostCagesForm()), batchErrors, null, null);
+            }
+
+            if (newForms.getNewGhostRacksForm() != null)
+            {
+                ghostRacksQus.insertRows(user, container, convertToMapList(newForms.getNewGhostRacksForm()), batchErrors, null, null);
             }
 
             if (batchErrors.hasErrors())
@@ -528,6 +519,7 @@ public class CageUIManager
                 response.put("errors", batchErrors);
                 return response;
             }
+
             tx.commit();
             response.put("success", true);
             response.put("historyid", newForms.getNewAllHistoryForm().getHistoryId());
@@ -1286,6 +1278,7 @@ public class CageUIManager
             //ArrayList<RacksForm> racksToInsertList = new ArrayList<>();
             //ArrayList<CagesForm> cagesToInsertList = new ArrayList<>();
             ArrayList<GhostCagesForm> ghostCagesToInsertList = new ArrayList<>();
+            ArrayList<GhostRacksForm> ghostRacksToInsertList = new ArrayList<>();
             Map<String,Map<String, Object>> cagesExtraContextMap = new HashMap<>();
             //ArrayList<RacksForm> racksToUpdateList = new ArrayList<>();
             //ArrayList<CagesForm> cagesToUpdateList = new ArrayList<>();
@@ -1324,6 +1317,16 @@ public class CageUIManager
                             newGhostCage.setCage(findLastNumberAfterDash(cage.getCageNum()));
                             ghostCagesToInsertList.add(newGhostCage);
                         }
+                        RackHistoryForm rackHistoryForm = new RackHistoryForm();
+                        GhostRacksForm newGhostRack = new GhostRacksForm();
+
+                        rackHistoryForm.setHistoryId(historyId);
+                        rackHistoryForm.setRoom(this.room.getName());
+                        rackHistoryForm.setGhostObjectId(rack.getObjectId());
+                        newGhostRack.setObjectid(rack.getObjectId());
+
+                        ghostRacksToInsertList.add(newGhostRack);
+                        rackHistoryToInsertList.add(rackHistoryForm);
                         continue;
                     }
                     // Check if this is a new real rack that needs to be added to racks table
@@ -1415,35 +1418,6 @@ public class CageUIManager
                                 cagesExtraContextMap.put(cage.getObjectId(), cageExtraContext);
                                 cageHistoryToInsertList.add(newCageHistory);
 
-                                /*if(prevCagesForm != null) {
-                                    prevCagesForm.setCageNumber(findLastNumberAfterDash(cage.getCageNum()));
-                                    prevCagesForm.setHeight(cageDims.get("height"));
-                                    prevCagesForm.setWidth(cageDims.get("width"));
-                                    prevCagesForm.setLength(cageDims.get("length"));
-                                    prevCagesForm.setSqft(cageDims.get("sqft"));
-
-                                    cageExtraContextMap.put("groupRotation", rackGroup.getRotation());
-                                    cageExtraContextMap.put("rackGroup", rackGroup.getGroupId());
-                                    prevCagesExtraContextMap.put(cage.getObjectId(),cageExtraContextMap);
-                                    cagesToUpdateList.add(prevCagesForm);
-                                }else{
-                                    // If rack was created in table without cages (creating rack outside of editor)
-                                    CagesForm cagesForm = new CagesForm();
-                                    cagesForm.setCageNumber(findLastNumberAfterDash(cage.getCageNum()));
-                                    cagesForm.setRack(rack.getObjectId());
-                                    cagesForm.setObjectId(cage.getObjectId());
-                                    cagesForm.setPositionId(cage.getPositionId());
-                                    cagesForm.setLength(cageDims.get("length"));
-                                    cagesForm.setWidth(cageDims.get("width"));
-                                    cagesForm.setHeight(cageDims.get("height"));
-                                    cagesForm.setSqft(cageDims.get("sqft"));
-
-                                    extraContextMap.put("groupRotation", rackGroup.getRotation());
-                                    extraContextMap.put("rackGroup", rackGroup.getGroupId());
-
-                                    cagesToInsertList.add(cagesForm);
-                                    cagesExtraContextMap.put(cage.getObjectId(), extraContextMap);
-                                }*/
                             }
                         }
                     }
@@ -1511,16 +1485,13 @@ public class CageUIManager
             cageHistoryFormWithContext.setExtraContext(cagesExtraContextMap);
             rackHistoryFormWithContext.setRackHistoryForms(rackHistoryToInsertList);
             rackHistoryFormWithContext.setExtraContext(racksExtraContextMap);
-/*
-            bundledForms.setNewRacksForm(racksToInsertList);
-            bundledForms.setCageHistoryForm(cagesFormWithContext);
-            bundledForms.setPrevRacksForm(racksToUpdateList);
-            bundledForms.setPrevCagesForm(prevCagesFormWithContext);*/
+
             bundledForms.setCageHistoryFormWithContext(cageHistoryFormWithContext);
             bundledForms.setRackHistoryFormWithContext(rackHistoryFormWithContext);
 
             bundledForms.setLayoutHistoryForm(layoutForms);
             bundledForms.setNewGhostCagesForm(ghostCagesToInsertList);
+            bundledForms.setNewGhostRacksForm(ghostRacksToInsertList);
 
             // Handle cage modifications history
             submitCageModificationsHistory(historyId, bundledForms);

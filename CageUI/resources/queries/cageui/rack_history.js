@@ -21,9 +21,12 @@ var console = require('console');
 var CageUI = require("cageui/CageUI").CageUI;
 
 function onUpsert(helper, scriptErrors, row){
-    row.objectid = row.objectid || LABKEY.Utils.generateUUID().toUpperCase();
 
+    console.log("rack EC: ", this.extraContext);
     if (this.extraContext['QCState'] === 1 && this.extraContext['racksExtraContext']) {
+        if(row.ghost_rack_id){ // don't include ghost racks in the racks table
+            return;
+        }
         //add any errors that are returned to the page
         let javaErrors = CageUI.Utils.getJavaHelper().updateRacks(row, this.extraContext['racksExtraContext']);
         if (javaErrors) {

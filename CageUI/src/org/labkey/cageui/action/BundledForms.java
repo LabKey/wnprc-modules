@@ -32,11 +32,8 @@ public class BundledForms
     ArrayList<LayoutHistoryForm> _layoutHistoryForm;
     CageHistoryFormWithContext _cageHistoryFormWithContext;
     RackHistoryFormWithContext _rackHistoryFormWithContext;
-/*    ArrayList<RacksForm> _newRacksForm;
-    ArrayList<RacksForm> _prevRacksForm;
-    CagesFormWithContext _newCagesForm;
-    CagesFormWithContext _prevCagesForm;*/
     ArrayList<GhostCagesForm> _newGhostCagesForm;
+    ArrayList<GhostRacksForm> _newGhostRacksForm;
 
     public AllHistoryForm getNewAllHistoryForm()
     {
@@ -118,46 +115,6 @@ public class BundledForms
         _rackHistoryFormWithContext = rackHistoryFormWithContext;
     }
 
-/*    public ArrayList<RacksForm> getNewRacksForm()
-    {
-        return _newRacksForm;
-    }
-
-    public void setNewRacksForm(ArrayList<RacksForm> newRacksForm)
-    {
-        _newRacksForm = newRacksForm;
-    }
-
-    public ArrayList<RacksForm> getPrevRacksForm()
-    {
-        return _prevRacksForm;
-    }
-
-    public void setPrevRacksForm(ArrayList<RacksForm> prevRacksForm)
-    {
-        _prevRacksForm = prevRacksForm;
-    }
-
-    public CagesFormWithContext getNewCagesForm()
-    {
-        return _newCagesForm;
-    }
-
-    public void setNewCagesForm(CagesFormWithContext newCagesForm)
-    {
-        _newCagesForm = newCagesForm;
-    }
-
-    public CagesFormWithContext getPrevCagesForm()
-    {
-        return _prevCagesForm;
-    }
-
-    public void setPrevCagesForm(CagesFormWithContext prevCagesForm)
-    {
-        _prevCagesForm = prevCagesForm;
-    }*/
-
     public Map<String, Object> getEhrRoomsForm()
     {
         return _ehrRoomsForm;
@@ -176,6 +133,16 @@ public class BundledForms
     public void setNewGhostCagesForm(ArrayList<GhostCagesForm> newGhostCagesForm)
     {
         _newGhostCagesForm = newGhostCagesForm;
+    }
+
+    public ArrayList<GhostRacksForm>getNewGhostRacksForm()
+    {
+        return _newGhostRacksForm;
+    }
+
+    public void setNewGhostRacksForm(ArrayList<GhostRacksForm> newGhostRacksForm)
+    {
+        _newGhostRacksForm = newGhostRacksForm;
     }
 
 }

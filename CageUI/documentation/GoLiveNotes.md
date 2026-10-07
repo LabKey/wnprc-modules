@@ -4,7 +4,7 @@ Some notes on what needs to be done on the housing cageUI when the project goes 
 on the labkey server UI and not through code.
 
 
-1. Create housing_test table with cageNew and condNew
+1. Create housing_test table
    1. Ensure permissions are copied from the original housing table as well
    2. cage and cond fields will be named cageOld and condOld. The new fields will replace them. If anything breaks because
       of this we will need to fix it. Then when we make the switch to the real housing table all we have to do is rename + add the new cage and cond fields

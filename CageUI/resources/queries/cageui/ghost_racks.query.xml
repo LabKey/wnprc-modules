@@ -19,24 +19,11 @@
 <query xmlns="http://labkey.org/data/xml/query">
     <metadata>
         <tables xmlns="http://labkey.org/data/xml">
-            <table tableName="ghost_cages" tableDbType="TABLE">
-                <tableTitle>Ghost Cages</tableTitle>
+            <table tableName="ghost_racks" tableDbType="TABLE">
+                <tableTitle>Ghost Racks</tableTitle>
                 <columns>
-                    <column columnName="rowid">
-                        <isKeyField>true</isKeyField>
-                    </column>
-                    <column columnName="cage_objectid"/>
-                    <column columnName="positionid"/>
-                    <column columnName="rack_group"/>
-                    <column columnName="rack_objectid">
-                        <fk>
-                            <fkDbSchema>cageui</fkDbSchema>
-                            <fkTable>ghost_racks</fkTable>
-                            <fkColumnName>objectid</fkColumnName>
-                        </fk>
-                    </column>
-                    <column columnName="group_rotation"/>
-                    <column columnName="cage"/>
+                    <column columnName="rowid" />
+                    <column columnName="objectid" />
                     <column columnName="container"/>
                     <column columnName="createdby"/>
                     <column columnName="created"/>

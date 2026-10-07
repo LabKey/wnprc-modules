@@ -25,6 +25,8 @@ public class RackHistoryForm
     private int _rowid;
     @JsonProperty("objectid")
     private String _objectId;
+    @JsonProperty("ghost_rack_id")
+    private String _ghostObjectId;
     @JsonProperty("historyid")
     private String _historyId;
     private String _room;
@@ -89,5 +91,15 @@ public class RackHistoryForm
     public void setNotes(String notes)
     {
         _notes = notes;
+    }
+
+    public String getGhostObjectId()
+    {
+        return _ghostObjectId;
+    }
+
+    public void setGhostObjectId(String ghostObjectId)
+    {
+        _ghostObjectId = ghostObjectId;
     }
 }

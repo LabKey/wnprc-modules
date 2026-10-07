@@ -204,14 +204,6 @@ public class TriggerScriptHelper
             newRack.setRackType((Integer) rackContext.get("rackType"));
         }else{
             prevRack.setRoom((String) rackHistoryRow.get("room"));
-            /*else{ // rack exists
-            if(rackContext.containsKey("removeRackFromRoom")){ // If it has the key it is true
-                prevRack.setRoom(null);
-            }
-            if(rackContext.containsKey("prevCondition")){
-                prevRack.setCondition((Integer) rackContext.get("prevCondition"));
-            }
-        }*/
         }
 
         try {

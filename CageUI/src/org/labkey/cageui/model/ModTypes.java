@@ -37,7 +37,8 @@ public enum ModTypes
     Extension("ex"),
     SPDivider("spd"),
     Restraint("res"),
-    Blind("bld");
+    Blind("bld"),
+    SqueezeBack("sb");
 
     private final String value;
 

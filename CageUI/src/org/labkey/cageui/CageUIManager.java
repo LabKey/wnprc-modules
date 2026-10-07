@@ -1077,9 +1077,13 @@ public class CageUIManager
 
                 // Apply extensions
                 boolean hasExtension = mods.stream().anyMatch(mod -> mod.getModification().equals(ModTypes.Extension));
+                boolean hasSqueezeBack = mods.stream().anyMatch(mod -> mod.getModification().equals(ModTypes.SqueezeBack));
                 if (hasExtension)
                 {
                     totalSqft += 2;
+                }
+                if(hasSqueezeBack){
+                    totalSqft -= 0.52;
                 }
 
                 // first cage in sequence should add its cage dimensions and ignore width + height + length modifiers between other cages

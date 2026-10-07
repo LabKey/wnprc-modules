@@ -75,7 +75,8 @@ export enum ModTypes {
     Extension = 'ex',
     SPDivider = 'spd', // Social Panel
     Restraint = 'res',
-    Blind = 'bld'
+    Blind = 'bld',
+    SqueezeBack = 'sb'
 }
 
 export enum ModDirections {
@@ -85,8 +86,9 @@ export enum ModDirections {
 }
 
 export enum ModStyle {
-    Attachment,
-    Separator
+    AttachmentOne,
+    Separator,
+    AttachmentTwo
 }
 
 export enum ModLocations {
@@ -119,6 +121,7 @@ export enum ModSvgLocId {
     Extension = 'extension',
     Restraint = 'restraint',
     Blind = 'blind',
+    SqueezeBack = 'squeezeBack',
     CTunnelCircle = 'cTunnel-circle',
     CTunnelLeft = 'cTunnel-left',
     CTunnelRight = 'cTunnel-right',

@@ -82,8 +82,6 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import org.junit.Assert;
-import org.junit.Test;
 
 public class CageUIManager
 {
@@ -94,7 +92,7 @@ public class CageUIManager
     private CageUIManager()
     {
         // prevent external construction with a private default constructor
-        _cache = CacheManager.getStringKeyCache(1000, CacheManager.UNLIMITED, "CageUICache");
+        _cache = CacheManager.getCache(String.class, 1000, CacheManager.UNLIMITED, "CageUICache");
     }
 
     public static CageUIManager get()

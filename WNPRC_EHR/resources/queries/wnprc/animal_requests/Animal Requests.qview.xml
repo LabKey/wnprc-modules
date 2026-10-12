@@ -2,6 +2,7 @@
     <columns>
         <column name="edit" ></column>
         <column name="rowid"></column>
+        <column name="request_number"/>
         <column name="date" ></column>
         <column name="createdBy"/>
         <column name="principalinvestigator"></column>

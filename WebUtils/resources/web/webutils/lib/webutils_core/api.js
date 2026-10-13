@@ -25,7 +25,7 @@ WebUtils.API = (function(){
     };
 
     var makeURLForHTTPAction = function(action, container) {
-        return [baseURL(), 'query', container || defaultContainerPath(), action + '.api'].join("/");
+        return LabKeyURL.buildURL('query', action + '.api', container || defaultContainerPath());
     };
 
     var makeRequest = function(url, config) {
@@ -238,7 +238,8 @@ WebUtils.API = (function(){
     };
 
     var getText = function(path) {
-        return makeRequest(baseURL() + path).then(function(response) {
+        // baseURL() already ends with "/"
+        return makeRequest(baseURL() + path.replace(/^\/+/, '')).then(function(response) {
             return response.text();
         });
     };

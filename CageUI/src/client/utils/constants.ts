@@ -332,5 +332,20 @@ export const Modifications: ModRecord = {
             property: 'opacity',
             value: '100'
         }]
+    },
+    [ModTypes.SqueezeBack]: {
+        name: 'Squeeze Back',
+        svgIds: {
+            [ModLocations.Direct]: {
+                [GroupRotation.Origin]: [ModSvgLocId.SqueezeBack],
+                [GroupRotation.Quarter]: [ModSvgLocId.SqueezeBack],
+                [GroupRotation.Half]: [ModSvgLocId.SqueezeBack],
+                [GroupRotation.ThreeQuarter]: [ModSvgLocId.SqueezeBack]
+            },
+        },
+        styles: [{
+            property: 'opacity',
+            value: '100'
+        }]
     }
 };

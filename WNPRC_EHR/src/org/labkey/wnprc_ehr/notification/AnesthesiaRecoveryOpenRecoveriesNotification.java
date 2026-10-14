@@ -77,7 +77,7 @@ public class AnesthesiaRecoveryOpenRecoveriesNotification extends AbstractEHRNot
 
         // Creates table.
         if (!myRecoveriesObject.unclosedRecoveries.isEmpty()) {
-            messageBody.append("The following recoveries are still open and have not been closed yet:");
+            messageBody.append("The following recoveries are still open and have not been closed yet:<br>");
             for (HashMap<String, String> result : myRecoveriesObject.unclosedRecoveries) {
                 messageBody.append(result.get("Id") + "<br>");
             }

@@ -10,6 +10,7 @@ import org.labkey.api.security.User;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -79,7 +80,7 @@ public class AnesthesiaRecoveryReviewNotification extends AbstractEHRNotificatio
 
         // Creates table.
         if (!myRequiredReviewsObject.reviewRequiredRecoveries.isEmpty()) {
-            messageBody.append("The following recoveries have been flagged as 'Review Required':");
+            messageBody.append("The following recoveries have been flagged as 'Review Required':<br>");
             for (HashMap<String, String> result : myRequiredReviewsObject.reviewRequiredRecoveries)
             {
                 messageBody.append(result.get("Id") + "<br>");

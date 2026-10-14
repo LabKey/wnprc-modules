@@ -395,6 +395,7 @@ public class WNPRC_EHRModule extends ExtendedSimpleModule
                 new LargeInfantAlertsRevamp(this),
                 new OverdueWeightAlertsRevamp(this),
                 new AnesthesiaRecoveryReviewNotification(this),
+                new AnesthesiaRecoveryOpenRecoveriesNotification(this),
                 new SiteErrorAlertsRevamp(this),
                 new WeightAlertsRevamp(this)
                 );

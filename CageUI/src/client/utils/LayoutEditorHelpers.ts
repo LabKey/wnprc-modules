@@ -23,7 +23,10 @@ import {
     generateUUID,
     getAdjLocation,
     getDefaultMod,
-    getTypeClassFromElement, isRoomCreator, isRoomModifier, isTemplateCreator,
+    getTypeClassFromElement,
+    isRoomCreator,
+    isRoomModifier,
+    isTemplateCreator,
     parseRoomItemType,
     roomItemToString
 } from './helpers';
@@ -35,7 +38,7 @@ import {
     CageMods,
     CageSvgId,
     DefaultRackTypes,
-    FullObjectHistoryData,
+    FullObjectHistoryData, GhostCageData,
     GroupId,
     LayoutHistoryData,
     LocationCoords,
@@ -63,12 +66,9 @@ import {
 import * as React from 'react';
 import { MutableRefObject } from 'react';
 import { Security } from '@labkey/api';
-import { GetUserPermissionsResponse } from '@labkey/api/dist/labkey/security/Permission';
 import { CELL_SIZE } from './constants';
-import { fetchCage, fetchCageHistory, fetchRack } from '../api/popularQueries';
+import { fetchCage, fetchCageHistory, fetchGhostCage, fetchRack } from '../api/popularQueries';
 import { ConnectedCage, ConnectedRack } from '../types/homeTypes';
-
-
 
 
 export const isTouchEvent = (event)=> {
@@ -81,7 +81,7 @@ export const extractRoomObjId = (id: string) => {
 }
 
 // Determines if the user has access to dragging the item
-export const isDraggable = (user: GetUserPermissionsResponse, itemType: RoomItemType) => {
+export const isDraggable = (user: Security.GetUserPermissionsResponse, itemType: RoomItemType) => {
     if(isRoomCreator(user) || isTemplateCreator(user)) {
         return true;
     }
@@ -97,7 +97,7 @@ export const isDraggable = (user: GetUserPermissionsResponse, itemType: RoomItem
 }
 
 // Determines if the user can open the items context menu
-export const canOpenContextMenu = (user: GetUserPermissionsResponse, itemType: RoomItemType) => {
+export const canOpenContextMenu = (user: Security.GetUserPermissionsResponse, itemType: RoomItemType) => {
     if(isRoomCreator(user) || isTemplateCreator(user)) {
         return true;
     }
@@ -112,7 +112,7 @@ export const canOpenContextMenu = (user: GetUserPermissionsResponse, itemType: R
     return false;
 }
 
-export const canPlaceObject = (user: GetUserPermissionsResponse, itemType: RoomItemType) => {
+export const canPlaceObject = (user: Security.GetUserPermissionsResponse, itemType: RoomItemType) => {
     if(isRoomCreator(user) || isTemplateCreator(user)) {
         return true;
     }
@@ -137,16 +137,30 @@ export const processRealLayoutHistory = async (data: LayoutHistoryData[]): Promi
     const processItem = async (item: LayoutHistoryData): Promise<FullObjectHistoryData> => {
         if (item.cage === null) {
             return {
+                isGhost: false,
                 extraContext: item.extraContext,
                 objectType: item.objectType,
                 xCoord: item.xCoord,
                 yCoord: item.yCoord
+            };
+        }else if(item.objectType === RackTypes.GhostCage){
+            const ghostCage: GhostCageData = await fetchGhostCage(item.cage);
+            return {
+                isGhost: true,
+                extraContext: item.extraContext,
+                objectType: item.objectType,
+                xCoord: item.xCoord,
+                yCoord: item.yCoord,
+                rackGroup: ghostCage.rackGroup,
+                groupRotation: ghostCage.groupRotation,
+                cage: ghostCage
             };
         } else {
             const cageHistory: CageHistoryData = await fetchCageHistory(item.historyId, item.cage);
             const cageData: CageData = await fetchCage(cageHistory.cage);
             const rackData: RackData = await fetchRack(cageData.rack);
             return {
+                isGhost: false,
                 extraContext: item.extraContext,
                 objectType: item.objectType,
                 xCoord: item.xCoord,

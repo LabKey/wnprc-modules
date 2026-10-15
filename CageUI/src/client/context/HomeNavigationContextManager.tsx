@@ -24,11 +24,10 @@ import { Cage, Rack, RackGroup, Room, RoomMods } from '../types/typings';
 import { findCageInGroup, findRackInGroup } from '../utils/LayoutEditorHelpers';
 import { buildNewLocalRoom, fetchRoomData } from '../utils/helpers';
 import _ from 'lodash';
-import { ActionURL } from '@labkey/api';
-import { GetUserPermissionsResponse } from '@labkey/api/dist/labkey/security/Permission';
+import { ActionURL, Security } from '@labkey/api';
 
 interface HomeNavigationContextProps {
-    user: GetUserPermissionsResponse;
+    user: Security.GetUserPermissionsResponse;
     children: ReactNode;
 }
 
@@ -48,7 +47,7 @@ export const useHomeNavigationContext = () => {
 
 export const HomeNavigationContextProvider: FC<HomeNavigationContextProps> = ({user, children}) => {
     const [selectedPage, setSelectedPage] = useState<SelectedPage>({selected: 'Home'});
-    const [userProfile, setUserProfile] = useState<GetUserPermissionsResponse>(user);
+    const [userProfile, setUserProfile] = useState<Security.GetUserPermissionsResponse>(user);
 
     const [selectedRoom, setSelectedRoom] = useState<Room>(null);
     const [selectedLocalRoom, setSelectedLocalRoom] = useState<Room>(null);

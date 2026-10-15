@@ -24,17 +24,15 @@ import {
     labkeyGetUserPermissions,
     updateRackConditionStatus
 } from '../../api/labkeyActions';
-import { GetUserPermissionsResponse } from '@labkey/api/dist/labkey/security/Permission';
-import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { RackConditionOption, RackConditions } from '../../types/typings';
-import { Filter } from '@labkey/api';
+import { Filter, Query, Security } from '@labkey/api';
 import { RackSwitchOption } from '../../types/homeTypes';
 import Select from 'react-select';
 import { ConfirmationPopup } from '../../components/ConfirmationPopup';
 
 
 export const UpdateRackStatus: FC = () => {
-    const [user, setUser] = useState<GetUserPermissionsResponse>(null);
+    const [user, setUser] = useState<Security.GetUserPermissionsResponse>(null);
 
     const [rackOptions, setRackOptions] = useState<RackSwitchOption[]>([]);
     const [rackConditions, setRackConditions] = useState<RackConditionOption[]>([]);
@@ -47,7 +45,7 @@ export const UpdateRackStatus: FC = () => {
 
     useEffect(() => {
         const userProfile = labkeyGetUserPermissions();
-        userProfile.then((profile: GetUserPermissionsResponse) => {
+        userProfile.then((profile: Security.GetUserPermissionsResponse) => {
             if (profile.user) {
                 setUser(profile);
             }
@@ -57,7 +55,7 @@ export const UpdateRackStatus: FC = () => {
     }, []);
 
     useEffect(() => {
-        const config: SelectRowsOptions = {
+        const config: Query.SelectRowsOptions = {
             schemaName: 'ehr_lookups',
             queryName: 'cageui_condition_codes',
             columns: ['value', 'title']
@@ -77,7 +75,7 @@ export const UpdateRackStatus: FC = () => {
     }, []);
 
     useEffect(() => {
-        const racksConfig: SelectRowsOptions = {
+        const racksConfig: Query.SelectRowsOptions = {
             schemaName: 'cageui',
             queryName: 'racks',
             columns: ['room','objectid', 'rack_type/displayName', 'rackid', 'rack_type/stationary', 'rack_type/rowid', 'condition'],

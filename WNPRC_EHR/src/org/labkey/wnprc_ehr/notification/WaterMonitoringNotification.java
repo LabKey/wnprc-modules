@@ -186,7 +186,11 @@ public class WaterMonitoringNotification extends AbstractEHRNotification
                 String mlsPerKg;
                 String totalWater;
                 for(Map<String,Object> mapItem : totalWaterByProject){
-                    LocalDateTime objectDateTime = ConvertHelper.convert(mapItem.get("date"),Date.class).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+                    // Casts date & time manually before formatting.
+                    // Using 'toInstant()' without casting first will throw an error due to ConvertHelper.convert() returning a 'java.sql.Date' instead of the 'java.util.Date' required by toInstant().
+                    Date rawDate = (Date) ConvertHelper.convert(mapItem.get("date"), Date.class);
+                    Date utilDate = new Date(rawDate.getTime());
+                    LocalDateTime objectDateTime = utilDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
                     mlsPerKg = ConvertHelper.convert(mapItem.get("mlsPerKg"),String.class) == null ? " " : ConvertHelper.convert(mapItem.get("mlsPerKg"),String.class);

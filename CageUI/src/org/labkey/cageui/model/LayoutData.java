@@ -20,16 +20,16 @@ package org.labkey.cageui.model;
 
 public class LayoutData
 {
-     private int _scale;
+     private double _scale;
     private int _borderWidth;
     private int _borderHeight;
 
-    public int getScale()
+    public double getScale()
     {
         return _scale;
     }
 
-    public void setScale(int scale)
+    public void setScale(double scale)
     {
         _scale = scale;
     }

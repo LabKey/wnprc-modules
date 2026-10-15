@@ -39,3 +39,22 @@ SELECT
 
 FROM study.waterTotalByDate
 WHERE TotalWater IS NOT NULL
+
+UNION ALL
+SELECT
+    Id AS Id,
+    date,
+    null AS project,
+    'Anesthesia Recovery' AS dataset,
+    'anesthesiarecovery' AS DataSetName,
+    'Animal fully recovered.' AS remark,
+    'Total Recovery Time: ' || CAST(CEILING(totalRecoveryTime) AS VARCHAR) || ' minutes' || CHR(10) ||
+    'Recovery Speed: ' || CAST(recoverySpeed AS VARCHAR) || CHR(10) ||
+    'Recovery Condition: ' || CAST(recoveryCondition AS VARCHAR)
+    AS description,
+    submitterInitials AS performedBy,
+    qcstate AS qcstate,
+    taskid AS taskid,
+    null AS requestid
+FROM study.anesthesiaRecoveriesFullHistory
+WHERE observation = 'Fully Recovered'

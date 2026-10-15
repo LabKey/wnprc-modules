@@ -22,13 +22,13 @@ import { Button } from 'react-bootstrap';
 import Select from 'react-select';
 import { RackConditionOption, RackConditions } from '../../../types/typings';
 import { useRoomContext } from '../../../context/RoomContextManager';
-import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { labkeyActionSelectWithPromise } from '../../../api/labkeyActions';
-import { ActionURL, Filter } from '@labkey/api';
+import { ActionURL, Filter, Query } from '@labkey/api';
 import { RackSwitchOption } from '../../../types/homeTypes';
 import { LayoutErrors } from '../../LayoutErrors';
 import { LoadingScreen } from '../../LoadingScreen';
 import { useHomeNavigationContext } from '../../../context/HomeNavigationContextManager';
+import { generateUUID } from '../../../utils/helpers';
 
 interface ChangeRackPopupProps {
     showChangeRackPopup: React.Dispatch<React.SetStateAction<boolean>>;
@@ -58,7 +58,7 @@ export const ChangeRackPopup: FC<ChangeRackPopupProps> = (props) => {
     const [showLayoutErrors, setShowLayoutErrors] = useState<string[]>([]);
 
     useEffect(() => {
-        const config: SelectRowsOptions = {
+        const config: Query.SelectRowsOptions = {
             schemaName: 'ehr_lookups',
             queryName: 'cageui_condition_codes',
             columns: ['value', 'title']
@@ -78,7 +78,7 @@ export const ChangeRackPopup: FC<ChangeRackPopupProps> = (props) => {
     }, []);
 
     useEffect(() => {
-        const racksConfig: SelectRowsOptions = {
+        const racksConfig: Query.SelectRowsOptions = {
             schemaName: 'cageui',
             queryName: 'racks',
             columns: ['room','objectid', 'rack_type/displayName', 'rackid', 'rack_type/stationary', 'rack_type/rowid', 'condition'],
@@ -90,7 +90,7 @@ export const ChangeRackPopup: FC<ChangeRackPopupProps> = (props) => {
         };
         labkeyActionSelectWithPromise(racksConfig).then((racksResult) => {
             if (racksResult.rowCount > 0) {
-                const options = racksResult.rows.reduce((acc, row) => {
+                let options = racksResult.rows.reduce((acc, row) => {
                     acc.push({
                         value: {
                             objectId: row.objectid,
@@ -101,6 +101,15 @@ export const ChangeRackPopup: FC<ChangeRackPopupProps> = (props) => {
                     });
                     return acc;
                 }, [] as RackSwitchOption[]);
+                const ghostCageOption: RackSwitchOption = {
+                    value: {
+                        objectId: generateUUID(),
+                        rackId: 0,
+                        typeRowId: 0
+                    },
+                    label: "Ghost Rack"
+                }
+                options = [ghostCageOption, ...options];
                 setRackOptions(options);
             }
         });
@@ -150,7 +159,6 @@ export const ChangeRackPopup: FC<ChangeRackPopupProps> = (props) => {
                 'home',
                 ActionURL.getContainer(),
                 {room: res.roomName, rack: res.rack});
-
             } else {
                 setIsSaving(false);
                 if (res?.reason) {

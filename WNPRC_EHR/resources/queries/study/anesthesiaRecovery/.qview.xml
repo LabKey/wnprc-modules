@@ -1,0 +1,37 @@
+<!--Defines the default qview for the anesthesiaRecovery dataset.-->
+
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="Id"/>
+        <column name="date"/>
+        <column name="observation"/>
+        <column name="observer"/>
+        <column name="submitterInitials"/>
+<!--        <column name="room"/>-->
+<!--        <column name="assignedTo"/>-->
+        <column name="recoverySpeed"/>
+        <column name="recoveryCondition"/>
+        <column name="cageLockSecure"/>
+        <!--        <column name="recoveryReason"/>-->
+<!--        <column name="groupId"/>-->
+        <column name="observerComments"/>
+        <column name="finalizeComments"/>
+<!--        <column name="location"/>-->
+<!--        <column name="cage"/>-->
+        <column name="recoveryId"/>
+        <column name="deviceId"/>
+        <column name="groupIdFinal"/>
+        <column name="recoveryStartTime"/>
+        <column name="recoveryReasonFinal"/>
+        <column name="cageFinal"/>
+        <column name="locationFinal"/>
+        <column name="roomFinal"/>
+        <column name="container"/>
+        <column name="history"/>
+        <column name="taskid"/>
+        <column name="QCState"/>
+    </columns>
+    <sorts>
+        <sort column="date" descending="true"/>
+    </sorts>
+</customView>

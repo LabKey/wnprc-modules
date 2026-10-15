@@ -22,7 +22,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class RoomHistoryForm
 {
-    private int _scale;
+    private double _scale;
     @JsonProperty("border_width")
     private int _borderWidth;
     @JsonProperty("border_height")
@@ -30,12 +30,12 @@ public class RoomHistoryForm
     @JsonProperty("historyid")
     private String _historyId;
 
-    public int getScale()
+    public double getScale()
     {
         return _scale;
     }
 
-    public void setScale(int scale)
+    public void setScale(double scale)
     {
         _scale = scale;
     }

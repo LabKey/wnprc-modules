@@ -15,6 +15,11 @@
  *  * limitations under the License.
  *
  */
+import * as d3 from 'd3';
+import { zoomTransform } from 'd3';
+import { MutableRefObject } from 'react';
+import { ActionURL, Filter, Query, Security, Utils } from '@labkey/api';
+import { selectDistinctRows } from '@labkey/components';
 
 import {
     AllHistoryData,
@@ -30,10 +35,12 @@ import {
     FetchRoomData,
     FullCageHistory,
     FullObjectHistoryData,
+    GhostCageData,
     GroupId,
     GroupRotation,
     LayoutData,
-    LayoutHistoryData, LoadedSvgs,
+    LayoutHistoryData,
+    LoadedSvgs,
     ModData,
     ModLocations,
     ModTypes,
@@ -57,10 +64,6 @@ import {
     UnitLocations,
     UnitType
 } from '../types/typings';
-import * as d3 from 'd3';
-import { zoomTransform } from 'd3';
-import { MutableRefObject } from 'react';
-import { ActionURL, Filter, Security, Utils } from '@labkey/api';
 import {
     addModEntries,
     areAllRacksNonDefault,
@@ -74,33 +77,28 @@ import {
     processRealLayoutHistory,
     setupEditCageEvent
 } from './LayoutEditorHelpers';
-import { SelectDistinctOptions } from '@labkey/api/dist/labkey/query/SelectDistinctRows';
-import { selectDistinctRows, selectRows } from '@labkey/components';
 import { CELL_SIZE, Modifications, roomSizeOptions, SVG_HEIGHT, SVG_WIDTH } from './constants';
 import { ExtraContext, LayoutSaveResult } from '../types/layoutEditorTypes';
-import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { labkeyActionSelectWithPromise, saveRoomLayout } from '../api/labkeyActions';
 import { cageModLookup } from '../api/popularQueries';
 import { ConnectedCages, ConnectedRacks } from '../types/homeTypes';
-import { GetUserPermissionsResponse } from '@labkey/api/dist/labkey/security/Permission';
 
 
-export const isTemplateCreator = (user: GetUserPermissionsResponse) => {
+export const isTemplateCreator = (user: Security.GetUserPermissionsResponse) => {
     return Security.hasEffectivePermission(user.container.effectivePermissions, 'org.labkey.cageui.security.permissions.CageUITemplateCreatorPermission');
 };
 
-export const isRoomCreator = (user: GetUserPermissionsResponse) => {
+export const isRoomCreator = (user: Security.GetUserPermissionsResponse) => {
     return Security.hasEffectivePermission(user.container.effectivePermissions, 'org.labkey.cageui.security.permissions.CageUIRoomCreatorPermission');
 };
 
-export const isRoomModifier = (user: GetUserPermissionsResponse) => {
+export const isRoomModifier = (user: Security.GetUserPermissionsResponse) => {
     return Security.hasEffectivePermission(user.container.effectivePermissions, 'org.labkey.cageui.security.permissions.CageUIRoomModifierPermission');
 };
 
-export const isCageModifier = (user: GetUserPermissionsResponse) => {
+export const isCageModifier = (user: Security.GetUserPermissionsResponse) => {
     return Security.hasEffectivePermission(user.container.effectivePermissions, 'org.labkey.cageui.security.permissions.CageUIModificationEditorPermission');
 };
-
 
 // Converts JS date object to labkey java friendly date object so it can be mapped properly from JS -> Java
 export const toLabKeyDate = (date: Date): string => {
@@ -144,7 +142,7 @@ export const changeStyleProperty = (element: Element, property: string, newValue
 };
 
 export const getSvgSize = async (type: RackTypes) => {
-    const config: SelectDistinctOptions = {
+    const config: Query.SelectDistinctOptions = {
         schemaName: 'ehr_lookups',
         queryName: 'cageui_item_types',
         column: 'description',
@@ -362,7 +360,7 @@ export const fetchRoomData = async (roomName: string, abortSignal?: AbortSignal)
     };
 
     // Make call to all_history for room and determine if template or not.
-    const allHistoryCfg: SelectRowsOptions = {
+    const allHistoryCfg: Query.SelectRowsOptions = {
         schemaName: 'cageui',
         queryName: 'all_history',
         columns: [],
@@ -388,7 +386,7 @@ export const fetchRoomData = async (roomName: string, abortSignal?: AbortSignal)
         let historyTable: string = allHistObj.historyType === 'template' ? 'template_layout_history' : 'layout_history';
         const isDefaultRoom: boolean = allHistObj.historyType === 'template';
 
-        const prevRoomConfig: SelectRowsOptions = {
+        const prevRoomConfig: Query.SelectRowsOptions = {
             schemaName: 'cageui',
             queryName: historyTable,
             columns: [],
@@ -398,7 +396,7 @@ export const fetchRoomData = async (roomName: string, abortSignal?: AbortSignal)
             ]
         };
 
-        const prevRoomBorderConfig: SelectRowsOptions = {
+        const prevRoomBorderConfig: Query.SelectRowsOptions = {
             schemaName: 'cageui',
             queryName: 'room_history',
             columns: ['scale', 'border_width', 'border_height'],
@@ -416,10 +414,20 @@ export const fetchRoomData = async (roomName: string, abortSignal?: AbortSignal)
             ]
         };
 
-        const [prevRoomResult, borderResult, modResult] = await Promise.all([
+        const roomsConfig = {
+            schemaName: 'ehr_lookups',
+            queryName: 'rooms',
+            columns: ['species'],
+            filterArray: [
+                Filter.create('room', roomName, Filter.Types.EQUALS),
+            ]
+        };
+
+        const [prevRoomResult, borderResult, modResult, roomsResult] = await Promise.all([
             labkeyActionSelectWithPromise(prevRoomConfig, abortSignal),
             labkeyActionSelectWithPromise(prevRoomBorderConfig, abortSignal),
-            labkeyActionSelectWithPromise(modHistoryConfig, abortSignal)
+            labkeyActionSelectWithPromise(modHistoryConfig, abortSignal),
+            labkeyActionSelectWithPromise(roomsConfig, abortSignal)
         ]);
 
         let borderObj: LayoutData;
@@ -485,6 +493,7 @@ export const fetchRoomData = async (roomName: string, abortSignal?: AbortSignal)
 
         prevRoomData.prevRoomData = {
             name: roomName,
+            species: roomsResult.rows[0].species,
             cagingData: cagingData,
             layoutData: borderObj,
             isDefault: isDefaultRoom,
@@ -499,7 +508,7 @@ export const fetchRoomData = async (roomName: string, abortSignal?: AbortSignal)
 const loadSvgs = async (): Promise<LoadedSvgs> => {
     const loadedSvgs: LoadedSvgs = {};
 
-    const config: SelectRowsOptions = {
+    const config: Query.SelectRowsOptions = {
         schemaName: "ehr_lookups",
         queryName: "cageui_svg_urls",
         columns: ["value", "title"]
@@ -533,7 +542,7 @@ const loadSvgs = async (): Promise<LoadedSvgs> => {
 // Adds the svgs from the saved layouts to the DOM. Mode edit is version displayed in the layout editor and view is the one in the home views.
 // roomForMods is passed if the unitsToRender is not room but needs access to the room object. This is for loading mods.
 export const addPrevRoomSvgs = async (
-    user: GetUserPermissionsResponse,
+    user: Security.GetUserPermissionsResponse,
     mode: 'edit' | 'view',
     unitsToRender: Room | RackGroup | Rack | Cage,
     layoutSvg: d3.Selection<SVGElement, {}, HTMLElement, any>,
@@ -593,9 +602,11 @@ export const addPrevRoomSvgs = async (
     // this function renders the actual visible svg in some groups
     const createRackGroup = (parentGroup, rack: Rack, isSingleRack, groupRotation: GroupRotation) => {
         const rackTypeString: RackStringType = roomItemToString(rack.type.type) as RackStringType;
+        // Ghost racks have 0 item id
+        const isGhostRack = rack.itemId === 0;
 
         const rackGroup = isSingleRack ? parentGroup : parentGroup.append('g')
-            .attr('id', rack.objectId)
+            .attr('id', rack.svgId)
             .attr('class', `rack type-${rackTypeString}`)
             .attr('transform', `translate(${rack.x},${rack.y})`)
             .style('pointer-events', 'bounding-box');
@@ -614,17 +625,27 @@ export const addPrevRoomSvgs = async (
             shape.classed('draggable', false);
             shape.style('pointer-events', 'none');
 
-            // in order to set the event pass in the context menu ref and styles to show/hide it
-            (shape.select('tspan').node() as SVGTSpanElement).textContent = `${parseRoomItemNum(cage.cageNum)}`;
+            if(!isGhostRack){
+                (shape.select('tspan').node() as SVGTSpanElement).textContent = `${parseRoomItemNum(cage.cageNum)}`;
+            }
 
             if (mode === 'view') {
                 loadCageMods(cage, shape, groupRotation);
+                if(isGhostRack){
+                    shape.select('[id=cageRect]')
+                        .style("fill", '#878787')
+                        .style("opacity", '0.7');
+                }
             }
 
             cageGroup.append(() => shape.node());
-            // attach context menu if user has permissions for cages
-            if(canOpenContextMenu(user, rack.type.type)){
-                setupEditCageEvent(cageGroup.node(), setSelectedObj, contextMenuRef, mode, setCtxMenuStyle);
+            // Dont attach menus to ghost racks
+            if(!isGhostRack){
+                // attach context menu if user has permissions for cages
+                if(canOpenContextMenu(user, rack.type.type)){
+                    // in order to set the event pass in the context menu ref and styles to show/hide it
+                    setupEditCageEvent(cageGroup.node(), setSelectedObj, contextMenuRef, mode, setCtxMenuStyle);
+                }
             }
 
         });
@@ -721,6 +742,7 @@ export const addPrevRoomSvgs = async (
 export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, UnitLocations]> => {
     const newLocalRoom: Room = {
         name: prevRoom.name,
+        species: prevRoom.species,
         rackGroups: [],
         valid: false,
         objects: [],
@@ -753,19 +775,24 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
 
     //check if a rack exists for the rackId, if it does return, else create new rack for the group
     const findOrAddRack = async (rackGroup: RackGroup, rackItem: FullObjectHistoryData): Promise<Rack> => {
-        let rackIdNum;
+        let rackIdNum: number;
         let rackObjectId;
         let extraContext: ExtraContext;
         let rackData = rackItem.rack as RackData;
         let rack: Rack;
         let rackCondition: RackConditions = RackConditions.Operational;
 
-        if (!prevRoom.isDefault) {
+        if(rackItem.isGhost){
+            rackIdNum = (rackItem.cage as GhostCageData).rack;
+            rackObjectId = (rackItem.cage as GhostCageData).rackObjId;
+            rackCondition = RackConditions.Operational;
+        }
+        else if (!prevRoom.isDefault) {
             rackIdNum = rackData.rackId;
             rackObjectId = rackData.objectId;
             rackCondition = rackData.condition;
         } else {
-            rackIdNum = rackItem.rack;
+            rackIdNum = rackItem.rack as number;
             rackObjectId = `default-rack-${rackIdNum}`;
         }
         rack = rackGroup.racks.find(r => rackObjectId === r.objectId);
@@ -776,7 +803,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
             let typeRowId;
             const rackPrefix = prevRoom.isDefault ? 'default-rack' : 'rack';
 
-            if (!prevRoom.isDefault) {
+            if (!prevRoom.isDefault && !rackItem.isGhost) {
                 typeRowId = rackData.rackType;
             }
 
@@ -786,7 +813,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
                 queryName: 'rack_types',
                 columns: ['rowid', 'type', 'displayName', 'size', 'manufacturer/value', 'manufacturer/title', 'stationary'],
                 filterArray: [
-                    Filter.create(prevRoom.isDefault ? 'type' : 'rowid', prevRoom.isDefault ? rackItem.objectType : typeRowId, Filter.Types.EQUALS)
+                    Filter.create(prevRoom.isDefault || rackItem.isGhost ? 'type' : 'rowid', prevRoom.isDefault || rackItem.isGhost ? rackItem.objectType : typeRowId, Filter.Types.EQUALS)
                 ]
             };
 
@@ -836,14 +863,22 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
         let extraContext: ExtraContext;
         let cageHistoryData = (rackItem.cage as FullCageHistory)?.cageHistory;
         let cageData = (rackItem.cage as FullCageHistory)?.cageData;
+        let ghostCageData = (rackItem.cage as GhostCageData);
         let cageObjId: string;
         let cageNum;
         let cagePositionId;
         if (!prevRoom.isDefault) {
-            cageNum = cageHistoryData.cageNum;
-            cageObjId = cageHistoryData.cage;
-            cagePositionId = cageData.positionId;
-            cageNumType = roomItemToString(rackItem.objectType);
+            if(rackItem.objectType === RackTypes.GhostCage){
+                cageNum = ghostCageData.cage;
+                cageObjId = ghostCageData.cageObjId;
+                cagePositionId = ghostCageData.positionId;
+                cageNumType = roomItemToString(rackItem.objectType);
+            }else{
+                cageNum = cageHistoryData.cageNum;
+                cageObjId = cageHistoryData.cage;
+                cagePositionId = cageData.positionId;
+                cageNumType = roomItemToString(rackItem.objectType);
+            }
         } else {
             cageNum = rackItem.cage;
             cageObjId = generateUUID();
@@ -858,7 +893,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
         const svgSize = await getSvgSize(rack.type.type);
 
         // This is where mods are loaded into state for the room
-        if (loadMods && !rack.type.isDefault) {
+        if (loadMods && !rack.type.isDefault && rack.type.type !== RackTypes.GhostCage) {
             cageMods = {
                 [ModLocations.Top]: [],
                 [ModLocations.Bottom]: [],

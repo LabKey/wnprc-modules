@@ -27,6 +27,7 @@ import java.util.Map;
 public class Room
 {
     private String _name;
+    private String _species;
     private List<RackGroup> _rackGroups;
     private List<RoomObject> _objects;
     private LayoutData _layoutData;
@@ -80,5 +81,15 @@ public class Room
     public void setMods(Map<String, ModEntry> mods)
     {
         _mods = mods;
+    }
+
+    public String getSpecies()
+    {
+        return _species;
+    }
+
+    public void setSpecies(String species)
+    {
+        _species = species;
     }
 }

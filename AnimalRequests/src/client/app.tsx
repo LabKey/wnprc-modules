@@ -1,14 +1,14 @@
 import * as React from 'react';
 import { createRoot } from 'react-dom/client';
+import { AnimalRequestForm } from './containers/Forms/AnimalRequestForm';
+import { getEHRData } from './query/actions';
+
 import './theme/css/index.css';
 import './theme/css/react-datepicker.css';
 import './theme/css/bootstrap.min.css';
 import './theme/css/tooltip.css';
 
-import {AnimalRequestForm} from "./containers/Forms/AnimalRequestForm";
-import { getEHRData } from './query/actions';
 window.addEventListener('DOMContentLoaded', (event) => {
-    //this has to be an array of promises
     const dataArr: Promise<any>[] = [
         getEHRData('ehr','investigatorsWithName', '', '', [], 'IncludeExternal'),
         getEHRData('ehr_lookups','animal_requests_viral_status'),
@@ -21,9 +21,9 @@ window.addEventListener('DOMContentLoaded', (event) => {
         getEHRData('ehr_lookups','animal_requests_infectiousdisease'),
         getEHRData('ehr_lookups', 'animal_requests_yes_no')
     ];
-    createRoot(
-        document.getElementById('app')
-    ).render(<AnimalRequestForm
+
+    createRoot(document.getElementById('app')).render(
+        <AnimalRequestForm
             loading={true}
             submitted={false}
             uniqueProtocolInvestigator={[{value: ''}]}
@@ -37,5 +37,6 @@ window.addEventListener('DOMContentLoaded', (event) => {
             animal_requests_infectiousdisease={[{value: ''}]}
             animal_requests_yes_no={[{value: ''}]}
             dataArr={dataArr}
-    />);
+        />
+    );
 });

@@ -15,7 +15,7 @@
  *  * limitations under the License.
  *
  */
-
+import { Security } from '@labkey/api';
 import {
     Cage,
     CageDirection,
@@ -38,7 +38,6 @@ import {
     parseRoomItemNum,
     parseRoomItemType
 } from './helpers';
-import { GetUserPermissionsResponse } from '@labkey/api/dist/labkey/security/Permission';
 
 
 // Returns true if the obj is in the list of available room objects that have a popup.
@@ -50,7 +49,7 @@ export const availRoomObjPopups = (obj: RoomObject): boolean => {
 }
 
 // Determines if the user has access to editing the layout
-export const canEditLayout = (user: GetUserPermissionsResponse) => {
+export const canEditLayout = (user: Security.GetUserPermissionsResponse) => {
     if(isRoomCreator(user) || isTemplateCreator(user) || isRoomModifier(user)) {
         return true;
     }

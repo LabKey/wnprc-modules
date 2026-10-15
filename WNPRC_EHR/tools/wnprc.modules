@@ -3,6 +3,5 @@ server/modules/*
 server/customModules/*
 server/optionalModules/*
 server/modules/labModules/*
-server/modules/onprcEHRModules/mergesync
 server/modules/wnprcModules/webutils
 server/modules/wnprcModules/dbutils

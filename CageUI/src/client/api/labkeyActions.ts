@@ -15,18 +15,14 @@
  *  * limitations under the License.
  *
  */
-
-import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { ActionURL, Ajax, Query, Security, Utils } from '@labkey/api';
-import { Command, QueryRequestOptions, SaveRowsOptions, SaveRowsResponse } from '@labkey/api/dist/labkey/query/Rows';
-import { GetUserPermissionsOptions } from '@labkey/api/dist/labkey/security/Permission';
-import { SelectDistinctOptions } from '@labkey/api/dist/labkey/query/SelectDistinctRows';
 import { CageMods, Rack, RackConditionOption, Room, SessionLog } from '../types/typings';
 import { buildURL } from '@labkey/components';
 import { RackSwitchOption } from '../types/homeTypes';
+import { AdoptionData } from '../types/adoptionFormTypes';
 
 export function labkeyActionSelectWithPromise(
-    options: SelectRowsOptions,
+    options: Query.SelectRowsOptions,
     signal?: any
 ): Promise<any> {
     return new Promise((resolve, reject) => {
@@ -51,7 +47,7 @@ export function labkeyActionSelectWithPromise(
 }
 
 export function labkeyActionSelectDistinctWithPromise(
-    options: SelectDistinctOptions,
+    options: Query.SelectDistinctOptions,
     signal?: any
 ): Promise<any> {
     return new Promise((resolve, reject) => {
@@ -76,7 +72,7 @@ export function labkeyActionSelectDistinctWithPromise(
 }
 
 export function labkeyActionInsertWithPromise(
-    options: QueryRequestOptions
+    options: Query.QueryRequestOptions
 ): Promise<any> {
     return new Promise((resolve, reject) => {
         options.success = (data) => {
@@ -90,7 +86,7 @@ export function labkeyActionInsertWithPromise(
 }
 
 export function labkeyActionUpdateWithPromise(
-    options: QueryRequestOptions
+    options: Query.QueryRequestOptions
 ): Promise<any> {
     return new Promise((resolve, reject) => {
         options.success = (data) => {
@@ -103,10 +99,9 @@ export function labkeyActionUpdateWithPromise(
     });
 }
 
-export const labkeySaveRows = (commands: Command[]): Promise<SaveRowsResponse> => {
-
+export const labkeySaveRows = (commands: Query.Command[]): Promise<Query.SaveRowsResponse> => {
     return new Promise((resolve, reject) => {
-        let options: SaveRowsOptions = {
+        let options: Query.SaveRowsOptions = {
             commands: commands,
             containerPath: ActionURL.getContainer(),
             success: (data) => {
@@ -120,9 +115,9 @@ export const labkeySaveRows = (commands: Command[]): Promise<SaveRowsResponse> =
     });
 };
 
-export const labkeyGetUserPermissions = (config?: GetUserPermissionsOptions) => {
+export const labkeyGetUserPermissions = (config?: Security.GetUserPermissionsOptions) => {
     return new Promise((resolve, reject) => {
-        const options: GetUserPermissionsOptions = {
+        const options: Security.GetUserPermissionsOptions = {
             ...config,
             success: (data) => {
                 resolve(data);
@@ -171,7 +166,7 @@ export function saveRoomLayout(room: Room, mods: CageMods[], prevRoomName: strin
 
 export function createNewRoomFromRackChange(room: Room, newRackOption: RackSwitchOption, prevRack: Rack ): Promise<{
     room: Room,
-    rack: string;
+    rack: string,
     errors: any[]
 }> {
     return new Promise((resolve, reject) => {
@@ -197,6 +192,22 @@ export function updateRackConditionStatus(rack: RackSwitchOption, condition: Rac
             success: (res) => resolve(JSON.parse(res.response)),
             failure: Utils.getCallbackWrapper((error) => reject(error)),
             jsonData: {rack: rack.value.objectId, condition: condition.value},
+        });
+    });
+}
+
+// This function is for submitting a adoption form.
+export function startAdoptionSubmission(animals: AdoptionData[]): Promise<{
+    success: boolean,
+    errors: any[]
+}> {
+    return new Promise((resolve, reject) => {
+        Ajax.request({
+            url: buildURL('cageui', 'submitAdoptionForm.api'),
+            method: 'POST',
+            success: (res) => resolve(JSON.parse(res.response)),
+            failure: Utils.getCallbackWrapper((error) => reject(error)),
+            jsonData: {adoptionData: animals},
         });
     });
 }

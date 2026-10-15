@@ -16,17 +16,15 @@
  *
  */
 
-import * as React from 'react';
-import { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import Select from 'react-select';
 import { labkeyActionSelectWithPromise } from '../../api/labkeyActions';
-import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
 import { Button } from 'react-bootstrap';
 import { CreateRackPopup } from './CreateRackPopup';
 import { useLayoutEditorContext } from '../../context/LayoutEditorContextManager';
 import { Rack, RackChangeOption, UnitType } from '../../types/typings';
 import { isRackDefault } from '../../utils/LayoutEditorHelpers';
-import { Filter } from '@labkey/api';
+import { Filter, Query } from '@labkey/api';
 
 
 interface ChangeRackProps {
@@ -58,13 +56,13 @@ export const ChangeRack: FC<ChangeRackProps> = (props) => {
         if (options.length > 0) {
             setOptions(options);
         } else {
-            const optConfig: SelectRowsOptions = {
+            const optConfig: Query.SelectRowsOptions = {
                 schemaName: 'cageui',
                 queryName: 'racks',
                 columns: ['rackid', 'rack_type', 'rowid', 'objectid', 'room'],
                 filterArray: [Filter.create('room', null, Filter.Types.ISBLANK)]
             };
-            const rackTypesConfig: SelectRowsOptions = {
+            const rackTypesConfig: Query.SelectRowsOptions = {
                 schemaName: 'cageui',
                 queryName: 'rack_types',
                 columns: ['displayName', 'rowid', 'type', 'manufacturer/title', 'manufacturer/value', 'size', 'stationary'],

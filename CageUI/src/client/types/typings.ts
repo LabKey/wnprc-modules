@@ -45,7 +45,8 @@ export enum RackTypes {
     Cage = 4,
     Pen = 5,
     TempCage = 6,
-    PlayCage = 7
+    PlayCage = 7,
+    GhostCage = 8
 }
 
 // Like rack types enum but for room objects, start at 100 to give buffer room for rack types
@@ -235,11 +236,24 @@ export interface CageModificationsType {
 
 export interface Room {
     name: string;
+    species: string;
     valid: boolean;
     rackGroups: RackGroup[];
     objects: RoomObject[];
     layoutData: LayoutData;
     mods?: RoomMods;
+}
+
+
+export interface GhostCageData {
+    rowid: number;
+    cageObjId: string;
+    positionId: number;
+    rackGroup: number;
+    rack: number;
+    rackObjId: string;
+    groupRotation: number;
+    cage: number;
 }
 
 export interface LayoutData {
@@ -320,13 +334,14 @@ export interface AllHistoryData {
 }
 
 export interface FullObjectHistoryData {
+    isGhost: boolean;
     objectType: RoomObjectTypes | RackTypes | DefaultRackTypes;
     extraContext: string | null;
     rackGroup?: number;
     groupRotation?: GroupRotation;
     // objectid of rack in racks table
     rack?: RackData | number;
-    cage?: FullCageHistory | number;
+    cage?: FullCageHistory | GhostCageData | number;
     xCoord: number;
     yCoord: number;
 }
@@ -346,6 +361,7 @@ export interface PrevRoom {
     layoutData: LayoutData;
     modData?: ModData[];
     isDefault: boolean;
+    species: string;
     name: string | null;
 }
 

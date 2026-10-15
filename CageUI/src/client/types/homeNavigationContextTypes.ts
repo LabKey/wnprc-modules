@@ -15,12 +15,10 @@
  *  * limitations under the License.
  *
  */
-
+import React, { SetStateAction } from 'react';
+import { Security } from '@labkey/api';
 import { SelectedPage } from './homeTypes';
 import { Cage, Rack, RackGroup, Room, RoomMods } from './typings';
-import { SetStateAction } from 'react';
-import { GetUserPermissionsResponse } from '@labkey/api/dist/labkey/security/Permission';
-import * as React from 'react';
 
 export interface HomeNavigationContextType {
     selectedPage: SelectedPage;
@@ -32,7 +30,7 @@ export interface HomeNavigationContextType {
     selectedRack: Rack;
     selectedCage: Cage;
     navigateTo: (page: SelectedPage) => void;
-    userProfile: GetUserPermissionsResponse;
+    userProfile: Security.GetUserPermissionsResponse;
     setIsNavLoading: React.Dispatch<SetStateAction<boolean>>;
     isNavLoading: boolean;
 }

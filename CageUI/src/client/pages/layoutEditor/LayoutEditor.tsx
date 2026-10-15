@@ -20,7 +20,7 @@ import * as React from 'react';
 import { FC, useEffect, useState } from 'react';
 import { RoomHeader } from '../../components/layoutEditor/RoomHeader';
 import '../../cageui.scss';
-import { ActionURL } from '@labkey/api';
+import { ActionURL, Security } from '@labkey/api';
 import { FullObjectHistoryData, PrevRoom, Room, UnitLocations } from '../../types/typings';
 import { LayoutEditorContextProvider } from '../../context/LayoutEditorContextManager';
 import Editor from '../../components/layoutEditor/Editor';
@@ -28,7 +28,6 @@ import { labkeyGetUserPermissions } from '../../api/labkeyActions';
 import { RoomSizeSelector, SelectorOptions } from '../../components/layoutEditor/RoomSizeSelector';
 import { ConfirmationPopup } from '../../components/ConfirmationPopup';
 import { isRoomCreator, isRoomModifier, isTemplateCreator } from '../../utils/helpers';
-import { GetUserPermissionsResponse } from '@labkey/api/dist/labkey/security/Permission';
 import { roomSizeOptions } from '../../utils/constants';
 import { buildNewLocalRoom, fetchRoomData } from '../../utils/helpers';
 
@@ -36,6 +35,7 @@ export const LayoutEditor: FC<any> = () => {
     const roomName: string = ActionURL.getParameter('room');
     const [prevRoomData, setPrevRoomData] = useState<PrevRoom>({
         name: null,
+        species: '',
         cagingData: [],
         layoutData: null,
         isDefault: true
@@ -50,13 +50,13 @@ export const LayoutEditor: FC<any> = () => {
     const [showSelectionPopup, setShowSelectionPopup] = useState<boolean>(true);
     const [errorPopup, setErrorPopup] = useState<string>(null);
     const [isLoading, setIsLoading] = useState<boolean>(true);
-    const [userProfile, setUserProfile] = useState<GetUserPermissionsResponse>(null);
+    const [userProfile, setUserProfile] = useState<Security.GetUserPermissionsResponse>(null);
     const [access, setAccess] = useState<boolean>(false);
 
 
     useEffect(() => {
         const userProfile = labkeyGetUserPermissions();
-        userProfile.then((profile: GetUserPermissionsResponse) => {
+        userProfile.then((profile: Security.GetUserPermissionsResponse) => {
             if (profile.user) {
                 setUserProfile(profile);
                 // if the user is a template creator grant access
@@ -128,6 +128,7 @@ export const LayoutEditor: FC<any> = () => {
                 // Don't use template name instead treat the template as an empty room with objects already placed
                 newLocalRoom = {
                     name: isTemplate ? 'new-layout' : prevRoomData.name,
+                    species: '',
                     rackGroups: [],
                     valid: false,
                     objects: [],

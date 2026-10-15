@@ -1,0 +1,10 @@
+<query xmlns="http://labkey.org/data/xml/query">
+<metadata>
+    <tables xmlns="http://labkey.org/data/xml">
+        <table tableName="session_log" tableDbType="TABLE" useColumnOrder="false">
+            <javaCustomizer class="org.labkey.wnprc_ehr.table.WNPRC_EHRCustomizer"/>
+
+        </table>
+    </tables>
+</metadata>
+</query>

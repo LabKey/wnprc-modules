@@ -15,16 +15,13 @@
  *  * limitations under the License.
  *
  */
-
-
-import { SelectRowsOptions } from '@labkey/api/dist/labkey/query/SelectRows';
-import { Filter } from '@labkey/api';
+import { Filter, Query } from '@labkey/api';
 import { labkeyActionSelectWithPromise } from './labkeyActions';
 import { EHRCageMods } from '../types/homeTypes';
-import { CageData, CageHistoryData, RackData } from '../types/typings';
+import { CageData, CageHistoryData, GhostCageData, RackData } from '../types/typings';
 
 export const cageModLookup = async (columns: string[], filterArray: Filter.IFilter[]): Promise<EHRCageMods[]> => {
-    const config: SelectRowsOptions = {
+    const config: Query.SelectRowsOptions = {
         schemaName: 'cageui',
         queryName: 'cage_modifications',
         columns: columns,
@@ -40,7 +37,7 @@ export const cageModLookup = async (columns: string[], filterArray: Filter.IFilt
 };
 
 export const fetchCageHistory = async (historyid: string, cage: string): Promise<CageHistoryData> => {
-    const config: SelectRowsOptions = {
+    const config: Query.SelectRowsOptions = {
         schemaName: 'cageui',
         queryName: 'cage_history',
         filterArray: [
@@ -74,7 +71,7 @@ export const fetchCageHistory = async (historyid: string, cage: string): Promise
 };
 
 export const fetchCage = async (objectId: string): Promise<CageData> => {
-    const config: SelectRowsOptions = {
+    const config: Query.SelectRowsOptions = {
         schemaName: 'cageui',
         queryName: 'cages',
         filterArray: [Filter.create('objectid', objectId, Filter.Types.EQUAL)]
@@ -103,8 +100,37 @@ export const fetchCage = async (objectId: string): Promise<CageData> => {
     }
 };
 
+export const fetchGhostCage = async (objectId: string): Promise<GhostCageData> => {
+    const config: Query.SelectRowsOptions = {
+        schemaName: 'cageui',
+        queryName: 'ghost_cages',
+        filterArray: [Filter.create('cage_objectid', objectId, Filter.Types.EQUAL)]
+    };
+
+    try {
+        const res = await labkeyActionSelectWithPromise(config);
+        if (res.rows.length === 1) {
+            return {
+                rowid: res.rows[0].rowid,
+                cageObjId: res.rows[0].cage_objectid,
+                positionId: res.rows[0].positionid,
+                rackGroup: res.rows[0].rack_group,
+                rack: 0,
+                rackObjId: res.rows[0].rack_objectid,
+                groupRotation: res.rows[0].group_rotation,
+                cage: res.rows[0].cage,
+            };
+        } else {
+            throw new Error('Error fetching ghost cage data');
+        }
+    }
+    catch (e) {
+        throw new Error('Error fetching ghost cage data: ' + (e as Error).message);
+    }
+};
+
 export const fetchRack = async (objectId: string): Promise<RackData> => {
-    const config: SelectRowsOptions = {
+    const config: Query.SelectRowsOptions = {
         schemaName: 'cageui',
         queryName: 'racks',
         filterArray: [Filter.create('objectid', objectId, Filter.Types.EQUAL)]

@@ -21,11 +21,10 @@ WITH FiveYearsAgo AS (
     SELECT TIMESTAMPADD('SQL_TSI_YEAR', -5, NOW()) AS StartDate
 ),
 
--- CTE for animals with diarrhea-related treatments in the last 5 years (Condition 2.5 and for Condition 2 matching)
+-- CTE for animals with diarrhea-related treatments in the last 5 years (Condition 2.5)
      DiarrheaTreatmentAnimals AS (
          SELECT DISTINCT
-             t.Id,
-             CAST(t.date AS DATE) AS dateOnly
+             t.Id
          FROM study.treatment_order t
          WHERE t.date >= (SELECT StartDate FROM FiveYearsAgo)
            AND (
@@ -46,17 +45,6 @@ WITH FiveYearsAgo AS (
              )
      ),
 
--- CTE to determine the current number of roommates for each animal
-     HousingRoommates AS (
-         SELECT
-             h.id,
-             COUNT(h2.id) AS NumRoommates
-         FROM study.housing h
-                  LEFT JOIN study.housing h2 ON h.room = h2.room AND h.cage = h2.cage AND h.id != h2.id AND h.enddate IS NULL AND h2.enddate IS NULL
-         WHERE h.enddate IS NULL
-         GROUP BY h.id
-     ),
-
 -- CTE to filter cage observations with diarrhea in the last 5 years
      DiarrheaCageObs AS (
          SELECT
@@ -66,38 +54,53 @@ WITH FiveYearsAgo AS (
              CAST(co.date AS DATE) AS dateOnly
          FROM ehr.cage_observations co
          WHERE co.date >= (SELECT StartDate FROM FiveYearsAgo)
+           AND co.cage IS NOT NULL
            AND co.feces IS NOT NULL
            AND (co.feces LIKE '%D%' OR co.feces LIKE '%SF%' OR co.feces LIKE '%WD%')
      ),
 
--- CTE to identify animals matching Condition 1 (single-housed) or Condition 2 (group-housed with treatment)
-     CageObsAnimals AS (
-         SELECT DISTINCT
-             h.id AS Id
+-- CTE to count the number of animals in each cage at the time of each diarrhea cage observation
+     CageObsDensity AS (
+         SELECT
+             dco.room,
+             dco.cage,
+             dco.date,
+             dco.dateOnly,
+             COUNT(DISTINCT h.id) AS animals_in_cage
          FROM DiarrheaCageObs dco
-                  JOIN study.housing h ON h.room = dco.room AND h.cage = dco.cage AND h.date <= dco.date AND (h.enddate >= dco.date OR h.enddate IS NULL)
-                  LEFT JOIN HousingRoommates hr ON h.id = hr.id
-                  LEFT JOIN DiarrheaTreatmentAnimals dta ON h.id = dta.Id AND dco.dateOnly = dta.dateOnly
-         WHERE (hr.NumRoommates = 0) OR (hr.NumRoommates > 0 AND dta.Id IS NOT NULL)
+         JOIN study.housing h ON h.room = dco.room AND h.cage = dco.cage AND h.date <= dco.date AND (h.enddate >= dco.date OR h.enddate IS NULL)
+         GROUP BY dco.room, dco.cage, dco.date, dco.dateOnly
+     ),
+
+-- CTE to attribute cage observations to individual animals housed in that cage on that date
+     DailyCageObs AS (
+         SELECT
+             h.id AS Id,
+             cod.dateOnly,
+             ROUND(MAX(CAST(1.00 / cod.animals_in_cage AS FLOAT)), 2) AS cage_obs
+         FROM CageObsDensity cod
+         JOIN study.housing h ON h.room = cod.room AND h.cage = cod.cage AND h.date <= cod.date AND (h.enddate >= cod.date OR h.enddate IS NULL)
+         WHERE cod.animals_in_cage > 0
+         GROUP BY h.id, cod.dateOnly
      ),
 
 -- CTE combining all potential diarrhea animal IDs across all conditions
      AllDiarrheaAnimals AS (
          -- Condition 1 & 2: Cage observations
-         SELECT Id, 1 AS is_cage_obs FROM CageObsAnimals
+         SELECT DISTINCT Id FROM DailyCageObs
          UNION ALL
          -- Condition 2.5: Treatments
-         SELECT DISTINCT Id, 0 AS is_cage_obs FROM DiarrheaTreatmentAnimals
+         SELECT DISTINCT Id FROM DiarrheaTreatmentAnimals
          UNION ALL
          -- Condition 3: Irregular observations
-         SELECT DISTINCT obs.Id, 0 AS is_cage_obs
+         SELECT DISTINCT obs.Id
          FROM study.obs obs
          WHERE obs.date >= (SELECT StartDate FROM FiveYearsAgo)
            AND obs.feces IS NOT NULL
            AND (obs.feces LIKE '%D%' OR obs.feces LIKE '%SF%' OR obs.feces LIKE '%WD%')
          UNION ALL
          -- Condition 4: Encounters
-         SELECT DISTINCT enc.Id, 0 AS is_cage_obs
+         SELECT DISTINCT enc.Id
          FROM study.encounters enc
          WHERE enc.date >= (SELECT StartDate FROM FiveYearsAgo)
            AND LOWER(enc.remark) LIKE '%diarrhea%'
@@ -109,8 +112,7 @@ WITH FiveYearsAgo AS (
              d.Id,
              d.gender,
              d.birth,
-             d.death,
-             MAX(a.is_cage_obs) AS is_cage_obs
+             d.death
          FROM AllDiarrheaAnimals a
                   JOIN study.demographics d ON a.Id = d.Id
          WHERE d.species = 'Rhesus'
@@ -201,11 +203,12 @@ SELECT
     COALESCE(dhc.housing_changes, 0) AS "housing_changes (Cumulative)",
     COALESCE(dt.treatments, 0) AS "treatments (Cumulative)",
     COALESCE(dds.diarrhea_status, 0) AS "diarrhea_status (Value)",
-    pda.is_cage_obs AS "Cage Obs (Value)"
+    COALESCE(dco.cage_obs, 0.0) AS "Cage Obs (Value)"
 FROM PotentialDiarrheaAnimals pda
          CROSS JOIN DateSeries ds
          LEFT JOIN DailyHousingChanges dhc ON pda.Id = dhc.Id AND ds.date = dhc.date
          LEFT JOIN DailyTreatments dt ON pda.Id = dt.Id AND ds.date = dt.date
          LEFT JOIN DailyDiarrheaStatus dds ON pda.Id = dds.Id AND ds.date = dds.dateOnly
+         LEFT JOIN DailyCageObs dco ON pda.Id = dco.Id AND ds.date = dco.dateOnly
 WHERE ds.date >= CAST(pda.birth AS DATE) AND (ds.date <= CAST(pda.death AS DATE) OR pda.death IS NULL)
 ORDER BY pda.Id, ds.date;

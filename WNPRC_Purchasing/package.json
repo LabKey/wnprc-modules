@@ -3,31 +3,31 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "setup": "npm ci",
     "build": "npm run build-dev",
-    "start": "cross-env NODE_ENV=development webpack serve --config node_modules/@labkey/build/webpack/watch.config.js",
-    "build-dev": "npm run clean && cross-env NODE_ENV=development webpack --config node_modules/@labkey/build/webpack/dev.config.js --color",
-    "build-prod": "npm run clean && cross-env NODE_ENV=production webpack --config node_modules/@labkey/build/webpack/prod.config.js --color --progress --profile",
+    "build-dev": "npm run clean && cross-env NODE_ENV=development rspack build --config node_modules/@labkey/build/configs/dev.config.js",
+    "build-prod": "npm run clean && cross-env NODE_ENV=production rspack build --config node_modules/@labkey/build/configs/prod.config.js",
     "clean": "rimraf resources/web/gen && rimraf resources/views/gen",
-    "lint-fix": "eslint --fix --ext .tsx,.ts src/client/**"
+    "lint-fix": "eslint --fix --ext .tsx,.ts src/client/**",
+    "setup": "npm ci --legacy-peer-deps",
+    "start": "cross-env NODE_ENV=development rspack serve --config node_modules/@labkey/build/configs/watch.config.js"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.7.2",
     "@fortawesome/free-solid-svg-icons": "^6.7.2",
     "@fortawesome/react-fontawesome": "^0.2.6",
-    "@labkey/api": "~1.51.5",
-    "@labkey/components": "~7.43.0",
+    "@labkey/api": "~1.53.2",
+    "@labkey/components": "~7.72.3",
     "font-awesome": "~4.7.0",
-    "immer": "~10.2.0",
-    "immutable": "~3.8.3",
+    "immer": "~11.2.3",
+    "immutable": "~3.8.4",
     "react-bootstrap": "~0.33.1"
   },
   "devDependencies": {
-    "@labkey/build": "9.1.5",
-    "@labkey/eslint-config": "1.2.2",
-    "uuid": "14.0.1"
+    "@labkey/build": "10.1.4",
+    "@labkey/eslint-config": "1.2.5"
   },
-  "overrides": {
-    "uuid": "14.0.1"
+  "allowScripts": {
+    "@parcel/watcher@2.6.0": true,
+    "core-js@2.6.12": true
   }
 }

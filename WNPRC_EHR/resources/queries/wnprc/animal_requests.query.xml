@@ -15,6 +15,7 @@
                         <shownInInsertView>true</shownInInsertView>
                         <url></url>
                     </column>
+                    <column columnName="request_number" />
 
                     <column columnName="date" >
                         <columnTitle>Date Requested</columnTitle>

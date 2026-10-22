@@ -21,12 +21,17 @@ SELECT
     r.objectid as rack_object_id,
     r.rackid,
     c.objectid as cage_object_id,
-    c.cage_number
+    c.cage_number,
+    (cit.title || ' ' || c.cage_number) as display_name
 FROM
     cageui.racks r
         JOIN
     ehr_lookups.rooms rm ON r.room = rm.room
         LEFT JOIN
     cageui.cages c ON r.objectid = c.rack
+        LEFT JOIN
+    cageui.rack_types rt ON r.rack_type = rt.rowid
+        LEFT JOIN
+    ehr_lookups.cageui_item_types cit ON rt.type = CAST(cit.value as INTEGER)
 ORDER BY
     r.room, r.rackid, c.cage_number;

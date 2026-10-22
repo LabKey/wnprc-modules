@@ -8,6 +8,42 @@
  * This is the default metadata applied to all queries when using getTableMetadata().  If adding attributes designed to be applied
  * to a given query in all contexts, they should be added here
  */
+
+function roomFilteredCageConfig(roomFieldName){
+    return {
+        xtype: 'combo',
+        store: {
+            xtype: 'labkey-store',
+            schemaName: 'cageui',
+            queryName: 'cagesInRoom',
+            columns: 'room,cage_object_id, display_name',
+            sort: 'cage_number',
+            autoLoad: false
+        },
+        displayField: 'display_name',
+        valueField: 'cage_object_id',
+        mode: 'local',
+        triggerAction: 'all',
+        typeAhead: true,
+        listeners: {
+            beforequery: function(qe){
+                var combo = qe.combo;
+                var form = combo.ownerCt && combo.ownerCt.getForm ? combo.ownerCt.getForm() : null;
+                var roomField = form ? form.findField(roomFieldName) : null;
+                var room = roomField ? roomField.getValue() : null;
+                if (!room)
+                    return false; // no room selected yet: don't list every cage
+                if (room !== combo.loadedRoom){
+                    combo.loadedRoom = room;
+                    combo.store.setUserFilters([LABKEY.Filter.create('room', room,
+                            LABKEY.Filter.Types.EQUAL)]);
+                    combo.store.load();
+                }
+            }
+        }
+    };
+}
+
 EHR.Metadata.registerMetadata('Default', {
     allQueries: {
         fieldDefaults: {
@@ -2301,15 +2337,24 @@ EHR.Metadata.registerMetadata('Default', {
                 allowBlank: false,
                 editorConfig: {
                     listeners: {
-                        change: function(field, val){
-                            if(val && !isNaN(val)){
-                                var newVal = EHR.Utils.padDigits(val, 4);
-                                if(val != newVal)
-                                    field.setValue(newVal);
+                        change: function (field, val) {
+                            let displayVal = field.getRawValue();
+                            if (typeof displayVal != 'string')
+                                displayVal = displayVal.toString();
+
+                            var pd = '';
+                            var length = 4;
+                            var padChar = '0';
+                            if (length > displayVal.length){
+                                for (var i=0; i < (length - displayVal.length); i++){
+                                    pd += padChar;
+                                }
                             }
+                            field.setRawValue(pd + displayVal);
                         }
                     }
-                }
+                },
+                formEditorConfig: roomFilteredCageConfig('initialRoom')
             },
             initialCond: {hidden: false}
         },
@@ -2372,7 +2417,7 @@ EHR.Metadata.registerMetadata('Default', {
             weight: {shownInGrid: false ,editorConfig: { forcePrecision: true, decimalPrecision : 3 }},
             wdate: {shownInGrid: false},
             room: {shownInGrid: false},
-            cage: {shownInGrid: false},
+            cage: {shownInGrid: false, formEditorConfig: roomFilteredCageConfig('room')},
             cond: {
                 shownInGrid: false
                 ,lookup:{ schemaName: 'ehr_lookups', queryName: 'housing_condition_codes', displayColumn: 'value', keyColumn: 'value'}

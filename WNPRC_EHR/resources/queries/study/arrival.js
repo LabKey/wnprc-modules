@@ -40,8 +40,13 @@ EHR.Server.TriggerManager.registerHandlerForQuery(EHR.Server.TriggerManager.Even
         }
 
         //if room provided, we insert into housing
-        if (row.initialRoom){
-            helper.getJavaHelper().createHousingRecord(row.Id, row.date, null, row.initialRoom, (row.initialCage || null), (row.initialCond || null));
+        if (row.initialRoom && row.Id && row.date){
+            try {
+                console.log("Trying to run create housing record");
+                WNPRC.Utils.getJavaHelper().createHousingRecord(row.Id, row.date, (isLiving ? null : row.date), row.room, (row.cage || null));
+            }catch (e) {
+                EHR.Server.Utils.addError(scriptErrors, 'housing', e, 'ERROR');
+            }
         }
     }
 });

@@ -62,6 +62,7 @@ import org.labkey.api.security.User;
 import org.labkey.api.security.UserManager;
 import org.labkey.api.study.security.SecurityEscalator;
 import org.labkey.api.util.DateUtil;
+import org.labkey.api.util.GUID;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.dbutils.api.SimpleQueryFactory;
@@ -93,7 +94,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -108,6 +111,7 @@ import java.util.stream.Collectors;
 public class TriggerScriptHelper {
     protected final Container container;
     protected final User user;
+    protected final static SimpleDateFormat _dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd kk:mm");
     protected static final Logger _log = LogManager.getLogger(TriggerScriptHelper.class);
     protected final SimpleQueryFactory queryFactory;
     public static JSONArray _aliasRow;
@@ -2839,4 +2843,530 @@ public class TriggerScriptHelper {
             }
         }
     }
+
+    private static class ActiveHousingRecord
+    {
+        String id;
+        String lsid;
+        String cond;
+        String reason;
+        String cage;
+    }
+
+    private static class AnimalDemoInfo
+    {
+        String id;
+        String gender;
+        String species;
+        String dam;
+        String sire;
+        Date birth;
+        String fosterDam;
+        String fosterSire;
+        boolean isInfant;
+        boolean isMarm;
+    }
+
+    private static class HousingCondition
+    {
+        String specialCondition;
+        String pairCondition;
+        String cageCondition;
+        String socialCondition;
+    }
+
+    private String resolveCageNumber(String cageObiId)
+    {
+        if (cageObiId == null)
+            return null;
+
+        String cageObjectId = cageObiId;
+        String cageNumber = null;
+
+        TableInfo ti = getTableInfo("cageui", "cagesInRoom", true);
+        if (ti != null)
+        {
+            SimpleFilter filter = new SimpleFilter(FieldKey.fromString("cage_object_id"), cageObiId);
+            TableSelector ts = new TableSelector(ti, PageFlowUtil.set("cage_object_id", "cage_number"), filter, null);
+            for (Map<String, Object> row : ts.getMapArray())
+            {
+                Object cageNumObj = row.get("cage_number");
+                String cageNum = cageNumObj != null ? cageNumObj.toString() : null;
+
+                if (cageNum != null)
+                {
+                    cageNumber = cageNum;
+                    break;
+                }
+            }
+        }
+
+        return cageNumber;
+    }
+
+    private List<ActiveHousingRecord> getActiveHousingRecordsInCage(String room, @Nullable String cageObjectId, @Nullable String cageNumber, @Nullable String origCage)
+    {
+        List<ActiveHousingRecord> list = new ArrayList<>();
+        TableInfo ti = getTableInfo("study", "housing", true);
+        if (ti == null || room == null)
+            return list;
+
+        SimpleFilter filter = new SimpleFilter(FieldKey.fromString("room"), room);
+        filter.addCondition(FieldKey.fromString("isActive"), true);
+
+        TableSelector ts = new TableSelector(ti, PageFlowUtil.set("Id", "lsid", "cond", "reason", "cage"), filter, null);
+        for (Map<String, Object> map : ts.getMapArray())
+        {
+            String rowCage = (String) map.get("cage");
+            boolean cageMatches = false;
+
+            if (cageObjectId == null && cageNumber == null && origCage == null)
+            {
+                if (rowCage == null || rowCage.trim().isEmpty())
+                    cageMatches = true;
+            }
+            else
+            {
+                if (rowCage != null)
+                {
+                    if (cageObjectId != null && rowCage.equalsIgnoreCase(cageObjectId))
+                        cageMatches = true;
+                    else if (cageNumber != null && rowCage.equalsIgnoreCase(cageNumber))
+                        cageMatches = true;
+                    else if (origCage != null && rowCage.equalsIgnoreCase(origCage))
+                        cageMatches = true;
+                }
+            }
+
+            if (cageMatches)
+            {
+                ActiveHousingRecord rec = new ActiveHousingRecord();
+                rec.id = (String) map.get("Id");
+                rec.lsid = (String) map.get("lsid");
+                rec.cond = (String) map.get("cond");
+                rec.reason = (String) map.get("reason");
+                rec.cage = rowCage;
+                list.add(rec);
+            }
+        }
+
+        return list;
+    }
+
+    private Map<String, AnimalDemoInfo> getAnimalDemographics(Set<String> animalIds, @Nullable String currentId, @Nullable Date currentDate)
+    {
+        Map<String, AnimalDemoInfo> map = new HashMap<>();
+        if (animalIds == null || animalIds.isEmpty())
+            return map;
+
+        TableInfo demoTi = getTableInfo("study", "demographics", true);
+        if (demoTi != null)
+        {
+            SimpleFilter filter = new SimpleFilter();
+            filter.addClause(new SimpleFilter.InClause(FieldKey.fromString("Id"), animalIds));
+            TableSelector ts = new TableSelector(demoTi, PageFlowUtil.set("Id", "gender", "species", "dam", "sire", "birth"), filter, null);
+            for (Map<String, Object> row : ts.getMapArray())
+            {
+                AnimalDemoInfo info = new AnimalDemoInfo();
+                info.id = (String) row.get("Id");
+                info.gender = (String) row.get("gender");
+                info.species = (String) row.get("species");
+                info.dam = (String) row.get("dam");
+                info.sire = (String) row.get("sire");
+                info.birth = (Date) row.get("birth");
+                map.put(info.id, info);
+            }
+        }
+
+        // For any animal not found in demographics (e.g. newborn animal being registered in birth trigger), check study.birth
+        for (String id : animalIds)
+        {
+            if (!map.containsKey(id))
+            {
+                AnimalDemoInfo info = new AnimalDemoInfo();
+                info.id = id;
+                TableInfo birthTi = getTableInfo("study", "birth", true);
+                if (birthTi != null)
+                {
+                    SimpleFilter filter = new SimpleFilter(FieldKey.fromString("Id"), id);
+                    TableSelector ts = new TableSelector(birthTi, PageFlowUtil.set("Id", "gender", "species", "dam", "sire", "date"), filter, null);
+                    Map<String, Object> birthRow = ts.getObject(Map.class);
+                    if (birthRow != null)
+                    {
+                        info.gender = (String) birthRow.get("gender");
+                        info.species = (String) birthRow.get("species");
+                        info.dam = (String) birthRow.get("dam");
+                        info.sire = (String) birthRow.get("sire");
+                        info.birth = (Date) birthRow.get("date");
+                    }
+                }
+                map.put(id, info);
+            }
+        }
+
+        // Check active adoptions for foster parents
+        TableInfo adoptionsTi = getTableInfo("study", "adoptions", true);
+        if (adoptionsTi != null)
+        {
+            SimpleFilter filter = new SimpleFilter();
+            filter.addClause(new SimpleFilter.InClause(FieldKey.fromString("Id"), animalIds));
+            TableSelector ts = new TableSelector(adoptionsTi, PageFlowUtil.set("Id", "date", "type", "dam", "sire"), filter, new Sort("date"));
+            for (Map<String, Object> row : ts.getMapArray())
+            {
+                String id = (String) row.get("Id");
+                String type = row.get("type") != null ? row.get("type").toString() : null;
+                AnimalDemoInfo info = map.get(id);
+                if (info != null)
+                {
+                    if ("0".equals(type))
+                    {
+                        info.fosterDam = (String) row.get("dam");
+                        info.fosterSire = (String) row.get("sire");
+                    }
+                    else if ("1".equals(type))
+                    {
+                        info.fosterDam = null;
+                        info.fosterSire = null;
+                    }
+                }
+            }
+        }
+
+        // Calculate isMarm and isInfant
+        Date now = currentDate != null ? currentDate : new Date();
+        for (AnimalDemoInfo info : map.values())
+        {
+            info.isMarm = info.species != null && info.species.toLowerCase().contains("marm");
+            if (info.birth != null)
+            {
+                long ageMillis = now.getTime() - info.birth.getTime();
+                info.isInfant = ageMillis < (365.25 * 24 * 60 * 60 * 1000L);
+            }
+            else if (info.id != null && info.id.equals(currentId))
+            {
+                info.isInfant = true;
+            }
+        }
+
+        return map;
+    }
+
+    private Set<String> getCageModifications(@Nullable String cageObjectId)
+    {
+        Set<String> mods = new HashSet<>();
+        if (cageObjectId == null)
+            return mods;
+
+        TableInfo ti = getTableInfo("cageui", "currentCageMods", true);
+        if (ti != null)
+        {
+            SimpleFilter filter = new SimpleFilter(FieldKey.fromString("cage"), cageObjectId);
+            TableSelector ts = new TableSelector(ti, Collections.singleton("modification"), filter, null);
+            for (String mod : ts.getArray(String.class))
+            {
+                if (mod != null)
+                    mods.add(mod);
+            }
+        }
+        return mods;
+    }
+
+    private HousingCondition calculateHousingCondition(
+            String animalId,
+            Set<String> allAnimalsInCage,
+            Map<String, AnimalDemoInfo> demoMap,
+            Set<String> cageMods,
+            @Nullable String reason,
+            boolean isSpecial,
+            boolean isInTransit,
+            @Nullable String explicitCond
+    )
+    {
+        HousingCondition cond = new HousingCondition();
+
+        if (isSpecial || "x".equalsIgnoreCase(explicitCond))
+        {
+            cond.specialCondition = "x";
+            return cond;
+        }
+
+        if (isInTransit || "it".equalsIgnoreCase(explicitCond))
+        {
+            cond.specialCondition = "it";
+            return cond;
+        }
+
+        // 1. Pairing Condition
+        int count = allAnimalsInCage.size();
+        if (count == 1)
+            cond.pairCondition = "s";
+        else if (count == 2)
+            cond.pairCondition = "p";
+        else if (count >= 3)
+            cond.pairCondition = "g";
+
+        // 2. Caging Condition
+        if (cageMods.contains("PCDivider"))
+            cond.cageCondition = "pc";
+        else if (cageMods.contains("VCDivider"))
+            cond.cageCondition = "vc";
+
+        // 3. Social Condition
+        AnimalDemoInfo animal = demoMap.get(animalId);
+        if (animal == null)
+        {
+            animal = new AnimalDemoInfo();
+            animal.id = animalId;
+        }
+
+        if (animal.isMarm || animal.isInfant)
+        {
+            boolean isMotherInDest = animal.dam != null && allAnimalsInCage.contains(animal.dam);
+            boolean isFatherInDest = animal.sire != null && allAnimalsInCage.contains(animal.sire);
+            boolean isAdoptedMotherInDest = animal.fosterDam != null && allAnimalsInCage.contains(animal.fosterDam);
+            boolean isAdoptedFatherInDest = animal.fosterSire != null && allAnimalsInCage.contains(animal.fosterSire);
+
+            if (isMotherInDest && isFatherInDest)
+                cond.socialCondition = "mf";
+            else if (isMotherInDest && isAdoptedFatherInDest)
+                cond.socialCondition = "mfa";
+            else if (isAdoptedMotherInDest && isFatherInDest)
+                cond.socialCondition = "amf";
+            else if (isAdoptedMotherInDest && isAdoptedFatherInDest)
+                cond.socialCondition = "mafa";
+            else if (isMotherInDest)
+                cond.socialCondition = "m";
+            else if (isAdoptedMotherInDest)
+                cond.socialCondition = "am";
+            else if (isFatherInDest)
+                cond.socialCondition = "f";
+            else if (isAdoptedFatherInDest)
+                cond.socialCondition = "af";
+        }
+        else // Adult
+        {
+            String infantId = null;
+            for (String otherId : allAnimalsInCage)
+            {
+                AnimalDemoInfo otherDemo = demoMap.get(otherId);
+                if (otherDemo != null && otherDemo.isInfant)
+                {
+                    infantId = otherId;
+                    break;
+                }
+            }
+
+            boolean isBreeding = reason != null && reason.contains("Breeding");
+
+            if (infantId != null)
+            {
+                if (isBreeding)
+                {
+                    if ("m".equalsIgnoreCase(animal.gender))
+                        cond.socialCondition = "b";
+                    else
+                        cond.socialCondition = "bi";
+                }
+                else
+                {
+                    AnimalDemoInfo infantDemo = demoMap.get(infantId);
+                    boolean isBioParent = infantDemo != null && (animalId.equals(infantDemo.dam) || animalId.equals(infantDemo.sire));
+                    if (isBioParent)
+                        cond.socialCondition = "i";
+                    else
+                        cond.socialCondition = "ia";
+                }
+            }
+            else
+            {
+                if (isBreeding)
+                    cond.socialCondition = "b";
+            }
+        }
+
+        return cond;
+    }
+
+    private String insertConditionRecord(TableInfo condTable, HousingCondition cond) throws QueryUpdateServiceException, DuplicateKeyException, SQLException, BatchValidationException
+    {
+        String objectId = new GUID().toString();
+        Map<String, Object> row = new CaseInsensitiveHashMap<>();
+        row.put("objectid", objectId);
+        row.put("special_condition", cond.specialCondition);
+        row.put("pair_condition", cond.pairCondition);
+        row.put("cage_condition", cond.cageCondition);
+        row.put("social_condition", cond.socialCondition);
+        row.put("container", getContainer().getId());
+
+        BatchValidationException errors = new BatchValidationException();
+        condTable.getUpdateService().insertRows(getUser(), getContainer(), Collections.singletonList(row), errors, null, getExtraContext());
+        if (errors.hasErrors())
+            throw errors;
+
+        return objectId;
+    }
+
+    private void updateOrInsertConditionRecord(TableInfo condTable, TableInfo housingTable, ActiveHousingRecord rec, HousingCondition cond)
+            throws QueryUpdateServiceException, DuplicateKeyException, SQLException, BatchValidationException, InvalidKeyException
+    {
+        boolean condRecordExists = false;
+        if (rec.cond != null)
+        {
+            SimpleFilter filter = new SimpleFilter(FieldKey.fromString("objectid"), rec.cond);
+            TableSelector ts = new TableSelector(condTable, filter, null);
+            condRecordExists = ts.exists();
+        }
+
+        if (condRecordExists)
+        {
+            Map<String, Object> row = new CaseInsensitiveHashMap<>();
+            row.put("objectid", rec.cond);
+            row.put("special_condition", cond.specialCondition);
+            row.put("pair_condition", cond.pairCondition);
+            row.put("cage_condition", cond.cageCondition);
+            row.put("social_condition", cond.socialCondition);
+
+            Map<String, Object> oldKey = new CaseInsensitiveHashMap<>();
+            oldKey.put("objectid", rec.cond);
+
+            BatchValidationException errors = new BatchValidationException();
+            condTable.getUpdateService().updateRows(getUser(), getContainer(), Collections.singletonList(row), Collections.singletonList(oldKey), errors, null, getExtraContext());
+            if (errors.hasErrors())
+                throw errors;
+        }
+        else
+        {
+            String newObjectId = insertConditionRecord(condTable, cond);
+            rec.cond = newObjectId;
+
+            Map<String, Object> housingRow = new CaseInsensitiveHashMap<>();
+            housingRow.put("lsid", rec.lsid);
+            housingRow.put("cond", newObjectId);
+
+            Map<String, Object> oldKey = new CaseInsensitiveHashMap<>();
+            oldKey.put("lsid", rec.lsid);
+
+            BatchValidationException errors = new BatchValidationException();
+            housingTable.getUpdateService().updateRows(getUser(), getContainer(), Collections.singletonList(housingRow), Collections.singletonList(oldKey), errors, null, getExtraContext());
+            if (errors.hasErrors())
+                throw errors;
+        }
+    }
+
+    public void createHousingRecord(String id, Date date, @Nullable Date enddate, String room, @Nullable String cage) throws QueryUpdateServiceException, DuplicateKeyException, SQLException, BatchValidationException, InvalidKeyException
+    {
+        createHousingRecord(id, date, enddate, room, cage, null, null);
+    }
+
+    public void createHousingRecord(String id, Date date, @Nullable Date enddate, String room, @Nullable String cage, @Nullable String cond) throws QueryUpdateServiceException, DuplicateKeyException, SQLException, BatchValidationException, InvalidKeyException
+    {
+        createHousingRecord(id, date, enddate, room, cage, cond, null);
+    }
+
+    public void createHousingRecord(String id, Date date, @Nullable Date enddate, String room, @Nullable String cageObjId, @Nullable String cond, @Nullable String taskId) throws QueryUpdateServiceException, DuplicateKeyException, SQLException, BatchValidationException, InvalidKeyException
+    {
+        if (id == null || date == null || room == null)
+            return;
+
+        //check for a pre-existing death record
+        Date deathDate = new TableSelector(getTableInfo("study", "deaths"), Collections.singleton("date"), new SimpleFilter(FieldKey.fromString("Id"), id), null).getObject(Date.class);
+        if (deathDate != null)
+        {
+            if (deathDate.before(date))
+            {
+                _log.error("attempting to create a housing record that starts after the death date: {}", _dateTimeFormat.format(date), new Exception());
+                return;
+            }
+            else if (enddate == null || enddate.after(deathDate))
+            {
+                enddate = deathDate;
+            }
+        }
+
+        TableInfo ti = getTableInfo("study", "housing");
+
+        //if this animal already has an active housing record, assume that is the current record and skip
+        SimpleFilter filter = new SimpleFilter(FieldKey.fromString("Id"), id);
+        filter.addCondition(FieldKey.fromString("isActive"), true);
+        TableSelector ts = new TableSelector(ti, PageFlowUtil.set("lsid"), filter, null);
+        if (ts.exists())
+        {
+            _log.info("animal already has an active housing record, skipping");
+            return;
+        }
+
+        boolean isSpecial = "x".equalsIgnoreCase(cond);
+        boolean isInTransit = "it".equalsIgnoreCase(cond);
+
+        String cageNumber = resolveCageNumber(cageObjId);
+
+        // Find existing active records in this room/cage
+        List<ActiveHousingRecord> existingRecords = getActiveHousingRecordsInCage(room, cageObjId, cageNumber, cageObjId);
+
+        Set<String> allAnimalsInCage = new LinkedHashSet<>();
+        for (ActiveHousingRecord rec : existingRecords)
+        {
+            if (!rec.id.equalsIgnoreCase(id))
+                allAnimalsInCage.add(rec.id);
+        }
+        allAnimalsInCage.add(id);
+
+        Map<String, AnimalDemoInfo> demoMap = getAnimalDemographics(allAnimalsInCage, id, date);
+        Set<String> cageMods = getCageModifications(cageObjId);
+
+        TableInfo condTable = getTableInfo("cageui", "housing_condition_records", true);
+
+        // Update condition records for all existing animals in this cage
+        if (condTable != null)
+        {
+            for (ActiveHousingRecord rec : existingRecords)
+            {
+                if (rec.id.equalsIgnoreCase(id))
+                    continue;
+
+                HousingCondition existingCond = calculateHousingCondition(rec.id, allAnimalsInCage, demoMap, cageMods, rec.reason, isSpecial, isInTransit, null);
+                updateOrInsertConditionRecord(condTable, ti, rec, existingCond);
+            }
+        }
+
+        // Calculate condition for the new incoming animal
+        HousingCondition newAnimalCond = calculateHousingCondition(id, allAnimalsInCage, demoMap, cageMods, null, isSpecial, isInTransit, cond);
+
+        String conditionObjectId = null;
+        if (condTable != null)
+        {
+            conditionObjectId = insertConditionRecord(condTable, newAnimalCond);
+        }
+
+        Map<String, Object> row = new CaseInsensitiveHashMap<>();
+        row.put("Id", id);
+        row.put("date", date);
+        row.put("room", room);
+        row.put("objectid", new GUID().toString());
+
+        if (conditionObjectId != null)
+            row.put("cond", conditionObjectId);
+        else if (cond != null)
+            row.put("cond", cond);
+
+        if (enddate != null)
+            row.put("enddate", enddate);
+
+        if (isSpecial || isInTransit)
+            row.put("cage", null);
+        else if (cageObjId != null)
+            row.put("cage", cageObjId);
+
+        if (taskId != null)
+            row.put("taskId", taskId);
+
+        List<Map<String, Object>> rows = new ArrayList<>();
+        rows.add(row);
+        BatchValidationException errors = new BatchValidationException();
+        ti.getUpdateService().insertRows(getUser(), getContainer(), rows, errors, null, getExtraContext());
+
+        if (errors.hasErrors())
+            throw errors;
+    }
+
 }

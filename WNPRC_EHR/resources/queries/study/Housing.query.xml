@@ -42,6 +42,7 @@
                             <fkColumnName>value</fkColumnName>
                         </fk>
                     </column>
+
                     <column columnName="divider">
                         <columnTitle>Divider</columnTitle>
                         <fk>

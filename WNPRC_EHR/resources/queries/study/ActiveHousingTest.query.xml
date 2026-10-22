@@ -1,0 +1,144 @@
+<!--
+  ~ /*
+  ~  * Copyright (c) 2026 Board of Regents of the University of Wisconsin System
+  ~  *
+  ~  * Licensed under the Apache License, Version 2.0 (the "License");
+  ~  * you may not use this file except in compliance with the License.
+  ~  * You may obtain a copy of the License at
+  ~  *
+  ~  *     http://www.apache.org/licenses/LICENSE-2.0
+  ~  *
+  ~  * Unless required by applicable law or agreed to in writing, software
+  ~  * distributed under the License is distributed on an "AS IS" BASIS,
+  ~  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  * See the License for the specific language governing permissions and
+  ~  * limitations under the License.
+  ~  */
+  -->
+
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="ActiveHousingTest" tableDbType="TABLE">
+                <tableUrl />
+                <insertUrl />
+                <importUrl />
+                <updateUrl />
+                <deleteUrl />
+                <columns>
+                    <column columnName="TotalRoommates" wrappedColumnName="lsid">
+                        <columnTitle>Total Cagemates</columnTitle>
+                        <isHidden>false</isHidden>
+                        <isUnselectable>true</isUnselectable>
+                        <fk>
+                            <fkDbSchema>study</fkDbSchema>
+                            <fkTable>housingTotalRoommates</fkTable>
+                            <fkColumnName>objectid</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="date">
+                        <formatString>yyyy-MM-dd HH:mm</formatString>
+                        <columnTitle>In Date</columnTitle>
+                    </column>
+                    <column columnName="enddate">
+                        <nullable>true</nullable>
+                        <isHidden>false</isHidden>
+                        <shownInInsertView>true</shownInInsertView>
+                        <shownInDetailsView>true</shownInDetailsView>
+                        <formatString>yyyy-MM-dd HH:mm</formatString>
+                        <columnTitle>Out Date</columnTitle>
+                    </column>
+                    <column columnName="QCState">
+                        <isHidden>false</isHidden>
+                        <shownInDetailsView>true</shownInDetailsView>
+                        <columnTitle>Status</columnTitle>
+                    </column>
+                    <column columnName="room">
+                        <nullable>false</nullable>
+                        <columnTitle>Room</columnTitle>
+                        <!--<url>/wnprc_ehr/cageDetails.view?-->
+                        <!--room=${room}&amp;-->
+                        <!--cage=${cage}&amp;-->
+                        <!--</url>-->
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>rooms</fkTable>
+                            <fkColumnName>room</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="cage">
+                        <!--<nullable>false</nullable>-->
+                        <columnTitle>Cage</columnTitle>
+                        <fk>
+                            <fkDbSchema>cageui</fkDbSchema>
+                            <fkTable>cages</fkTable>
+                            <fkColumnName>objectid</fkColumnName>
+                            <fkDisplayColumnName>cage_number</fkDisplayColumnName>
+                        </fk>
+                        <url>/wnprc_ehr/cageDetails.view?
+                            room=${room}&amp;
+                            cage=${cage}&amp;
+                        </url>
+                    </column>
+                    <column columnName="cageOld">
+                        <!--<nullable>false</nullable>-->
+                        <columnTitle>Cage Old</columnTitle>
+                        <url>/EHR/cageDetails.view?
+                            room=${room}&amp;
+                            cage=${cageOld}&amp;
+                        </url>
+                    </column>
+                    <column columnName="condOld">
+                        <nullable>true</nullable>
+                        <columnTitle>Condition Old</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>housing_condition_codes</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="cond">
+                        <nullable>true</nullable>
+                        <columnTitle>Condition</columnTitle>
+                        <fk>
+                            <fkDbSchema>cageui</fkDbSchema>
+                            <fkTable>housing_condition_records</fkTable>
+                            <fkColumnName>objectid</fkColumnName>
+                            <fkDisplayColumnName>final_condition</fkDisplayColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="reason">
+                        <columnTitle>Reason For Move</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>housing_reason</fkTable>
+                            <fkColumnName>value</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="restraintType">
+                        <columnTitle>Restraint Type</columnTitle>
+                        <fk>
+                            <fkDbSchema>ehr_lookups</fkDbSchema>
+                            <fkTable>restraint_type</fkTable>
+                            <fkColumnName>type</fkColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="cagesJoined">
+                        <columnTitle># of Connected Cages</columnTitle>
+                        <isHidden>true</isHidden>
+                    </column>
+                    <column columnName="isTemp">
+                        <isHidden>false</isHidden>
+                    </column>
+                    <!--<column columnName="parentid">-->
+                    <!--<fk>-->
+                    <!--<fkDbSchema>study</fkDbSchema>-->
+                    <!--<fkTable>studyDataParent</fkTable>-->
+                    <!--<fkColumnName>objectid</fkColumnName>-->
+                    <!--</fk>-->
+                    <!--</column>-->
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

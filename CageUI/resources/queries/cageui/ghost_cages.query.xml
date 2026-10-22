@@ -28,7 +28,13 @@
                     <column columnName="cage_objectid"/>
                     <column columnName="positionid"/>
                     <column columnName="rack_group"/>
-                    <column columnName="rack_objectid"/>
+                    <column columnName="rack_objectid">
+                        <fk>
+                            <fkDbSchema>cageui</fkDbSchema>
+                            <fkTable>ghost_racks</fkTable>
+                            <fkColumnName>objectid</fkColumnName>
+                        </fk>
+                    </column>
                     <column columnName="group_rotation"/>
                     <column columnName="cage"/>
                     <column columnName="container"/>

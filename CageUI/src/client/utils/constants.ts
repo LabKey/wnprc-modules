@@ -22,6 +22,8 @@ export const CELL_SIZE = 30; // number of pixels of a cell for length/width
 export const SVG_WIDTH = 810; // width of the layout svg
 export const SVG_HEIGHT = 1290; // height of the layout svg
 
+export const GHOST_TYPE_ID = 17; // rowid of the ghost cage rack type.
+
 // These are the options users can choose to select a room size. Scale adjusts the zoom level of the layout
 export const roomSizeOptions = [
     {

@@ -42,6 +42,7 @@
                 <property name="columnTitle" value="Room"/>
             </properties>
         </column>
+
         <column name="Id/curLocation/cage">
             <properties>
                 <property name="columnTitle" value="Cage"/>

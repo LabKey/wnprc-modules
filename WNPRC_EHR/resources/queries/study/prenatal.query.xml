@@ -58,7 +58,7 @@
                     </column>
                     <column columnName="cage">
                         <columnTitle>Cage</columnTitle>
-                        <url>/EHR/cageDetails.view?
+                        <url>/wnprc_ehr/cageDetails.view?
                             room=${room}&amp;
                             cage=${cage}&amp;
                         </url>
@@ -71,7 +71,7 @@
                             <fkTable>cage</fkTable>
                             <fkColumnName>roomcage</fkColumnName>
                         </fk>
-                        <url>/EHR/cageDetails.view?
+                        <url>/wnprc_ehr/cageDetails.view?
                             room=${room}&amp;
                             cage=${cage}&amp;
                         </url>

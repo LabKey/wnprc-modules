@@ -25,7 +25,7 @@ import { Cage, Room, RoomObject, RoomObjectTypes } from '../../../types/typings'
 import { addPrevRoomSvgs, isRoomModifier } from '../../../utils/helpers';
 import { findCageInGroup, updateBorderSize } from '../../../utils/LayoutEditorHelpers';
 import { ConfirmationPopup } from '../../ConfirmationPopup';
-import _ from 'lodash';
+import * as lodash from 'lodash';
 import { LayoutErrors } from '../../LayoutErrors';
 import { LayoutSaveResult, SelectedObj } from '../../../types/layoutEditorTypes';
 import { useRoomContext } from '../../../context/RoomContextManager';
@@ -35,6 +35,7 @@ import { CagePopup } from './CagePopup';
 import { useHomeNavigationContext } from '../../../context/HomeNavigationContextManager';
 import { RoomObjectPopup } from './RoomObjectPopup';
 import { availRoomObjPopups } from '../../../utils/homeHelpers';
+import { ModificationSaveResult } from '../../../types/homeTypes';
 
 interface RoomLayoutProps {
 }
@@ -105,16 +106,23 @@ export const RoomLayout: FC<RoomLayoutProps> = (props) => {
     /  This would take some time and can be added later if requested/needed.
      */
     useEffect(() => {
-        const modsEqual = _.isEqual(selectedRoomMods, selectedLocalRoom.mods);
-        const objectsEqual = _.isEqual(selectedRoom?.objects, selectedLocalRoom.objects);
+        const modsEqual = lodash.isEqual(selectedRoomMods, selectedLocalRoom.mods);
+        const objectsEqual = lodash.isEqual(selectedRoom?.objects, selectedLocalRoom.objects);
         setShowChangesMenu(!modsEqual || !objectsEqual);
     }, [selectedRoom, selectedLocalRoom, selectedRoomMods]);
 
     const saveLayout = async () => {
 
-        let res: LayoutSaveResult = await submitLayoutMods();
+        let res: ModificationSaveResult = await submitLayoutMods();
 
-        if (res.success) {
+        if(res.success && res.transferToHousing){
+            window.location.href = ActionURL.buildURL(ActionURL.getController(), 'housingTransfer', ActionURL.getContainer(), {
+                room: selectedLocalRoom.name,
+                cages: res.cages,
+                historyId: res.historyid,
+                returnUrl: window.location.href
+            });
+        }else if (res.success) {
             // succssesful save
             setIsSaving(false);
             navigateTo({selected: 'Room', room: selectedLocalRoom.name});

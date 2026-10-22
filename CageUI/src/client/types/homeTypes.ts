@@ -25,10 +25,8 @@ import {
     ModLocations,
     ModStyle,
     ModTypes,
-    Rack,
-    Room
+    Rack
 } from './typings';
-import { Option } from '@labkey/components';
 
 
 export type SelectedViews = 'Home' | 'Room' | 'Rack' | 'Cage';
@@ -101,7 +99,10 @@ export type ConnectedCages = {
 };
 
 export interface ModificationSaveResult {
-    status: 'Success' | 'Failure';
+    success: boolean;
+    transferToHousing: boolean;
+    historyid?: string;
+    cages?: string[];
     reason?: string[];
 }
 
@@ -113,3 +114,4 @@ export interface RackSwitchOption {
     };
     label: string;
 }
+

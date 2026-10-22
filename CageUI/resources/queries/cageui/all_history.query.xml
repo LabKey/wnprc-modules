@@ -37,6 +37,15 @@
                     <column columnName="start_date"/>
                     <column columnName="end_date"/>
                     <column columnName="historyid"/>
+                    <column columnName="QCState">
+                        <columnTitle>Status</columnTitle>
+                        <fk>
+                            <fkDbSchema>core</fkDbSchema>
+                            <fkTable>QCState</fkTable>
+                            <fkColumnName>RowId</fkColumnName>
+                            <fkDisplayColumnName>Label</fkDisplayColumnName>
+                        </fk>
+                    </column>
                     <column columnName="container"/>
                     <column columnName="createdby"/>
                     <column columnName="created"/>

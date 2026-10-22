@@ -19,7 +19,7 @@
                     <column columnName="Id::goal">
                         <columnTitle>Goals For Day</columnTitle>
 
-                        <url>/EHR/cageDetails.view?
+                        <url>/wnprc_ehr/cageDetails.view?
                             room=${room}&amp;
                             cage=${cage}&amp;
                         </url>

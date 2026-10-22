@@ -141,7 +141,7 @@
                         <isHidden>true</isHidden>
                         <shownInInsertView>false</shownInInsertView>
                         <columnTitle>Room</columnTitle>
-                        <url>/ehr/cageDetails.view?
+                        <url>/wnprc_ehr/cageDetails.view?
                             room=${room}&amp;
                         </url>
                         <fk>
@@ -154,9 +154,18 @@
                         <isHidden>true</isHidden>
                         <shownInInsertView>false</shownInInsertView>
                         <columnTitle>Cage</columnTitle>
-                        <url>/ehr/cageDetails.view?
+                        <url>/EHR/cageDetails.view?
                             room=${room}&amp;
                             cage=${cage}&amp;
+                        </url>
+                    </column>
+                    <column columnName="cageNew">
+                        <isHidden>true</isHidden>
+                        <shownInInsertView>false</shownInInsertView>
+                        <columnTitle>Cage New</columnTitle>
+                        <url>/wnprc_ehr/cageDetails.view?
+                            room=${room}&amp;
+                            cage=${cageNew}&amp;
                         </url>
                     </column>
                     <column columnName="cond">

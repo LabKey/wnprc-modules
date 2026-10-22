@@ -37,6 +37,8 @@ import { dateTimeColumnType } from '../DateTimeGridField';
 import { generateUUID } from '../../utils/helpers';
 import { ActionURL, Filter, Query } from '@labkey/api';
 import { labkeyActionSelectWithPromise, startAdoptionSubmission } from '../../api/labkeyActions';
+import { HousingTransferData } from '../../types/housingFormTypes';
+import { Option } from '@labkey/components';
 import { AutoCompleteEditCell } from '../AutoCompleteEditCell';
 import { LoadingScreen } from '../LoadingScreen';
 import { LayoutErrors } from '../LayoutErrors';

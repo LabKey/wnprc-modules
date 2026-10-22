@@ -1,0 +1,65 @@
+/*
+ *
+ *  * Copyright (c) 2026 Board of Regents of the University of Wisconsin System
+ *  *
+ *  * Licensed under the Apache License, Version 2.0 (the "License");
+ *  * you may not use this file except in compliance with the License.
+ *  * You may obtain a copy of the License at
+ *  *
+ *  *     http://www.apache.org/licenses/LICENSE-2.0
+ *  *
+ *  * Unless required by applicable law or agreed to in writing, software
+ *  * distributed under the License is distributed on an "AS IS" BASIS,
+ *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  * See the License for the specific language governing permissions and
+ *  * limitations under the License.
+ *
+ */
+
+require("ehr/triggers").initScript(this);
+var console = require('console');
+var CageUI = require("cageui/CageUI").CageUI;
+
+function onUpsert(helper, scriptErrors, row){
+
+    console.log("rack EC: ", this.extraContext);
+    if (this.extraContext['QCState'] === 1 && this.extraContext['racksExtraContext']) {
+        if(row.ghost_rack_id){ // don't include ghost racks in the racks table
+            return;
+        }
+        //add any errors that are returned to the page
+        let javaErrors = CageUI.Utils.getJavaHelper().updateRacks(row, this.extraContext['racksExtraContext']);
+        if (javaErrors) {
+            for (let i = 0; i < javaErrors.length; i++) {
+                let error = javaErrors[i];
+                console.log('Field: ' + error.field + ', Message: ' + error.message + ', Severity: ' + error.severity);
+                EHR.Server.Utils.addError(scriptErrors, error.field, error.message, error.severity);
+            }
+        }
+    }
+}
+
+function onComplete(event, errors, helper){
+    var racksToRemove = this.extraContext["racksExtraContext"] &&
+            this.extraContext["racksExtraContext"]["racksToRemoveFromRoom"] &&
+            this.extraContext["racksExtraContext"]["racksToRemoveFromRoom"]["racksToRemoveFromRoom"] || {};
+
+    console.log("Remove Racks: ", racksToRemove, this.extraContext);
+
+    if(Object.keys(racksToRemove).length > 0){
+        let racksToRemoveArray = [];
+        for (let key in racksToRemove) {
+            if (racksToRemove.hasOwnProperty(key)) {
+                racksToRemoveArray.push(racksToRemove[key]);
+            }
+        }
+        let javaErrors = CageUI.Utils.getJavaHelper().removeRacksFromRoom(racksToRemoveArray);
+        if (javaErrors) {
+            for (let i = 0; i < javaErrors.length; i++) {
+                let error = javaErrors[i];
+                console.log('Field: ' + error.field + ', Message: ' + error.message + ', Severity: ' + error.severity);
+                EHR.Server.Utils.addError(scriptErrors, error.field, error.message, error.severity);
+            }
+        }
+    }
+}

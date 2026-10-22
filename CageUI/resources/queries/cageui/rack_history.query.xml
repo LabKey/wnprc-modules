@@ -19,7 +19,7 @@
 <query xmlns="http://labkey.org/data/xml/query">
     <metadata>
         <tables xmlns="http://labkey.org/data/xml">
-            <table tableName="racks" tableDbType="TABLE">
+            <table tableName="rack_history" tableDbType="TABLE">
                 <javaCustomizer class="org.labkey.cageui.table.CageUICustomizer" />
                 <tableTitle>Rack History</tableTitle>
                 <columns>
@@ -33,6 +33,13 @@
                             <fkTable>racks</fkTable>
                             <fkColumnName>objectid</fkColumnName>
                             <fkDisplayColumnName>rackid</fkDisplayColumnName>
+                        </fk>
+                    </column>
+                    <column columnName="ghost_rack_id">
+                        <fk>
+                            <fkDbSchema>cageui</fkDbSchema>
+                            <fkTable>ghost_racks</fkTable>
+                            <fkColumnName>objectid</fkColumnName>
                         </fk>
                     </column>
                     <column columnName="room">

@@ -30,12 +30,10 @@ public class BundledForms
     ArrayList<CageModificationHistoryForm> _cageModificationHistoryForm;
     ArrayList<TemplateLayoutHistoryForm> _templateLayoutHistoryForm;
     ArrayList<LayoutHistoryForm> _layoutHistoryForm;
-    ArrayList<CageHistoryForm> _cageHistoryForm;
-    ArrayList<RacksForm> _newRacksForm;
-    ArrayList<RacksForm> _prevRacksForm;
-    CagesFormWithContext _newCagesForm;
-    CagesFormWithContext _prevCagesForm;
+    CageHistoryFormWithContext _cageHistoryFormWithContext;
+    RackHistoryFormWithContext _rackHistoryFormWithContext;
     ArrayList<GhostCagesForm> _newGhostCagesForm;
+    ArrayList<GhostRacksForm> _newGhostRacksForm;
 
     public AllHistoryForm getNewAllHistoryForm()
     {
@@ -97,54 +95,24 @@ public class BundledForms
         _layoutHistoryForm = layoutHistoryForm;
     }
 
-    public ArrayList<CageHistoryForm> getCageHistoryForm()
+    public CageHistoryFormWithContext getCageHistoryFormWithContext()
     {
-        return _cageHistoryForm;
+        return _cageHistoryFormWithContext;
     }
 
-    public void setCageHistoryForm(ArrayList<CageHistoryForm> cageHistoryForm)
+    public void setCageHistoryFormWithContext(CageHistoryFormWithContext cageHistoryFormWithContext)
     {
-        _cageHistoryForm = cageHistoryForm;
+        _cageHistoryFormWithContext = cageHistoryFormWithContext;
     }
 
-    public ArrayList<RacksForm> getNewRacksForm()
+    public RackHistoryFormWithContext getRackHistoryFormWithContext()
     {
-        return _newRacksForm;
+        return _rackHistoryFormWithContext;
     }
 
-    public void setNewRacksForm(ArrayList<RacksForm> newRacksForm)
+    public void setRackHistoryFormWithContext(RackHistoryFormWithContext rackHistoryFormWithContext)
     {
-        _newRacksForm = newRacksForm;
-    }
-
-    public ArrayList<RacksForm> getPrevRacksForm()
-    {
-        return _prevRacksForm;
-    }
-
-    public void setPrevRacksForm(ArrayList<RacksForm> prevRacksForm)
-    {
-        _prevRacksForm = prevRacksForm;
-    }
-
-    public CagesFormWithContext getNewCagesForm()
-    {
-        return _newCagesForm;
-    }
-
-    public void setNewCagesForm(CagesFormWithContext newCagesForm)
-    {
-        _newCagesForm = newCagesForm;
-    }
-
-    public CagesFormWithContext getPrevCagesForm()
-    {
-        return _prevCagesForm;
-    }
-
-    public void setPrevCagesForm(CagesFormWithContext prevCagesForm)
-    {
-        _prevCagesForm = prevCagesForm;
+        _rackHistoryFormWithContext = rackHistoryFormWithContext;
     }
 
     public Map<String, Object> getEhrRoomsForm()
@@ -165,6 +133,16 @@ public class BundledForms
     public void setNewGhostCagesForm(ArrayList<GhostCagesForm> newGhostCagesForm)
     {
         _newGhostCagesForm = newGhostCagesForm;
+    }
+
+    public ArrayList<GhostRacksForm>getNewGhostRacksForm()
+    {
+        return _newGhostRacksForm;
+    }
+
+    public void setNewGhostRacksForm(ArrayList<GhostRacksForm> newGhostRacksForm)
+    {
+        _newGhostRacksForm = newGhostRacksForm;
     }
 
 }

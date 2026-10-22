@@ -19,17 +19,20 @@ import * as d3 from 'd3';
 import { zoomTransform } from 'd3';
 import { MutableRefObject } from 'react';
 import { ActionURL, Filter, Query, Security, Utils } from '@labkey/api';
-import { selectDistinctRows } from '@labkey/components';
+import { selectDistinctRows, selectRows } from '@labkey/components';
 
 import {
     AllHistoryData,
+    AnimalWeightInfo,
     Cage,
+    CageClassRecord,
     CageDirection,
     CageModification,
     CageModificationsType,
     CageMods,
     CageNumber,
     CageSvgId,
+    CageWeightResult,
     DefaultRackStringType,
     DefaultRackTypes,
     FetchRoomData,
@@ -59,7 +62,7 @@ import {
     RoomObject,
     RoomObjectStringType,
     RoomObjectTypes,
-    SessionLog,
+    SessionLog, SvgSizes,
     TemplateHistoryData,
     UnitLocations,
     UnitType
@@ -80,9 +83,18 @@ import {
 import { CELL_SIZE, Modifications, roomSizeOptions, SVG_HEIGHT, SVG_WIDTH } from './constants';
 import { ExtraContext, LayoutSaveResult } from '../types/layoutEditorTypes';
 import { labkeyActionSelectWithPromise, saveRoomLayout } from '../api/labkeyActions';
-import { cageModLookup } from '../api/popularQueries';
+import {
+    cageModLookup,
+    fetchAnimalsInActiveHousingCage,
+    fetchCageDimensions,
+    fetchCageSizeReq, fetchDemographicsWeights
+} from '../api/popularQueries';
 import { ConnectedCages, ConnectedRacks } from '../types/homeTypes';
 
+
+export const zeroPadName = (num, places) => {
+    return(String(num).padStart(places, '0'));
+};
 
 export const isTemplateCreator = (user: Security.GetUserPermissionsResponse) => {
     return Security.hasEffectivePermission(user.container.effectivePermissions, 'org.labkey.cageui.security.permissions.CageUITemplateCreatorPermission');
@@ -141,21 +153,21 @@ export const changeStyleProperty = (element: Element, property: string, newValue
     }
 };
 
-export const getSvgSize = async (type: RackTypes) => {
-    const config: Query.SelectDistinctOptions = {
+export const getSvgSize = async (type?: RackTypes): Promise<SvgSizes | SvgSizes[]> => {
+    const config: Query.SelectRowsOptions = {
         schemaName: 'ehr_lookups',
         queryName: 'cageui_item_types',
-        column: 'description',
-        filterArray: [Filter.create('value', type, Filter.Types.EQUAL)]
+        columns: ['description', 'value'],
+        filterArray: type ? [Filter.create('value', type, Filter.Types.EQUAL)] : []
     };
 
-    const res = await selectDistinctRows(config);
+    const res = await labkeyActionSelectWithPromise(config);
 
-    if (res.values.length === 1) {
-        return res.values[0];
+    if (res.rows.length === 1) {
+        return res.rows[0];
+    }else{
+        return res.rows;
     }
-
-    return;
 };
 
 // matches "string-number", if a match return the number
@@ -596,8 +608,42 @@ export const addPrevRoomSvgs = async (
                 });
             });
         });
-
     };
+
+    /*
+        This function creates a container for the selected animal ID and returns it to be appended to the cage element.
+     */
+    const createAnimalContainer = (id: string, shape: d3.Selection<SVGElement, unknown, null, undefined>, idIdx: number) => {
+        const factor = 20;
+        // Create the SVG group element
+        const group = shape.append("g")
+            .attr("id", `animal-id-${id}`)
+
+        // Add the rectangle
+        group.append("rect")
+            .attr("id", "animal-id-container")
+            .attr("x", "3")
+            .attr("y", `${3 + (idIdx * factor)}`)
+            .attr("width", `${id.length * 6.8}`)
+            .attr("height", "16.23")
+            .attr("rx", "2.44")
+            .attr("ry", "2.44")
+            .style("fill", "#c5050c")
+            .style("stroke", "#c5050c")
+            .style("stroke-miterlimit", "10");
+
+        // Add the text element
+        group.append("text")
+            .attr("id", "animal-id")
+            .attr("transform", `translate(6.94 ${15.29 + (idIdx * factor)})`)
+            .style("fill", "#fff")
+            .style("font-family", "MyriadPro-Regular, 'Myriad Pro'")
+            .style("font-size", "12px")
+            .append("tspan")
+            .attr("x", "0")
+            .attr("y", "0")
+            .text(id);
+    }
 
     // this function renders the actual visible svg in some groups
     const createRackGroup = (parentGroup, rack: Rack, isSingleRack, groupRotation: GroupRotation) => {
@@ -635,6 +681,17 @@ export const addPrevRoomSvgs = async (
                     shape.select('[id=cageRect]')
                         .style("fill", '#878787')
                         .style("opacity", '0.7');
+                }
+                if(cage.animals){
+                    if(cage.animals.length > 3){
+                        // If animals in cage is more than 4 display a count of the animals in the cage
+                        createAnimalContainer(`${cage.animals.length} animals`, shape, 0)
+                    }else{
+                        // Display animal ids if count is less than 4
+                        cage.animals.forEach((animal, idx) => {
+                            createAnimalContainer(animal.id, shape, idx)
+                        })
+                    }
                 }
             }
 
@@ -753,6 +810,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
     let newMods: RoomMods = {};
     let roomObjNum = 1;
     const loadMods: boolean = !!prevRoom.modData;
+    const svgSizes: SvgSizes[] = await getSvgSize() as SvgSizes[];
     //check if a group exists for the groupId, if it does return, else create new group for the room
     const findOrAddGroup = (rackItem: FullObjectHistoryData): RackGroup => {
         // groupId is a single number so check if the GroupId string contains it
@@ -890,7 +948,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
         if (rackItem.extraContext) {
             extraContext = JSON.parse(rackItem.extraContext);
         }
-        const svgSize = await getSvgSize(rack.type.type);
+        const svgSize = parseInt(svgSizes.find(size => parseInt(size.value) === rack.type.type).description);
 
         // This is where mods are loaded into state for the room
         if (loadMods && !rack.type.isDefault && rack.type.type !== RackTypes.GhostCage) {
@@ -940,6 +998,7 @@ export const buildNewLocalRoom = async (prevRoom: PrevRoom): Promise<[Room, Unit
             y: rackItem.yCoord - rack.y - group.y,
             size: svgSize,
             mods: cageMods,
+            animals: rackItem.animals
         };
 
         newUnitLocs[cageNumType].push({
@@ -1407,7 +1466,16 @@ export const findConnectedRacks = (group: RackGroup, currRack: Rack, cage?: Cage
     return connections;
 };
 
-export const saveRoomHelper = async (room: Room, sessionLog: SessionLog, oldTemplateName?: string, prevRackCondition?: RackConditionOption): Promise<LayoutSaveResult> => {
+/*
+    Helper to prepare data before saving the room layout.
+
+    @param room The room layout to save
+    @param sessionLog Session log metadata to save to session log table
+    @param status QCState of the layout being submitted. Defaults to Completed (1). Used by mod changes paired with animal transfers.
+    @param oldTemplateName Previous template name to overwrite. Used when saving templates with updated names
+    @param prevRackCondition The condition of the previous rack to save. Used when changing racks within a room.
+ */
+export const saveRoomHelper = async (room: Room, sessionLog: SessionLog, oldTemplateName?: string, prevRackCondition?: RackConditionOption, status?: number): Promise<LayoutSaveResult> => {
     const newModData: CageMods[] = [];
 
     const roomName = room.name;
@@ -1500,12 +1568,12 @@ export const saveRoomHelper = async (room: Room, sessionLog: SessionLog, oldTemp
     let result: LayoutSaveResult;
 
     try {
-        const layoutSave = await saveRoomLayout(room, newModData, oldRoomName,sessionLog, prevRackCondition);
+        const layoutSave = await saveRoomLayout(room, newModData, oldRoomName,sessionLog, prevRackCondition, status);
         let errors;
         if (layoutSave.success === false) {
             errors = Array.isArray(layoutSave.errors) ? layoutSave.errors : [layoutSave.errors];
         }
-        result = {success: layoutSave.success, roomName: roomName, reason: errors};
+        result = {success: layoutSave.success, roomName: roomName, reason: errors, historyid: layoutSave.historyid};
     }
     catch (e) {
         const errors = Array.isArray(e.errors) ? e.errors : [e.errors];
@@ -1514,3 +1582,108 @@ export const saveRoomHelper = async (room: Room, sessionLog: SessionLog, oldTemp
     // Determine success or failure
     return result;
 }
+
+
+/**
+ * Helper function that fetches cage size requirements from ehr_lookups.cageclass,
+ * retrieves the animals currently in a room + cage from study.housing_test,
+ * looks up their current weights in study.demographicsWeightChange
+ * and determines if the cage is over or under its weight limit.
+ *
+ * @param room Room name
+ * @param cage Cage objectId in housing_test and cageui.cages
+ * @param abortSignal Optional AbortSignal for query cancellation
+ * @returns CageWeightResult containing allowedWeight, actualWeight, status ('over' | 'under' | 'equal'), isOverWeight, and details.
+ */
+export const checkCageWeightLimit = async (
+    room: string,
+    cage: string,
+    animalIds?: string[],
+    abortSignal?: AbortSignal
+): Promise<CageWeightResult> => {
+    // 1. Fetch cageclass data, cage dimensions, and current occupants in parallel
+    const [cageClassList, cageDimensions, defaultAnimalIds] = await Promise.all([
+        fetchCageSizeReq(abortSignal),
+        fetchCageDimensions(cage, abortSignal),
+        animalIds ? Promise.resolve(animalIds) : fetchAnimalsInActiveHousingCage(room, cage, abortSignal)
+    ]);
+
+    const targetAnimalIds = animalIds || defaultAnimalIds;
+
+    // 2. Fetch current weights for the animals in the cage
+    const animals = await fetchDemographicsWeights(targetAnimalIds, abortSignal);
+
+    // 3. Compute actual total weight of animals currently in the cage
+    const actualWeight = animals.reduce((sum, a) => sum + (a.weight || 0), 0);
+
+    // 4. Calculate required SQFT and height for all animals based on cageclass
+    let requiredSqft = 0;
+    let requiredHeight = 0;
+    animals.forEach(a => {
+        if (a.weight !== null && a.weight !== undefined) {
+            const matchingTier = cageClassList.find(c =>
+                (c.low <= a.weight && a.weight < c.high) ||
+                (c.low < a.weight && a.weight <= c.high) ||
+                (c.low <= a.weight && a.weight <= c.high)
+            );
+            if (matchingTier) {
+                requiredSqft += matchingTier.sqft;
+                if (matchingTier.height > requiredHeight) {
+                    requiredHeight = matchingTier.height;
+                }
+            }
+        }
+    });
+
+    // 5. Determine allowed weight for the cage based on cage SQFT and cageclass
+    let allowedWeight: number | null = null;
+    const cageSqft = cageDimensions.sqft;
+    const cageHeight = cageDimensions.height;
+
+    if (cageSqft !== null && cageSqft !== undefined && cageClassList.length > 0) {
+        // Find all tiers whose SQFT requirement fits within the cage SQFT
+        const fittingTiers = cageClassList.filter(c => {
+            const fitsSqft = c.sqft <= cageSqft;
+            const fitsHeight = cageHeight !== null && cageHeight !== undefined ? c.height <= cageHeight : true;
+            return fitsSqft && fitsHeight;
+        });
+
+        if (fittingTiers.length > 0) {
+            allowedWeight = Math.max(...fittingTiers.map(t => t.high));
+        } else {
+            // If cage SQFT is smaller than the lowest tier requirement
+            allowedWeight = cageClassList[0]?.high ?? null;
+        }
+    }
+
+    // 6. Determine if the weight limit is over, under, or equal
+    let isOverWeight = false;
+    let status: 'over' | 'under' | 'equal' = 'under';
+
+    if (allowedWeight !== null) {
+        if (actualWeight > allowedWeight || (cageSqft !== null && requiredSqft > cageSqft) || (cageHeight !== null && requiredHeight > cageHeight)) {
+            isOverWeight = true;
+            status = 'over';
+        } else if (actualWeight === allowedWeight && actualWeight > 0) {
+            isOverWeight = false;
+            status = 'equal';
+        } else {
+            isOverWeight = false;
+            status = 'under';
+        }
+    }
+
+    return {
+        room,
+        cage,
+        allowedWeight,
+        actualWeight: Math.round(actualWeight * 100) / 100,
+        isOverWeight,
+        status,
+        cageSqft,
+        cageHeight,
+        requiredSqft: Math.round(requiredSqft * 100) / 100,
+        requiredHeight,
+        animals
+    };
+};

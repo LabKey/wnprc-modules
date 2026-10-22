@@ -20,19 +20,21 @@ import * as React from 'react';
 import { FC, useEffect, useState } from 'react';
 import '../../../cageui.scss';
 import { useHomeNavigationContext } from '../../../context/HomeNavigationContextManager';
-import { CageDimensions } from '../../../types/typings';
+import { CageDimensions, CageWeightResult } from '../../../types/typings';
 import { labkeyActionSelectWithPromise } from '../../../api/labkeyActions';
 import { Filter } from '@labkey/api';
 import { SubViewContent } from '../SubViewContent';
 import { CageDetails } from './CageDetails';
 import { getCageNumDisplay } from '../../../utils/homeHelpers';
+import { checkCageWeightLimit } from '../../../utils/helpers';
 
 export const CageViewContent: FC = () => {
     const {selectedCage, selectedLocalRoom, selectedRack} = useHomeNavigationContext();
     const [cageDimensions, setCageDimensions] = useState<CageDimensions>(null);
+    const [cageWeights, setCageWeights] = useState<CageWeightResult>(null);
 
     useEffect(() => {
-        if (!selectedCage) {
+        if (!selectedCage || !selectedLocalRoom) {
             return;
         }
         const opts = {
@@ -52,6 +54,12 @@ export const CageViewContent: FC = () => {
                 });
             }
         });
+
+        checkCageWeightLimit(selectedLocalRoom.name, selectedCage.objectId).then(r => {
+                setCageWeights(r);
+            }
+        );
+
     }, [selectedCage]);
 
 
@@ -67,7 +75,10 @@ export const CageViewContent: FC = () => {
             <SubViewContent
                     tabs={[{
                         name: 'Details',
-                        children: <CageDetails cageDimensions={cageDimensions}/>
+                        children: <CageDetails
+                            cageWeights={cageWeights}
+                            cageDimensions={cageDimensions}
+                        />
                     }
                     ]}
             />

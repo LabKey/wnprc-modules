@@ -45,7 +45,13 @@ public class CageUICustomizer extends AbstractTableCustomizer
         if (table instanceof AbstractTableInfo)
         {
             if (table.getName().equalsIgnoreCase("rack_types") && table.getSchema().getName().equalsIgnoreCase("cageui"))
+            {
                 customizeRackTypesTable((AbstractTableInfo) table);
+            }
+            if (table.getName().equalsIgnoreCase("housing_condition_records") && table.getSchema().getName().equalsIgnoreCase("cageui"))
+            {
+                customizeHousingConditionRecordsTable((AbstractTableInfo) table);
+            }
         }
     }
 
@@ -83,5 +89,15 @@ public class CageUICustomizer extends AbstractTableCustomizer
         nameCol.setDescription("Name of the rack type combining several columns into a string so the users have a detailed view of what they are choosing");
         ti.addColumn(nameCol);
     }
+
+    private void customizeHousingConditionRecordsTable(AbstractTableInfo ti)
+    {
+        SQLFragment sql = new SQLFragment("(SELECT CONCAT(pair_condition, social_condition) as final_condition)");
+        ExprColumn newCol = new ExprColumn(ti, "final_condition", sql, JdbcType.VARCHAR);
+        newCol.setLabel("Final Condition");
+        newCol.setDescription("Final condition concatenated from pair_condition and social_condition");
+        ti.addColumn(newCol);
+    }
+
 }
 

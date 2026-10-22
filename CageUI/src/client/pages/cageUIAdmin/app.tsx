@@ -16,33 +16,15 @@
  *
  */
 
-package org.labkey.cageui.action;
+import * as React from 'react';
+import { createRoot } from 'react-dom/client';
+import { CageUIAdmin } from './CageUIAdmin';
 
-import java.util.ArrayList;
-import java.util.Map;
 
-public class CagesFormWithContext
-{
-    private ArrayList<CagesForm> _cagesForm;
-    private Map<String,Map<String, Object>> _extraContext;
+// Need to wait for container element to be available in labkey wrapper before render
+window.addEventListener('DOMContentLoaded', (event) => {
 
-    public ArrayList<CagesForm> getCagesForm()
-    {
-        return _cagesForm;
-    }
-
-    public void setCagesForm(ArrayList<CagesForm> cagesForm)
-    {
-        _cagesForm = cagesForm;
-    }
-
-    public Map<String,Map<String, Object>> getExtraContext()
-    {
-        return _extraContext;
-    }
-
-    public void setExtraContext(Map<String,Map<String, Object>> extraContext)
-    {
-        _extraContext = extraContext;
-    }
-}
+    createRoot(document.getElementById('app')).render(
+        <CageUIAdmin/>
+    );
+});

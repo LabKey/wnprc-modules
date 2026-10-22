@@ -23,8 +23,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Date;
 
-;
-
 public class AllHistoryForm
 {
     private Integer _rowid;
@@ -33,13 +31,15 @@ public class AllHistoryForm
     @JsonProperty("history_type")
     private String _historyType;
     @JsonProperty("start_date")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm")
     private Date _startDate;
     @JsonProperty("end_date")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm")
     private Date _endDate;
     @JsonProperty("historyid")
     private String _historyId;
+    @JsonProperty("QCState")
+    private Integer _qcState;
 
     public String getRoom()
     {
@@ -109,5 +109,15 @@ public class AllHistoryForm
     public void setHistoryId(String historyId)
     {
         _historyId = historyId;
+    }
+
+    public Integer getQcState()
+    {
+        return _qcState;
+    }
+
+    public void setQcState(Integer qcState)
+    {
+        _qcState = qcState;
     }
 }

@@ -40,7 +40,7 @@ import {
     RoomObjectTypes,
     UnitLocations,
     UnitType,
-    SessionLog
+    SessionLog, SvgSizes
 } from '../types/typings';
 import {
     CellKey,
@@ -306,7 +306,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
     const addRack = async (id: number, x: number, y: number, newScale: number, rackType: RackTypes): Promise<Rack | null> => {
         const newCageNum: CageNumber = `${roomItemToString(rackType) as RackStringType}-${getNextCageNum(roomItemToString(rackType) as RackStringType)}`;
 
-        const svgSize = await getSvgSize(rackType);
+        const svgSize = await getSvgSize(rackType) as SvgSizes;
         if (!svgSize) {
             await showLayoutEditorError('No size found for cage');
             return null;
@@ -322,7 +322,7 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
             cageNum: newCageNum,
             x: 0,
             y: 0,
-            size: svgSize,
+            size: parseInt(svgSize.description),
         };
 
         // First cage in rack is always at rack starting position as well
@@ -1054,8 +1054,10 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
                 const newObjId = generateUUID();
                 newCageData = { objectId: newObjId, svgId: `cageSVG_${newObjId}` as CageSvgId };
             } else {
+                // Use prevCage, if rack was created but cages weren't then create new ids
                 const prevCage = prevCages.find(pc => pc.positionId === c.positionId);
-                newCageData = { objectId: prevCage.objectId, svgId: `cageSVG_${prevCage.objectId}` as CageSvgId };
+                const objId = prevCage ? prevCage.objectId : generateUUID();
+                newCageData = { objectId: objId, svgId: `cageSVG_${objId}` as CageSvgId };
             }
 
             const locIndex = newUnitLocs[key]?.findIndex(loc => loc.cageId === c.svgId);

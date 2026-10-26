@@ -378,7 +378,8 @@ export const fetchRoomData = async (roomName: string, abortSignal?: AbortSignal)
         columns: [],
         filterArray: [
             Filter.create('room', roomName, Filter.Types.EQUALS),
-            Filter.create('end_date', null, Filter.Types.ISBLANK)
+            Filter.create('end_date', null, Filter.Types.ISBLANK),
+            Filter.create('QCState', '1', Filter.Types.EQUALS),
         ]
     };
 

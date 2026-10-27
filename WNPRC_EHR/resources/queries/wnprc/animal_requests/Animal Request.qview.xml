@@ -1,6 +1,7 @@
 <customView xmlns="http://labkey.org/data/xml/queryCustomView">
     <columns>
         <column name="rowid"/>
+        <column name="request_number"/>
         <column name="principalinvestigator"/>
         <column name="numberofanimals"/>
         <column name="speciesneeded"/>

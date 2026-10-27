@@ -33,11 +33,11 @@ export const AnimalEditor: FC<AnimalEditorProps> = (props) => {
     const [animalsInCage, setAnimalsInCage] = useState<AnimalInCage[]>(currCage.animals);
 
     const startHousingTransfer = () => {
-        window.location.href = ActionURL.buildURL(ActionURL.getController(), 'housingTransfer', ActionURL.getContainer(), {
+        window.open(ActionURL.buildURL(ActionURL.getController(), 'housingTransfer', ActionURL.getContainer(), {
             room: selectedRoom.name,
             cages: currCage.objectId,
             returnUrl: window.location.href
-        });
+        }));
     }
 
     return (

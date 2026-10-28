@@ -17,9 +17,9 @@
  */
 const fs = require('fs');
 const path = require('path');
+const { rspack } = require('@rspack/core');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
+const { TsCheckerRspackPlugin } = require('ts-checker-rspack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const host = require("./host.js");
 
@@ -34,7 +34,7 @@ const isProductionBuild = process.env.NODE_ENV === 'production';
 let labkeyUIComponentsPath = path.resolve('./node_modules/@labkey/components');
 let labkeyUIPremiumPath = path.resolve('./node_modules/@labkey/premium');
 let labkeyUIEhrPath = path.resolve('./node_modules/@labkey/ehr');
-const labkeyBuildTSConfigPath = path.resolve('./node_modules/@labkey/build/webpack/tsconfig.json');
+const labkeyBuildTSConfigPath = path.resolve('./node_modules/@labkey/build/configs/tsconfig.json');
 const customTSConfigPath = path.resolve('./tsconfig.json');
 const tsconfigPath = fs.existsSync(customTSConfigPath) ? customTSConfigPath : labkeyBuildTSConfigPath;
 
@@ -99,6 +99,7 @@ const SASS_PLUGINS = [
         options: {
             implementation: require('sass'),
             sassOptions: {
+                silenceDeprecations: ['import'],
                 quietDeps: !isProductionBuild
             },
             // "sourceMap" must be set to true when resolve-url-loader is used downstream
@@ -107,50 +108,52 @@ const SASS_PLUGINS = [
     }
 ];
 
-const BABEL_PLUGINS = [
-    // These make up @babel/preset-react, we cannot use preset-react because we need to ensure that the
-    // typescript plugins run before the class properties plugins in order for allowDeclareFields to work
-    // properly. We can use preset-react and stop using allowDeclareFields if we stop using Immutable.
-    '@babel/plugin-syntax-jsx',
-    '@babel/plugin-transform-react-jsx',
-    '@babel/plugin-transform-react-display-name',
+// We previously used babel-loader with a hand-ordered set of plugins so that the TypeScript transform ran before the
+// class-properties transform, which is what made @babel/plugin-transform-typescript's `allowDeclareFields` behave
+// correctly with Immutable. Rspack uses SWC (builtin:swc-loader) instead, which is where the major speed gain comes
+// from. SWC reproduces the relevant behavior:
+//   - TypeScript + TSX parsing handles both .ts/.tsx and .jsx (TS syntax is a superset).
+//   - `transform.useDefineForClassFields: false` makes SWC assign class fields directly (the loose / "set" semantics
+//     Babel produced) rather than emitting Object.defineProperty. Combined with SWC always ELIDING `declare` fields,
+//     this matches Babel's allowDeclareFields behavior: declared-only fields produce no output and therefore do not
+//     clobber Immutable Record defaults.
+//   - `transform.react.runtime: 'classic'` matches our @babel/plugin-transform-react-jsx (classic React.createElement)
+//     setup. In dev, `development` and `refresh` enable the React Fast Refresh transform (replacing
+//     react-refresh/babel + @pmmmwh/react-refresh-webpack-plugin).
+//   - `env.targets` carries over the browser targets we passed to @babel/preset-env (drives object-rest-spread,
+//     async/await, etc. down-leveling). Note: do NOT also set jsc.target — SWC errors if both are present.
+// NOTE: SWC's classic JSX transform does not replicate @babel/plugin-transform-react-display-name (auto-assigning
+// component displayName). We set displayName explicitly in source (see CLAUDE.md React conventions), so this is a
+// no-op in practice, but it is a behavioral difference from the old Babel pipeline.
+const SWC_TARGETS = 'last 2 versions, not dead, not IE 11, > 5%';
 
-    // These make up @babel/preset-typescript
-    ['@babel/plugin-transform-typescript', {
-        allExtensions: true, // required when using isTSX
-        allowDeclareFields: true,
-        isTSX: true,
-    }],
-
-    '@babel/plugin-transform-class-properties',
-    '@babel/plugin-transform-object-rest-spread',
-];
-
-const BABEL_CONFIG = {
-    loader: 'babel-loader',
+const makeSwcConfig = (isDev) => ({
+    loader: 'builtin:swc-loader',
     options: {
-        babelrc: false,
-        cacheDirectory: true,
-        presets: [
-            [
-                '@babel/preset-env',
-                {
-                    // support async/await
-                    'targets': 'last 2 versions, not dead, not IE 11, > 5%',
-                }
-            ],
-        ],
-        plugins: BABEL_PLUGINS,
-    }
-};
+        jsc: {
+            parser: {
+                syntax: 'typescript',
+                tsx: true,
+            },
+            transform: {
+                react: {
+                    runtime: 'classic',
+                    development: isDev,
+                    refresh: isDev,
+                },
+                // Match Babel's loose class-fields behavior so `declare` fields are elided rather than emitted as
+                // `field = undefined`, which would clobber Immutable Record defaults.
+                useDefineForClassFields: false,
+            },
+        },
+        env: {
+            targets: SWC_TARGETS,
+        },
+    },
+});
 
-const BABEL_DEV_CONFIG = {
-    ...BABEL_CONFIG,
-    options: {
-        ...BABEL_CONFIG.options,
-        plugins: [require.resolve('react-refresh/babel')].concat(BABEL_PLUGINS),
-    }
-};
+const SWC_CONFIG = makeSwcConfig(false);
+const SWC_DEV_CONFIG = makeSwcConfig(true);
 
 const TS_CHECKER_CONFIG = {
     typescript: {
@@ -200,24 +203,31 @@ const TS_CHECKER_DEV_CONFIG = {
 };
 
 const labkeyPackagesDev = process.env.LINK
-    ? {
-        // Note that for modules that don't have these packages, the aliases are just ignored and don't
-        // seem to cause any problems.
-        '@labkey/api': path.resolve('./node_modules/@labkey/api'),
-        '@labkey/components': labkeyUIComponentsPath,
-        '@labkey/premium': labkeyUIPremiumPath,
-        '@labkey/premium/assay': labkeyUIPremiumPath + '/assay',
-        '@labkey/premium/eln': labkeyUIPremiumPath + '/eln',
-        '@labkey/premium/entities': labkeyUIPremiumPath + '/entities',
-        '@labkey/premium/workflow': labkeyUIPremiumPath + '/workflow',
-        '@labkey/premium/storage': labkeyUIPremiumPath + '/storage',
-        '@labkey/premium/search': labkeyUIPremiumPath + '/search',
-        '@labkey/ehr': labkeyUIEhrPath,
-        '@labkey/ehr/participanthistory': labkeyUIEhrPath + '/participanthistory',
-    }
-    : {};
+        ? {
+            // Note that for modules that don't have these packages, the aliases are just ignored and don't
+            // seem to cause any problems.
+            '@labkey/api': path.resolve('./node_modules/@labkey/api'),
+            '@labkey/components': labkeyUIComponentsPath,
+            '@labkey/premium': labkeyUIPremiumPath,
+            '@labkey/premium/assay': labkeyUIPremiumPath + '/assay',
+            '@labkey/premium/eln': labkeyUIPremiumPath + '/eln',
+            '@labkey/premium/entities': labkeyUIPremiumPath + '/entities',
+            '@labkey/premium/workflow': labkeyUIPremiumPath + '/workflow',
+            '@labkey/premium/storage': labkeyUIPremiumPath + '/storage',
+            '@labkey/premium/search': labkeyUIPremiumPath + '/search',
+            '@labkey/ehr': labkeyUIEhrPath,
+            '@labkey/ehr/participanthistory': labkeyUIEhrPath + '/participanthistory',
+        }
+        : {};
+
+// There is a bug in react-router 7.x that causes a warning about import.meta.hot being undefined, which does not affect
+//  us but does cause a warning to be emitted and triggers the error overlay in our hot reload builds.
+const ignoreWarnings = [
+    { module: /react-router/, message: /import\.meta/ },
+];
 
 module.exports = {
+    ignoreWarnings,
     lkModule,
     labkeyUIComponentsPath,
     labkeyUIPremiumPath,
@@ -270,33 +280,39 @@ module.exports = {
         STYLE: [
             {
                 test: /\.css$/,
-                use: [MiniCssExtractPlugin.loader, 'css-loader']
+                // `type: 'javascript/auto'` opts these rules out of Rspack's native CSS handling so that
+                // CssExtractRspackPlugin (the mini-css-extract-plugin replacement) processes them instead.
+                type: 'javascript/auto',
+                use: [rspack.CssExtractRspackPlugin.loader, 'css-loader']
             },
             {
                 test: /\.s[ac]ss$/i,
-                use: [MiniCssExtractPlugin.loader].concat(SASS_PLUGINS),
+                type: 'javascript/auto',
+                use: [rspack.CssExtractRspackPlugin.loader].concat(SASS_PLUGINS),
             },
         ],
         STYLE_DEV: [
             {
                 test: /\.css$/,
+                type: 'javascript/auto',
                 use: ['style-loader', 'css-loader']
             },
             {
                 test: /\.s[ac]ss$/i,
+                type: 'javascript/auto',
                 use: ['style-loader'].concat(SASS_PLUGINS),
             },
         ],
         TYPESCRIPT: [
             {
                 test: /\.(jsx|ts|tsx)(?!.*\.(spec|test)\.(jsx?|tsx?))$/,
-                use: [BABEL_CONFIG]
+                use: [SWC_CONFIG]
             }
         ],
         TYPESCRIPT_WATCH: [
             {
                 test: /\.(jsx|ts|tsx)(?!.*\.(spec|test)\.(jsx?|tsx?))$/,
-                use: [BABEL_DEV_CONFIG]
+                use: [SWC_DEV_CONFIG]
             }
         ]
     },
@@ -336,7 +352,7 @@ module.exports = {
                         dependencies: app.dependencies,
                         viewTemplate: app.template,
                         filename: '../../web/gen/' + app.name + '.lib.xml',
-                        template: 'node_modules/@labkey/build/webpack/lib.template.xml',
+                        template: 'node_modules/@labkey/build/configs/lib.template.xml',
                         minify: minifyTemplateOptions
                     }),
                 ]);
@@ -354,7 +370,7 @@ module.exports = {
                         requiresNoPermission: app.requiresNoPermission,
                         viewTemplate: app.template,
                         filename: '../../views/gen/' + app.name + '.view.xml',
-                        template: 'node_modules/@labkey/build/webpack/app.view.template.xml',
+                        template: 'node_modules/@labkey/build/configs/app.view.template.xml',
                         minify: minifyTemplateOptions
                     }),
                     new HtmlWebpackPlugin({
@@ -377,7 +393,7 @@ module.exports = {
                         requiresNoPermission: app.requiresNoPermission,
                         viewTemplate: app.template,
                         filename: '../../views/gen/' + app.name + 'Dev.view.xml',
-                        template: 'node_modules/@labkey/build/webpack/app.view.template.xml',
+                        template: 'node_modules/@labkey/build/configs/app.view.template.xml',
                         minify: minifyTemplateOptions
                     }),
                     new HtmlWebpackPlugin({
@@ -396,11 +412,11 @@ module.exports = {
             return plugins;
         }, []);
 
-        allPlugins.push(new MiniCssExtractPlugin({
+        allPlugins.push(new rspack.CssExtractRspackPlugin({
             filename: '[name].[contenthash].css',
         }));
 
-        allPlugins.push(new ForkTsCheckerWebpackPlugin(TS_CHECKER_CONFIG));
+        allPlugins.push(new TsCheckerRspackPlugin(TS_CHECKER_CONFIG));
 
         if (process.env.ANALYZE) {
             allPlugins.push(new BundleAnalyzerPlugin());

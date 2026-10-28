@@ -16,8 +16,8 @@
  *
  */
 
-const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
-const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
+const { TsCheckerRspackPlugin } = require('ts-checker-rspack-plugin');
+const { ReactRefreshRspackPlugin } = require('@rspack/plugin-react-refresh');
 const constants = require('./constants');
 const path = require('path');
 // relative to the <lk_module>/node_modules/@labkey/build/webpack dir
@@ -59,6 +59,7 @@ for (let i = 0; i < entryPoints.apps.length; i++) {
 
 module.exports = {
     context: constants.context,
+    ignoreWarnings: constants.ignoreWarnings,
     mode: 'development',
     devServer: devServer,
     entry: entries,
@@ -72,7 +73,8 @@ module.exports = {
             ...constants.aliases.LABKEY_PACKAGES_DEV,
             // This assures there is only one copy of react used while doing start-link
             react: path.resolve('./node_modules/react'),
-            'react-router-dom': path.resolve('./node_modules/react-router-dom'),
+            'react-dom': path.resolve('./node_modules/react-dom'),
+            'react-router$': path.resolve('./node_modules/react-router'),
         },
         extensions: constants.extensions.TYPESCRIPT.concat('.scss')
     },
@@ -84,8 +86,10 @@ module.exports = {
         emitOnErrors: false,
     },
     plugins: [
-        new ReactRefreshWebpackPlugin(),
-        // This Plugin type checks our TS code, @babel/preset-typescript does not type check, it only transforms
-        new ForkTsCheckerWebpackPlugin(constants.TS_CHECKER_DEV_CONFIG)
+        // Rspack's React Fast Refresh integration. The matching builtin:swc-loader transform (react.refresh: true)
+        // is enabled in constants.SWC_DEV_CONFIG (used by loaders.TYPESCRIPT_WATCH above).
+        new ReactRefreshRspackPlugin(),
+        // This Plugin type checks our TS code; builtin:swc-loader does not type check, it only transforms.
+        new TsCheckerRspackPlugin(constants.TS_CHECKER_DEV_CONFIG)
     ],
 };

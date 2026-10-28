@@ -24,6 +24,7 @@ import { Filter, Query } from '@labkey/api';
 import { labkeyActionSelectWithPromise } from '../api/labkeyActions';
 import { ConditionCode, HousingTransferData } from '../types/housingFormTypes';
 import dayjs from 'dayjs';
+import { EXEMPT_PROJECT_ID } from './constants';
 
 export const getCode = (code: string, options: ConditionCode[]): ConditionCode => {
     return options.find(opt => opt.value === code);
@@ -379,4 +380,113 @@ export const getPlannedOccupantsForCage = async (
     }
 
     return occupants;
+};
+
+
+// In-memory cache to avoid redundant queries during the session
+const projectAssignmentCache = new Map<string, boolean>();
+
+export const isMatchingProject = (projectVal: any, targetProject: string = EXEMPT_PROJECT_ID): boolean => {
+    if (projectVal === null || projectVal === undefined) {
+        return false;
+    }
+    let str: string = '';
+    if (typeof projectVal === 'object') {
+        if (projectVal.value !== undefined && projectVal.value !== null) {
+            str = projectVal.value.toString().trim();
+        } else if (projectVal.project !== undefined && projectVal.project !== null) {
+            str = projectVal.project.toString().trim();
+        } else {
+            str = projectVal.toString().trim();
+        }
+    } else {
+        str = projectVal.toString().trim();
+    }
+    if (!str) {
+        return false;
+    }
+    return str === targetProject || parseInt(str, 10) === parseInt(targetProject, 10);
+};
+
+/**
+ * Checks if any of the given animals (HousingTransferData or animal ID string)
+ * belongs to the target project (defaults to '20031102').
+ * Checks:
+ * 1. animal.project if an animal object is provided
+ * 2. In-memory cache for the animal ID
+ * 3. Batch query against study.ActiveAssignments
+ */
+export const checkAnyAnimalBelongsToProject = async (
+    animals: (HousingTransferData | string)[],
+    targetProject: string = EXEMPT_PROJECT_ID
+): Promise<boolean> => {
+    if (!animals || animals.length === 0) return false;
+
+    const uncachedIds: string[] = [];
+
+    for (const a of animals) {
+        if (!a) continue;
+        const animalId = typeof a === 'string' ? a.trim() : a.id?.trim();
+        if (!animalId) continue;
+
+        // 1. If animal object has project property matching targetProject
+        if (typeof a === 'object' && isMatchingProject(a.project, targetProject)) {
+            return true;
+        }
+
+        // 2. Check cache
+        const cacheKey = `${animalId.toLowerCase()}_${targetProject}`;
+        if (projectAssignmentCache.has(cacheKey)) {
+            if (projectAssignmentCache.get(cacheKey)) {
+                return true;
+            }
+        } else if (!uncachedIds.some(id => id.toLowerCase() === animalId.toLowerCase())) {
+            uncachedIds.push(animalId);
+        }
+    }
+
+    if (uncachedIds.length === 0) {
+        return false;
+    }
+
+    // 3. Batch query ActiveAssignments for uncached animal IDs
+    const config: Query.SelectRowsOptions = {
+        schemaName: 'study',
+        queryName: 'ActiveAssignments',
+        columns: ['Id', 'project'],
+        filterArray: [
+            Filter.create('Id', uncachedIds, Filter.Types.IN)
+        ]
+    };
+
+    try {
+        const res = await labkeyActionSelectWithPromise(config);
+        const matchingAnimalIds = new Set<string>();
+
+        if (res?.rows) {
+            res.rows.forEach(row => {
+                const rowId = (row.Id || row.id)?.toString().trim();
+                if (rowId && isMatchingProject(row.project, targetProject)) {
+                    matchingAnimalIds.add(rowId.toLowerCase());
+                }
+            });
+        }
+
+        for (const id of uncachedIds) {
+            const isMatch = matchingAnimalIds.has(id.toLowerCase());
+            projectAssignmentCache.set(`${id.toLowerCase()}_${targetProject}`, isMatch);
+        }
+
+        return matchingAnimalIds.size > 0;
+    } catch (e) {
+        console.error('Error checking active assignments for project exemption:', e);
+        return false;
+    }
+};
+
+export const checkAnimalBelongsToProject = async (
+    animal: HousingTransferData | string,
+    targetProject: string = EXEMPT_PROJECT_ID
+): Promise<boolean> => {
+    return checkAnyAnimalBelongsToProject([animal], targetProject);
 };

@@ -30,7 +30,7 @@ import { fetchConditionCodes } from '../../api/popularQueries';
 import { canEditConditionPermission } from '../../utils/homeHelpers';
 import { LayoutErrors } from '../LayoutErrors';
 import { checkCageWeightLimit } from '../../utils/helpers';
-import { getPlannedOccupantsForCage } from '../../utils/housingTransferHelpers';
+import { checkAnyAnimalBelongsToProject, getEffectiveCageId, getPlannedOccupantsForCage } from '../../utils/housingTransferHelpers';
 
 interface HousingFormProps {
     user: Security.GetUserPermissionsResponse;
@@ -422,7 +422,11 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
                 const weightResult = await checkCageWeightLimit(roomName, destCage.value, plannedOccupants);
 
                 if (weightResult.isOverWeight) {
-                    validationErrors.push(`Cage ${destCage.label} in Room ${roomName} exceeds weight limit (Total Weight: ${weightResult.actualWeight} lbs, Allowed: ${weightResult.allowedWeight} lbs${weightResult.cageSqft ? `, Required SQFT: ${weightResult.requiredSqft}, Cage SQFT: ${weightResult.cageSqft}` : ''}). Move cannot be completed.`);
+                    const movingAnimals = allAnimals.filter(a => getEffectiveCageId(a) === destCage.value);
+                    const isExempt = await checkAnyAnimalBelongsToProject([...movingAnimals, ...plannedOccupants]);
+                    if (!isExempt) {
+                        validationErrors.push(`Cage ${destCage.label} in Room ${roomName} exceeds weight limit (Total Weight: ${weightResult.actualWeight} lbs, Allowed: ${weightResult.allowedWeight} lbs${weightResult.cageSqft ? `, Required SQFT: ${weightResult.requiredSqft}, Cage SQFT: ${weightResult.cageSqft}` : ''}). Move cannot be completed.`);
+                    }
                 }
             }
         }

@@ -584,7 +584,7 @@ public class CageUIController extends SpringActionController
                 housingRecords.add(newTransferRecord);
             }
 
-            return CageUIManager.get().submitHousingTransfer(housingRecords, housingConditionRecords, taskRecord, getUser(), getContainer(), layoutChangeId);
+            return CageUIManager.get().submitHousingTransfer(housingRecords, housingConditionRecords, taskRecord, getUser(), getContainer(), getLayoutChangeId());
         }
     }
 

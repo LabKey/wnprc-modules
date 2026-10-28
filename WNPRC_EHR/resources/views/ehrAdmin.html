@@ -92,6 +92,11 @@ if (LABKEY.Security.currentUser.isAdmin){
                     {name: 'Validate Housing Snapshot', url: '<%=contextPath%><%=containerPath%>/query-executeQuery.view?schemaName=study&query.queryName=ValidateHousingSnapshot'},
                     {name: 'Validate Status Field Calculation', url: '<%=contextPath%><%=containerPath%>/query-executeQuery.view?schemaName=study&query.queryName=Validate_status'}
                 ]
+            },
+            {header: "CageUI",
+                items: [
+                    {name: "Housing Cleanup", url: '<%=contextPath%>/cageui/WNPRC/EHR/cageUIAdmin.view'}
+                ]
             }
         ]
     })

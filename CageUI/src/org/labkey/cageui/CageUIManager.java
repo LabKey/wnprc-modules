@@ -134,7 +134,7 @@ public class CageUIManager
     {
         try
         {
-            Module ehr = ModuleLoader.getInstance().getModule(CageUIModule.NAME);
+            Module ehr = ModuleLoader.getInstance().getModule("EHR");
             ModuleProperty mp = ehr.getModuleProperties().get(CageUIManager.EHRAdminUserPropName);
             String emailAddress = PropertyManager.getCoalescedProperty(PropertyManager.SHARED_USER, c, mp.getCategory(), CageUIManager.EHRAdminUserPropName);
             if (emailAddress == null)
@@ -319,8 +319,14 @@ public class CageUIManager
 
             if(layoutChangeId != null){
                 AllHistoryForm formToClose = getAllHistoryFromId(layoutChangeId);
+                AllHistoryForm formToEnd = getAllHistory(formToClose.getRoom());
+                ArrayList<AllHistoryForm> formsToUpdate = new ArrayList<>();
+                formToEnd.setEndDate(formToClose.getStartDate());
                 formToClose.setQcState(1); // mark as completed
-                cageUIAllHistoryQus.updateRows(user, container, convertToMapList(formToClose), null, batchErrors, null, null);
+                formToEnd.setQcState(1);
+                formsToUpdate.add(formToEnd);
+                formsToUpdate.add(formToClose);
+                cageUIAllHistoryQus.updateRows(user, container, convertToMapList(formsToUpdate), null, batchErrors, null, null);
             }
 
             if (isUpdate) {
@@ -565,6 +571,7 @@ public class CageUIManager
         SimpleFilter filter = new SimpleFilter();
         filter.addCondition(FieldKey.fromString("room"), room, CompareType.EQUAL);
         filter.addCondition(FieldKey.fromString("end_date"), null, CompareType.ISBLANK);
+        filter.addCondition(FieldKey.fromString("QCState"), 1, CompareType.EQUAL);
         TableSelector selector = new TableSelector(table, filter, null);
 
         ObjectMapper mapper = JsonUtil.createDefaultMapper();
@@ -720,6 +727,7 @@ public class CageUIManager
         AllHistoryForm allHistory = getAllHistory(room);
         if (allHistory == null) return null;
         allHistory.setEndDate(endDate);
+        allHistory.setQcState(1);
         return allHistory;
     }
 
@@ -1199,8 +1207,11 @@ public class CageUIManager
         private void submitRoomHistory(String historyId, BundledForms bundledForms, Date newEndAndStartDate)
         {
 
-            // 1. get row in allHistory to end the current room.
-            AllHistoryForm allHistoryToEnd = endPreviousAllHistory(this.room.getName(), newEndAndStartDate);
+            // 1. get row in allHistory to end the current room. Only close the previous if the new is not in progress
+            AllHistoryForm allHistoryToEnd = null;
+            if(this.status == 1){
+                allHistoryToEnd = endPreviousAllHistory(this.room.getName(), newEndAndStartDate);
+            }
 
             // 2. Create new all history record
             AllHistoryForm allHistoryToStart = startNewAllHistory(this.room.getName(), this.isTemplate, newEndAndStartDate, historyId, this.status);

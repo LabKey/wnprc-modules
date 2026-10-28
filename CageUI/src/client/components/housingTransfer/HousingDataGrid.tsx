@@ -52,7 +52,8 @@ import {
     checkIsAdoptedFatherInDest,
     getEffectiveCageId,
     getOriginalCageId,
-    getPlannedOccupantsForCage
+    getPlannedOccupantsForCage,
+    checkAnyAnimalBelongsToProject
 } from '../../utils/housingTransferHelpers';
 import { checkCageWeightLimit } from '../../utils/helpers';
 
@@ -75,7 +76,7 @@ interface HousingDataGridProps {
 }
 
 export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
-    const {prevData, autoConditions, user, roomLabel, animals, allAnimals, onAnimalsChange, onAnimalsFound, roomOptions, reasonOptions, centerAnimals, roomAnimals, animalLocations, conditionCodes, setFormErrors } = props;
+    const { prevData, autoConditions, user, roomLabel, animals, allAnimals, onAnimalsChange, onAnimalsFound, roomOptions, reasonOptions, centerAnimals, roomAnimals, animalLocations, conditionCodes, setFormErrors } = props;
     const [rowMetadata, setRowMetadata] = useState<Record<string, HousingRowMetadata>>({});
     const [canEditCondition, setCanEditCondition] = useState<boolean>(false);
     const [newAnimalId, setNewAnimalId] = useState<string>(null);
@@ -93,20 +94,20 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
 
     const isSpecialHousing = useCallback((animal: HousingTransferData) => {
         if (!animal) return false;
-        return animal.destinationCage?.label === 'Special Housing' || 
-               animal.destinationCage?.value === 'Special Housing' || 
-               animal.destinationRoom?.label === 'Special Housing' || 
-               animal.destinationRoom?.value === 'Special Housing' ||
-               (animal.condition && animal.condition.some(c => c.value === 'x'));
+        return animal.destinationCage?.label === 'Special Housing' ||
+            animal.destinationCage?.value === 'Special Housing' ||
+            animal.destinationRoom?.label === 'Special Housing' ||
+            animal.destinationRoom?.value === 'Special Housing' ||
+            (animal.condition && animal.condition.some(c => c.value === 'x'));
     }, []);
 
     const isInTransit = useCallback((animal: HousingTransferData) => {
         if (!animal) return false;
-        return animal.destinationCage?.label === 'In Transit' || 
-               animal.destinationCage?.value === 'In Transit' || 
-               animal.destinationRoom?.label === 'In Transit' || 
-               animal.destinationRoom?.value === 'In Transit' ||
-               (animal.condition && animal.condition.some(c => c.value === 'it'));
+        return animal.destinationCage?.label === 'In Transit' ||
+            animal.destinationCage?.value === 'In Transit' ||
+            animal.destinationRoom?.label === 'In Transit' ||
+            animal.destinationRoom?.value === 'In Transit' ||
+            (animal.condition && animal.condition.some(c => c.value === 'it'));
     }, []);
 
     const handleSpecialHousingConfirm = useCallback(() => {
@@ -186,7 +187,7 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
         }
     }, [autoConditions]);
 
-    const handleCellChange = useCallback((field: string, paramId: GridRowId, value: any)=> {
+    const handleCellChange = useCallback((field: string, paramId: GridRowId, value: any) => {
         const updatedAnimals = animals.map(a => a.id === paramId ? { ...a, [field]: value } : a);
         onAnimalsChange(updatedAnimals);
     }, [animals, onAnimalsChange]);
@@ -211,10 +212,10 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
                 label: "300901",
                 value: "00300901"
             },
-            {
-                label: "400901",
-                value: "00400901"
-            });
+                {
+                    label: "400901",
+                    value: "00400901"
+                });
 
             setRowMetadata(prev => ({
                 ...prev,
@@ -262,18 +263,18 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
         // For now, return a placeholder or keep existing if any.
 
         // Calculate pairing codes
-        if(animalsInCage.length === 1){
+        if (animalsInCage.length === 1) {
             pairingCode = 's';
-        }else if(animalsInCage.length === 2){
+        } else if (animalsInCage.length === 2) {
             pairingCode = 'p';
-        }else{
+        } else {
             pairingCode = 'g';
         }
         newCond.push(getCode(pairingCode, conditionCodes));
 
         // Calculate caging code
         const cageCodes = await getCagingCodes(destCageId);
-        if(cageCodes.length > 0){
+        if (cageCodes.length > 0) {
             cageCodes.forEach(code => {
                 newCond.push(getCode(code, conditionCodes));
             })
@@ -284,34 +285,34 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
         const isAnimalMarm = await checkIsMarm(animalId);
         const isAnimalInfant = await checkIsInfant(animalId);
 
-        if(isAnimalMarm || isAnimalInfant){
-            if(pairingCode === 'p'){
+        if (isAnimalMarm || isAnimalInfant) {
+            if (pairingCode === 'p') {
                 const socialCode = await getSocialCode(animalId, animalsInCage);
-                if(socialCode){
+                if (socialCode) {
                     newCond.push(getCode(socialCode, conditionCodes));
                 }
-            }else{
+            } else {
                 const isMotherInDestination = await checkIsMotherInDest(animalId, animalsInCage);
                 const isFatherInDestination = await checkIsFatherInDest(animalId, animalsInCage);
                 const isAdoptedMotherInDestination = await checkIsAdoptedMotherInDest(animalId, animalsInCage);
                 const isAdoptedFatherInDestination = await checkIsAdoptedFatherInDest(animalId, animalsInCage);
 
-                if(isMotherInDestination && isFatherInDestination){
+                if (isMotherInDestination && isFatherInDestination) {
                     newCond.push(getCode('mf', conditionCodes));
-                }else if(isMotherInDestination && isAdoptedFatherInDestination){
+                } else if (isMotherInDestination && isAdoptedFatherInDestination) {
                     newCond.push(getCode('amf', conditionCodes));
-                }else if (isAdoptedMotherInDestination && isFatherInDestination){
+                } else if (isAdoptedMotherInDestination && isFatherInDestination) {
                     newCond.push(getCode('mfa', conditionCodes));
-                }else if (isAdoptedMotherInDestination && isAdoptedFatherInDestination){
+                } else if (isAdoptedMotherInDestination && isAdoptedFatherInDestination) {
                     newCond.push(getCode('mafa', conditionCodes));
-                }else{
+                } else {
                     const socialCode = await getSocialCode(animalId, animalsInCage);
-                    if(socialCode){
+                    if (socialCode) {
                         newCond.push(getCode(socialCode, conditionCodes));
                     }
                 }
             }
-        }else { // Animal in transit is not infant or marm
+        } else { // Animal in transit is not infant or marm
             const isBreeding = reasonForMove.find((r: Option<string>) => r.value === 'Breeding');
 
             // Check if any animals in destination are infant offspring to the animal in transit
@@ -338,12 +339,12 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
                 }
             }
         }
-        
+
         return newCond;
     }, [conditionCodes]);
 
     const updateConditionCodes = useCallback(async (affectedAnimals: HousingTransferData[], currentAnimals: HousingTransferData[]) => {
-        if(!autoConditions) return;
+        if (!autoConditions) return;
         const cageGroups: Record<string, string[]> = {};
         const newRowMetadata: Record<string, Partial<HousingRowMetadata>> = {};
 
@@ -435,8 +436,8 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
             id: newAnimalId,
             inDate: dayjs(),
             outDate: null,
-            destinationRoom: {value: null, label: ''},
-            destinationCage: {value: '', label: ''},
+            destinationRoom: { value: null, label: '' },
+            destinationCage: { value: '', label: '' },
             condition: [],
             reasonForMove: [],
             project: null,
@@ -618,36 +619,43 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
         let updatedAnimals = animals.map((row) => (row.id === newRow.id ? newRow : row));
         let finalRow = newRow;
 
-        if (newRow.destinationRoom?.value !== oldRow.destinationRoom?.value || 
+        if (newRow.destinationRoom?.value !== oldRow.destinationRoom?.value ||
             (newRow.destinationRoom?.value === null && oldRow.destinationRoom?.value !== null)) {
             updatedAnimals = await handleRoomChange(newRow.id, newRow.destinationRoom);
             finalRow = updatedAnimals.find(a => a.id === newRow.id) || newRow;
         } else if (newRow.destinationCage?.value !== oldRow.destinationCage?.value) {
             if (newRow.destinationCage && newRow.destinationRoom?.label &&
-                newRow.destinationCage.value !== 'Special Housing' && 
-                newRow.destinationCage.label !== 'Special Housing' && 
-                newRow.destinationCage.value !== 'In Transit' && 
-                newRow.destinationCage.label !== 'In Transit' && 
-                newRow.destinationCage.value !== '0' && 
+                newRow.destinationCage.value !== 'Special Housing' &&
+                newRow.destinationCage.label !== 'Special Housing' &&
+                newRow.destinationCage.value !== 'In Transit' &&
+                newRow.destinationCage.label !== 'In Transit' &&
+                newRow.destinationCage.value !== '0' &&
                 newRow.destinationCage.value !== '-1') {
-                
+
                 const destCageId = newRow.destinationCage.value;
                 const destRoomName = newRow.destinationRoom.label;
                 const plannedOccupants = await getPlannedOccupantsForCage(destCageId, allAnimals, newRow.id);
                 const weightResult = await checkCageWeightLimit(destRoomName, destCageId, plannedOccupants);
 
                 if (weightResult.isOverWeight) {
-                    const errorMsg = `Cannot move animal ${newRow.id} to Room ${destRoomName}, Cage ${newRow.destinationCage.label}: Cage weight limit exceeded (Total Weight: ${weightResult.actualWeight} lbs, Allowed: ${weightResult.allowedWeight} lbs${weightResult.cageSqft ? `, Required SQFT: ${weightResult.requiredSqft}, Cage SQFT: ${weightResult.cageSqft}` : ''}).`;
-                    if (setFormErrors) {
-                        setFormErrors([errorMsg]);
+                    const isExempt = await checkAnyAnimalBelongsToProject([newRow, ...plannedOccupants]);
+                    if (!isExempt) {
+                        const errorMsg = `Cannot move animal ${newRow.id} to Room ${destRoomName}, Cage ${newRow.destinationCage.label}: Cage weight limit exceeded (Total Weight: ${weightResult.actualWeight} lbs, Allowed: ${weightResult.allowedWeight} lbs${weightResult.cageSqft ? `, Required SQFT: ${weightResult.requiredSqft}, Cage SQFT: ${weightResult.cageSqft}` : ''}).`;
+                        if (setFormErrors) {
+                            setFormErrors([errorMsg]);
+                        }
+                        finalRow = {
+                            ...newRow,
+                            destinationCage: { value: '', label: '' }
+                        };
+                        updatedAnimals = animals.map((row) => (row.id === newRow.id ? finalRow : row));
+                        onAnimalsChange(updatedAnimals);
+                        return finalRow;
+                    } else {
+                        if (setFormErrors) {
+                            setFormErrors([]);
+                        }
                     }
-                    finalRow = {
-                        ...newRow,
-                        destinationCage: { value: '', label: '' }
-                    };
-                    updatedAnimals = animals.map((row) => (row.id === newRow.id ? finalRow : row));
-                    onAnimalsChange(updatedAnimals);
-                    return finalRow;
                 } else {
                     if (setFormErrors) {
                         setFormErrors([]);
@@ -870,7 +878,8 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
                 return !!reasonForMove.find((r: Option<string>) => r.value === 'Breeding');
             },
         },
-        { field: 'ejacConfirmed', headerName: 'Ejaculation Confirmed', flex: 0.5, minWidth: 100,
+        {
+            field: 'ejacConfirmed', headerName: 'Ejaculation Confirmed', flex: 0.5, minWidth: 100,
             renderCell: (params: GridRenderCellParams) => {
                 const currentRow = params.row as HousingTransferData;
                 const isBreedingEnded = currentRow.reasonForMove.find((r: Option<string>) => r.value === 'Breeding ended');
@@ -891,26 +900,28 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
                 return null;
             }
         },
-        { field: 'remarks', headerName: 'Remarks', flex: 2, minWidth: 200, editable: true, renderCell: (params: GridRenderCellParams) => {
-            const reasonForMoveValues = (params.row.reasonForMove || []).map((r: Option<string>) => r.value);
-            const isSpecial = isSpecialHousing(params.row);
-            const requiresRemarks = reasonForMoveValues.includes("Other (write reason in remarks section)") ||
-                reasonForMoveValues.includes("Behavior") ||
-                isSpecial;
-            const isMissing = requiresRemarks && (!params.row.remarks || params.row.remarks.trim() === '');
-            
-            return (
-                <Box sx={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', py: 0.5 }}>
-                    <Typography variant="body2" sx={{ 
-                        color: isMissing ? 'error.main' : 'inherit',
-                        whiteSpace: 'pre-wrap',
-                        wordBreak: 'break-word',
-                        lineHeight: 1.2
-                    }}>
-                        {params.value}
-                    </Typography>
-                </Box>
-            )},
+        {
+            field: 'remarks', headerName: 'Remarks', flex: 2, minWidth: 200, editable: true, renderCell: (params: GridRenderCellParams) => {
+                const reasonForMoveValues = (params.row.reasonForMove || []).map((r: Option<string>) => r.value);
+                const isSpecial = isSpecialHousing(params.row);
+                const requiresRemarks = reasonForMoveValues.includes("Other (write reason in remarks section)") ||
+                    reasonForMoveValues.includes("Behavior") ||
+                    isSpecial;
+                const isMissing = requiresRemarks && (!params.row.remarks || params.row.remarks.trim() === '');
+
+                return (
+                    <Box sx={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', py: 0.5 }}>
+                        <Typography variant="body2" sx={{
+                            color: isMissing ? 'error.main' : 'inherit',
+                            whiteSpace: 'pre-wrap',
+                            wordBreak: 'break-word',
+                            lineHeight: 1.2
+                        }}>
+                            {params.value}
+                        </Typography>
+                    </Box>
+                )
+            },
             renderEditCell: (params) => {
                 const reasonForMoveValues = (params.row.reasonForMove || []).map((r: Option<string>) => r.value);
                 const isSpecial = isSpecialHousing(params.row);
@@ -918,7 +929,7 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
                     reasonForMoveValues.includes("Behavior") ||
                     isSpecial;
                 const isMissing = requiresRemarks && (!params.value || params.value.trim() === '');
-                
+
                 return (
                     <TextField
                         variant="standard"
@@ -947,35 +958,37 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
                 );
             }
         },
-        { field: 'performedBy', headerName: 'Performed By', minWidth: 150, editable: true, renderCell: (params: GridRenderCellParams) => {
-            const isMissing = !params.value || params.value.trim() === '';
-            return (
-                <Box sx={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center' }}>
-                    <Typography variant="body2" sx={{ color: isMissing ? 'error.main' : 'inherit' }}>
-                        {params.value}
-                    </Typography>
-                </Box>
-            );
+        {
+            field: 'performedBy', headerName: 'Performed By', minWidth: 150, editable: true, renderCell: (params: GridRenderCellParams) => {
+                const isMissing = !params.value || params.value.trim() === '';
+                return (
+                    <Box sx={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center' }}>
+                        <Typography variant="body2" sx={{ color: isMissing ? 'error.main' : 'inherit' }}>
+                            {params.value}
+                        </Typography>
+                    </Box>
+                );
+            },
+            renderEditCell: (params) => {
+                const isMissing = !params.value || params.value.trim() === '';
+                return (
+                    <TextField
+                        fullWidth
+                        variant="standard"
+                        autoFocus
+                        value={params.value || ''}
+                        onChange={(e) => params.api.setEditCellValue({ id: params.id, field: params.field, value: e.target.value })}
+                        required
+                        error={isMissing}
+                        sx={{
+                            '& .MuiInput-root': {
+                                padding: '4px 0 5px',
+                            }
+                        }}
+                    />
+                );
+            }
         },
-        renderEditCell: (params) => {
-            const isMissing = !params.value || params.value.trim() === '';
-            return (
-                <TextField
-                    fullWidth
-                    variant="standard"
-                    autoFocus
-                    value={params.value || ''}
-                    onChange={(e) => params.api.setEditCellValue({ id: params.id, field: params.field, value: e.target.value })}
-                    required
-                    error={isMissing}
-                    sx={{
-                        '& .MuiInput-root': {
-                            padding: '4px 0 5px',
-                        }
-                    }}
-                />
-            );
-        }},
         {
             field: 'alert',
             headerName: 'Alert',

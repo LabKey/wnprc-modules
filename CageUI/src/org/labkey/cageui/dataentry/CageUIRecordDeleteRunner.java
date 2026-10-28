@@ -74,8 +74,8 @@ public class CageUIRecordDeleteRunner implements Job
     public static final String PROPERTY_DOMAIN = "org.labkey.wnprc_ehr.cageui.recorddeletion";
     public static final String ENABLED_PROP = "isEnabled";
     private static final Logger _log = LogManager.getLogger(CageUIRecordDeleteRunner.class);
-    private static final int _hour = 23;
-    private static final int _minute = 30;
+    private static final int _hour = 15;
+    private static final int _minute = 40;
 
     public CageUIRecordDeleteRunner()
     {
@@ -100,7 +100,7 @@ public class CageUIRecordDeleteRunner implements Job
         if (rootUser == null)
             return;
 
-        run(ContainerManager.getRoot());
+        run(ContainerManager.getForPath("/WNPRC/EHR/"));
     }
 
     public void run(Container c)
@@ -150,30 +150,22 @@ public class CageUIRecordDeleteRunner implements Job
         return historyIdKeys;
     }
 
-    private <T> List<Map<String, Object>> getRecordsToDelete(User u, Container c, Collection<String> historyIds, TableInfo ti, Class<T> formClass, Function<T, Object> rowIdExtractor){
+    private <T> List<Map<String, Object>> getRecordsToDelete(User u, Container c, Collection<String> historyIds, TableInfo ti, Class<T> formClass, Function<T, Object> rowIdExtractor) {
         SimpleFilter filter = new SimpleFilter();
         filter.addCondition(FieldKey.fromString("historyid"), historyIds, CompareType.IN);
         TableSelector selector = new TableSelector(ti, filter, null);
 
-        ObjectMapper mapper = JsonUtil.createDefaultMapper();
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        // Use getArrayList() to get typed rows directly
+        List<T> forms = selector.getArrayList(formClass);
 
-        TypeReference<ArrayList<T>> typeRef = new TypeReference<ArrayList<T>>() {};
-        ArrayList<T> forms = mapper.convertValue(selector.getMapArray(), typeRef);
-
-        List<Map<String, Object>> keys = forms.stream()
+        return forms.stream()
                 .map(form -> {
                     Map<String, Object> rowMap = new HashMap<>();
                     rowMap.put("rowid", rowIdExtractor.apply(form));
                     return rowMap;
                 })
                 .toList();
-
-        return keys;
     }
-
-
-
 
     private void deleteInProgressRecords(User u, Container c, List<Map<String, Object>> rowsToDelete) throws ValidationException
     {
@@ -190,11 +182,11 @@ public class CageUIRecordDeleteRunner implements Job
                 .map(map -> (String) map.get("historyid"))
                 .collect(Collectors.toCollection(ArrayList::new));
 
-        List<Map<String, Object>> allHistoryRowIds = getRecordsToDelete(u, c, historyIdsToRemove, cageHistoryTable, AllHistoryForm.class, AllHistoryForm::getRowid);
+        List<Map<String, Object>> allHistoryRowIds = getRecordsToDelete(u, c, historyIdsToRemove, allHistoryTable, AllHistoryForm.class, AllHistoryForm::getRowid);
         List<Map<String, Object>> cageHistoryRowIds = getRecordsToDelete(u, c, historyIdsToRemove, cageHistoryTable, CageHistoryForm.class, CageHistoryForm::getRowid);
-        List<Map<String, Object>> rackHistoryRowIds = getRecordsToDelete(u, c, historyIdsToRemove, cageHistoryTable, RackHistoryForm.class, RackHistoryForm::getRowid);
-        List<Map<String, Object>> cageModHistoryRowIds = getRecordsToDelete(u, c, historyIdsToRemove, cageHistoryTable, CageModificationHistoryForm.class, CageModificationHistoryForm::getRowid);
-        List<Map<String, Object>> roomHistoryRowIds = getRecordsToDelete(u, c, historyIdsToRemove, cageHistoryTable, RoomHistoryForm.class, RoomHistoryForm::getRowid);
+        List<Map<String, Object>> rackHistoryRowIds = getRecordsToDelete(u, c, historyIdsToRemove, rackHistoryTable, RackHistoryForm.class, RackHistoryForm::getRowid);
+        List<Map<String, Object>> cageModHistoryRowIds = getRecordsToDelete(u, c, historyIdsToRemove, cageModificationsHistoryTable, CageModificationHistoryForm.class, CageModificationHistoryForm::getRowid);
+        List<Map<String, Object>> roomHistoryRowIds = getRecordsToDelete(u, c, historyIdsToRemove, roomHistoryTable, RoomHistoryForm.class, RoomHistoryForm::getRowid);
 
         QueryUpdateService allHistoryQus = allHistoryTable.getUpdateService();
         if (allHistoryQus == null)

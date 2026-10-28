@@ -24,6 +24,8 @@ export const SVG_HEIGHT = 1290; // height of the layout svg
 
 export const GHOST_TYPE_ID = 17; // rowid of the ghost cage rack type.
 
+export const EXEMPT_PROJECT_ID = '20031102';
+
 // These are the options users can choose to select a room size. Scale adjusts the zoom level of the layout
 export const roomSizeOptions = [
     {

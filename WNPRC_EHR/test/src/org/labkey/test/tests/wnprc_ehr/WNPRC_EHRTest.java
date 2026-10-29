@@ -3327,7 +3327,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest
         waitForText("Please select a file to import results from");
         click(Locator.radioButtonByNameAndValue("fileselection","2"));
         click(Locator.extButton("Import"));
-        Assert.assertEquals("No matching clinpath records found.",Locator.id("clinpath-virology-err").findElement(getDriver()).getText());
+        Assert.assertEquals("No matching clinpath records found.",waitForElement(Locator.id("clinpath-virology-err")).getText());
     }
 
     @Test
@@ -3365,7 +3365,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest
         //_extHelper.clickExtButton("Import");
         waitForText("Import");
         click(Locator.extButton("Import"));
-        Assert.assertEquals("Bad date format. Set the date column format to 'Date'.",Locator.id("clinpath-virology-err").findElement(getDriver()).getText());
+        Assert.assertEquals("Bad date format. Set the date column format to 'Date'.",waitForElement(Locator.id("clinpath-virology-err")).getText());
     }
 
     @Test

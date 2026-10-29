@@ -637,10 +637,17 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
                 const plannedOccupants = await getPlannedOccupantsForCage(destCageId, allAnimals, newRow.id);
                 const weightResult = await checkCageWeightLimit(destRoomName, destCageId, plannedOccupants);
 
-                if (weightResult.isOverWeight) {
+                if (weightResult.isOverWeight || weightResult.hasInsufficientHeight) {
                     const isExempt = await checkAnyAnimalBelongsToProject([newRow, ...plannedOccupants]);
                     if (!isExempt) {
-                        const errorMsg = `Cannot move animal ${newRow.id} to Room ${destRoomName}, Cage ${newRow.destinationCage.label}: Cage weight limit exceeded (Total Weight: ${weightResult.actualWeight} lbs, Allowed: ${weightResult.allowedWeight} lbs${weightResult.cageSqft ? `, Required SQFT: ${weightResult.requiredSqft}, Cage SQFT: ${weightResult.cageSqft}` : ''}).`;
+                        const errorDetails: string[] = [];
+                        if (weightResult.isOverWeight) {
+                            errorDetails.push(`Cage weight limit exceeded (Total Weight: ${weightResult.actualWeight} lbs, Allowed: ${weightResult.allowedWeight} lbs${weightResult.cageSqft ? `, Required SQFT: ${weightResult.requiredSqft}, Cage SQFT: ${weightResult.cageSqft}` : ''})`);
+                        }
+                        if (weightResult.hasInsufficientHeight) {
+                            errorDetails.push(`Cage height requirement not met (Required Height: ${weightResult.requiredHeight} in, Cage Height: ${weightResult.cageHeight} in)`);
+                        }
+                        const errorMsg = `Cannot move animal ${newRow.id} to Room ${destRoomName}, Cage ${newRow.destinationCage.label}: ${errorDetails.join(' and ')}.`;
                         if (setFormErrors) {
                             setFormErrors([errorMsg]);
                         }

@@ -421,11 +421,16 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
                 const plannedOccupants = await getPlannedOccupantsForCage(destCage.value, allAnimals);
                 const weightResult = await checkCageWeightLimit(roomName, destCage.value, plannedOccupants);
 
-                if (weightResult.isOverWeight) {
+                if (weightResult.isOverWeight || weightResult.hasInsufficientHeight) {
                     const movingAnimals = allAnimals.filter(a => getEffectiveCageId(a) === destCage.value);
                     const isExempt = await checkAnyAnimalBelongsToProject([...movingAnimals, ...plannedOccupants]);
                     if (!isExempt) {
-                        validationErrors.push(`Cage ${destCage.label} in Room ${roomName} exceeds weight limit (Total Weight: ${weightResult.actualWeight} lbs, Allowed: ${weightResult.allowedWeight} lbs${weightResult.cageSqft ? `, Required SQFT: ${weightResult.requiredSqft}, Cage SQFT: ${weightResult.cageSqft}` : ''}). Move cannot be completed.`);
+                        if (weightResult.isOverWeight) {
+                            validationErrors.push(`Cage ${destCage.label} in Room ${roomName} exceeds weight limit (Total Weight: ${weightResult.actualWeight} lbs, Allowed: ${weightResult.allowedWeight} lbs${weightResult.cageSqft ? `, Required SQFT: ${weightResult.requiredSqft}, Cage SQFT: ${weightResult.cageSqft}` : ''}). Move cannot be completed.`);
+                        }
+                        if (weightResult.hasInsufficientHeight) {
+                            validationErrors.push(`Cage ${destCage.label} in Room ${roomName} does not meet height requirement (Required Height: ${weightResult.requiredHeight} in, Cage Height: ${weightResult.cageHeight} in). Move cannot be completed.`);
+                        }
                     }
                 }
             }
@@ -443,7 +448,7 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
         setIsSaving(false);
         if (valid) {
             setErrors([]);
-            alert('Validation successful: All fields and cage weight limits are compliant.');
+            alert('Validation successful: All fields and cage requirements are compliant.');
         } else {
             setErrors(validationErrors);
         }

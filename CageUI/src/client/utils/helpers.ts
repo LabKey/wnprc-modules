@@ -1589,12 +1589,13 @@ export const saveRoomHelper = async (room: Room, sessionLog: SessionLog, oldTemp
  * Helper function that fetches cage size requirements from ehr_lookups.cageclass,
  * retrieves the animals currently in a room + cage from study.housing_test,
  * looks up their current weights in study.demographicsWeightChange
- * and determines if the cage is over or under its weight limit.
+ * and determines if the cage is over or under its weight limit or height requirement.
  *
  * @param room Room name
  * @param cage Cage objectId in housing_test and cageui.cages
+ * @param animalIds Optional list of animal IDs (e.g. planned occupants during transfer)
  * @param abortSignal Optional AbortSignal for query cancellation
- * @returns CageWeightResult containing allowedWeight, actualWeight, status ('over' | 'under' | 'equal'), isOverWeight, and details.
+ * @returns CageWeightResult containing allowedWeight, actualWeight, status ('over' | 'under' | 'equal'), isOverWeight, hasInsufficientHeight, and details.
  */
 export const checkCageWeightLimit = async (
     room: string,
@@ -1622,11 +1623,17 @@ export const checkCageWeightLimit = async (
     let requiredHeight = 0;
     animals.forEach(a => {
         if (a.weight !== null && a.weight !== undefined) {
-            const matchingTier = cageClassList.find(c =>
+            let matchingTier = cageClassList.find(c =>
                 (c.low <= a.weight && a.weight < c.high) ||
                 (c.low < a.weight && a.weight <= c.high) ||
                 (c.low <= a.weight && a.weight <= c.high)
             );
+            if (!matchingTier && cageClassList.length > 0) {
+                const highestTier = cageClassList[cageClassList.length - 1];
+                if (a.weight >= highestTier.high) {
+                    matchingTier = highestTier;
+                }
+            }
             if (matchingTier) {
                 requiredSqft += matchingTier.sqft;
                 if (matchingTier.height > requiredHeight) {
@@ -1643,11 +1650,7 @@ export const checkCageWeightLimit = async (
 
     if (cageSqft !== null && cageSqft !== undefined && cageClassList.length > 0) {
         // Find all tiers whose SQFT requirement fits within the cage SQFT
-        const fittingTiers = cageClassList.filter(c => {
-            const fitsSqft = c.sqft <= cageSqft;
-            const fitsHeight = cageHeight !== null && cageHeight !== undefined ? c.height <= cageHeight : true;
-            return fitsSqft && fitsHeight;
-        });
+        const fittingTiers = cageClassList.filter(c => c.sqft <= cageSqft);
 
         if (fittingTiers.length > 0) {
             allowedWeight = Math.max(...fittingTiers.map(t => t.high));
@@ -1657,21 +1660,23 @@ export const checkCageWeightLimit = async (
         }
     }
 
-    // 6. Determine if the weight limit is over, under, or equal
+    // 6. Determine if the weight limit or height requirement is violated
     let isOverWeight = false;
-    let status: 'over' | 'under' | 'equal' = 'under';
+    if (allowedWeight !== null && actualWeight > allowedWeight) {
+        isOverWeight = true;
+    } else if (cageSqft !== null && cageSqft !== undefined && requiredSqft > cageSqft) {
+        isOverWeight = true;
+    }
 
-    if (allowedWeight !== null) {
-        if (actualWeight > allowedWeight || (cageSqft !== null && requiredSqft > cageSqft) || (cageHeight !== null && requiredHeight > cageHeight)) {
-            isOverWeight = true;
-            status = 'over';
-        } else if (actualWeight === allowedWeight && actualWeight > 0) {
-            isOverWeight = false;
-            status = 'equal';
-        } else {
-            isOverWeight = false;
-            status = 'under';
-        }
+    const hasInsufficientHeight = cageHeight !== null && cageHeight !== undefined && requiredHeight > 0 && requiredHeight > cageHeight;
+
+    let status: 'over' | 'under' | 'equal' = 'under';
+    if (isOverWeight || hasInsufficientHeight) {
+        status = 'over';
+    } else if (allowedWeight !== null && actualWeight === allowedWeight && actualWeight > 0) {
+        status = 'equal';
+    } else {
+        status = 'under';
     }
 
     return {
@@ -1680,11 +1685,12 @@ export const checkCageWeightLimit = async (
         allowedWeight,
         actualWeight: Math.round(actualWeight * 100) / 100,
         isOverWeight,
+        hasInsufficientHeight,
         status,
         cageSqft,
         cageHeight,
         requiredSqft: Math.round(requiredSqft * 100) / 100,
-        requiredHeight,
+        requiredHeight: Math.round(requiredHeight * 100) / 100,
         animals
     };
 };

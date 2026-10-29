@@ -331,8 +331,8 @@ export const fetchCageDimensions = async (cageObjectId: string, abortSignal?: Ab
         if (res.rows && res.rows.length > 0) {
             const row = res.rows[0];
             return {
-                sqft: row.sqft ?? null,
-                height: row.height ?? null
+                sqft: row.sqft !== null && row.sqft !== undefined ? parseFloat(row.sqft) : null,
+                height: row.height !== null && row.height !== undefined ? parseFloat(row.height) : null
             };
         }
         return { sqft: null, height: null };

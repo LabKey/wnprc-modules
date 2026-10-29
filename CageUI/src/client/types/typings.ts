@@ -499,6 +499,7 @@ export interface CageWeightResult {
     allowedWeight: number | null;
     actualWeight: number;
     isOverWeight: boolean;
+    hasInsufficientHeight: boolean;
     status: 'over' | 'under' | 'equal';
     cageSqft: number | null;
     cageHeight: number | null;

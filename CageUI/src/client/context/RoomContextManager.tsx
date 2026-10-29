@@ -195,7 +195,7 @@ export const RoomContextProvider = ({children}) => {
 
         console.log('Cages with different NoDivider or NoFloor mods:', differentCages);
         let layoutRes: LayoutSaveResult;
-        const transferToHousing: boolean = differentCages.length > 0;
+        const transferToHousing: boolean = differentCages.length > 0 && differentCages.some(c => c.animals.length > 0);
         if(transferToHousing){
             layoutRes = await saveRoomHelper(selectedLocalRoom, newSessionLog, null, null, 2);
         }else{

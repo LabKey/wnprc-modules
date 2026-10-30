@@ -820,7 +820,7 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
             field: 'condition',
             headerName: 'Condition',
             minWidth: 150,
-            editable: true,
+            editable: canEditCondition,
             display: 'flex',
             renderCell: (params: GridRenderCellParams) => {
                 const metadata = rowMetadata[params.id as string];

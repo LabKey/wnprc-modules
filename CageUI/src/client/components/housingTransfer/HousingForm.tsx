@@ -408,10 +408,8 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
             const destCage = animal.destinationCage;
             const destRoom = animal.destinationRoom;
             if (destCage && destCage.value && 
-                destCage.value !== 'Special Housing' && 
-                destCage.label !== 'Special Housing' && 
-                destCage.value !== 'In Transit' && 
-                destCage.label !== 'In Transit' && 
+                destCage.value !== 'Special Housing' &&
+                destCage.value !== 'In Transit' &&
                 destCage.value !== '0' && 
                 destCage.value !== '-1' &&
                 !checkedCages.has(destCage.value)) {

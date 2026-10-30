@@ -1021,9 +1021,10 @@ public class CageUIManager
             for (String cageId : component)
             {
                 Cage cage = findCageById(cageId);
-                if (cage != null && cage.getPositionId() < minPositionId)
+                int cageNum = findLastNumberAfterDash(cage.getCageNum());
+                if (cage != null && cageNum < minPositionId)
                 {
-                    minPositionId = cage.getPositionId();
+                    minPositionId = cageNum;
                     firstCageId = cageId;
                 }
             }

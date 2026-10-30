@@ -1054,8 +1054,10 @@ export const LayoutEditorContextProvider: FC<LayoutContextProps> = ({children, p
                 const newObjId = generateUUID();
                 newCageData = { objectId: newObjId, svgId: `cageSVG_${newObjId}` as CageSvgId };
             } else {
+                // Use prevCage, if rack was created but cages weren't then create new ids
                 const prevCage = prevCages.find(pc => pc.positionId === c.positionId);
-                newCageData = { objectId: prevCage.objectId, svgId: `cageSVG_${prevCage.objectId}` as CageSvgId };
+                const objId = prevCage ? prevCage.objectId : generateUUID();
+                newCageData = { objectId: objId, svgId: `cageSVG_${objId}` as CageSvgId };
             }
 
             const locIndex = newUnitLocs[key]?.findIndex(loc => loc.cageId === c.svgId);

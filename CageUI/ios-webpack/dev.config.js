@@ -20,6 +20,7 @@ const constants = require('./constants');
 
 module.exports = {
     context: constants.context,
+    ignoreWarnings: constants.ignoreWarnings,
     mode: 'development',
     devtool: 'eval',
     entry: constants.processEntries(entryPoints),

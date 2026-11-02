@@ -64,11 +64,11 @@ public class TreatmentAlertsNotificationRevamp extends AbstractEHRNotification {
     }
     @Override
     public String getScheduleDescription() {
-        return "Daily at 6:00AM, 10:00AM, 1:00PM, 3:00PM, 5:00PM, 7:00PM";
+        return "Daily at 10:00AM, 1:00PM, 3:00PM, 5:00PM, 7:00PM, 11:00PM";
     }
     @Override
     public String getCronString() {
-        return notificationToolkit.createCronString("0", "6,10,13,15,17,19", "*");
+        return notificationToolkit.createCronString("0", "10,13,15,17,19,23", "*");
     }
     @Override
     public String getCategory() {

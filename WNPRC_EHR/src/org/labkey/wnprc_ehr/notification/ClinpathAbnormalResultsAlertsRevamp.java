@@ -63,11 +63,11 @@ public class ClinpathAbnormalResultsAlertsRevamp extends AbstractEHRNotification
     }
     @Override
     public String getScheduleDescription() {
-        return "Daily every hour from 7:05AM - 5:05PM";
+        return "Daily at 3:05PM";
     }
     @Override
     public String getCronString() {
-        return notificationToolkit.createCronString("5", "7,8,9,10,11,12,13,14,15,16,17", "*");
+        return notificationToolkit.createCronString("5", "15", "*");
     }
     @Override
     public String getCategory() {
@@ -114,7 +114,7 @@ public class ClinpathAbnormalResultsAlertsRevamp extends AbstractEHRNotification
         for (HashMap<String, String> result : returnArray) {
             // Verifies 'alert status' exists before adding results.
             if (!result.get("alertStatus").isEmpty()) {
-                if (result.get("alertStatus").equals("t")) {
+                if (result.get("alertStatus").equals("t") && !java.util.List.of("MCV", "MCH", "MCHC", "RDW", "RDW-SD", "RDW-CV", "MPV").contains(result.get("testid"))) {
                     // Updates current location.
                     if (result.get("Id/curLocation/area").isEmpty()) {
                         result.put("Id/curLocation/area", "No Active Housing");
@@ -151,10 +151,16 @@ public class ClinpathAbnormalResultsAlertsRevamp extends AbstractEHRNotification
             }
         }
 
-        // Prints text.
+        // Prints all tasks completed.
         messageBody.append("There have been " + returnArray.size() + " clinpath tasks completed since " + lastRunDate + "<br>");
         messageBody.append(notificationToolkit.createHyperlink("Click here to view them", clinpathTasksUrlView) + "<p>\n");
+        // Prints only tasks within the criteria.
+        SimpleFilter myFilterWithIssueFilters = new SimpleFilter(myFilter);
+        myFilterWithIssueFilters.addCondition("testid", "MCV;MCH;MCHC;RDW;RDW-SD;RDW-CV;MPV", CompareType.NOT_IN);
+        myFilterWithIssueFilters.addCondition("alertStatus", true, CompareType.EQUAL);
+        String clinpathTasksUrlViewWithIssueFilters = notificationToolkit.createQueryURL(c, "execute", "study", "ClinpathRefRange", myFilterWithIssueFilters);
         messageBody.append("<p>Listed below are the abnormal records.<br>\n");
+        messageBody.append(notificationToolkit.createHyperlink("Click here to view them", clinpathTasksUrlViewWithIssueFilters) + "<p>\n");
 
         // Prints table with all records.
         String[] tableColumns = new String[]{"Id", "Collect Date", "Date Completed", "Test ID", "Result", "Units", "Status", "Ref Range Min", "Ref Range Max", "Age At Time"};
@@ -198,7 +204,13 @@ public class ClinpathAbnormalResultsAlertsRevamp extends AbstractEHRNotification
 
                 // Displays table.
                 NotificationToolkit.NotificationRevampTable myTable = new NotificationToolkit.NotificationRevampTable(tableColumns, currentTableData);
-                myTable.rowColors = rowColorsList;
+                myTable.cellColors = new ArrayList<>();
+                for (String color : rowColorsList) {
+                    // Sets only the 'status' column to red in each row (instead of coloring the entire row like previous versions did).
+                    String[] cellRow = new String[tableColumns.length];
+                    cellRow[6] = color;
+                    myTable.cellColors.add(cellRow);
+                }
                 messageBody.append(myTable.createBasicHTMLTable());
             }
         }

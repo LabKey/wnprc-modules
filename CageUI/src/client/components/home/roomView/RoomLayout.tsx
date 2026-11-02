@@ -116,12 +116,14 @@ export const RoomLayout: FC<RoomLayoutProps> = (props) => {
         let res: ModificationSaveResult = await submitLayoutMods();
 
         if(res.success && res.transferToHousing){
-            window.location.href = ActionURL.buildURL(ActionURL.getController(), 'housingTransfer', ActionURL.getContainer(), {
+            window.open(ActionURL.buildURL(ActionURL.getController(), 'housingTransfer', ActionURL.getContainer(), {
                 room: selectedLocalRoom.name,
                 cages: res.cages,
                 historyId: res.historyid,
                 returnUrl: window.location.href
-            });
+            }));
+            setIsSaving(false);
+            navigateTo({selected: 'Room', room: selectedLocalRoom.name});
         }else if (res.success) {
             // succssesful save
             setIsSaving(false);

@@ -35,23 +35,20 @@ FROM
          */
 
         SELECT
-            coalesce(p.protocol, pa.protocol) as protocol,
+            pa.protocol,
             'Macaque' as species,
             group_concat(DISTINCT pa.id) as Animals,
-            CONVERT(Count(pa.id), INTEGER) AS TotalAnimals
+            CONVERT(Count(DISTINCT pa.id), INTEGER) AS TotalAnimals
 
-        FROM ehr.protocol_counts p
-            LEFT OUTER JOIN ehr.protocolAnimals pa ON (p.protocol = pa.protocol and p.species = pa.species)
+        FROM ehr.protocolAnimals pa
 
-
-        WHERE pa.species = 'Cynomolgus' OR pa.species = 'Rhesus'
-
-          AND EXISTS (  -- Check if 'macaque' exists for protocol
-            SELECT 1
-            FROM ehr.protocol_counts pc2
-            WHERE pc2.protocol = p.protocol AND pc2.species = 'Macaque'
+        WHERE pa.species IN ('Cynomolgus', 'Rhesus')
+            AND EXISTS (
+                SELECT 1
+                FROM ehr.protocol_counts pc2
+                WHERE pc2.protocol = pa.protocol AND pc2.species = 'Macaque'
             )
-        GROUP BY coalesce(p.protocol, pa.protocol), p.species
+        GROUP BY pa.protocol
 
 
     ) p

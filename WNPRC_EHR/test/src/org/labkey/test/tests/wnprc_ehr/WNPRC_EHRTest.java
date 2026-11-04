@@ -3294,7 +3294,8 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest
         //for this one the click works but the function times out for some reason
         //_extHelper.clickExtButton("Import");
         click(Locator.extButton("Import"));
-        waitForElement(Locator.button("Submit Final"), WAIT_FOR_JAVASCRIPT);
+        // The import window closes only after the async import adds the results rows
+        waitForTextToDisappear("Please select a file to import results from", WAIT_FOR_JAVASCRIPT);
         click(Locator.extButton("Submit Final"));
         click(Locator.extButton("Yes"));
 
@@ -3348,17 +3349,11 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest
         selectVirologyFile(INCORRECT_FORMAT_SAMPLE_FILE_NAME);
         //for this one the click works but the function times out for some reason
         //_extHelper.clickExtButton("Import");
-        click(waitForElement(Locator.extButton("Preview")));
+        waitAndClick(Locator.extButton("Preview"));
         switchToWindow(1);
-        try
-        {
-            Assert.assertEquals("Bad date format. Set the date column format to 'Date'.", waitForElement(Locator.id("bad-date-preview-err")).getText());
-        }
-        finally
-        {
-            getDriver().close();
-            switchToMainWindow();
-        }
+        Assert.assertEquals("Bad date format. Set the date column format to 'Date'.", waitForElement(Locator.id("bad-date-preview-err")).getText());
+        getDriver().close();
+        switchToMainWindow();
     }
 
     @Test
@@ -3374,7 +3369,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest
         selectVirologyFile(INCORRECT_FORMAT_SAMPLE_FILE_NAME);
         //for this one the click works but the function times out for some reason
         //_extHelper.clickExtButton("Import");
-        click(waitForElement(Locator.extButton("Import")));
+        waitAndClick(Locator.extButton("Import"));
         Assert.assertEquals("Bad date format. Set the date column format to 'Date'.",waitForElement(Locator.id("clinpath-virology-err")).getText());
     }
 

@@ -56,6 +56,7 @@ import {
     checkAnyAnimalBelongsToProject
 } from '../../utils/housingTransferHelpers';
 import { checkCageWeightLimit } from '../../utils/helpers';
+import { CageWeightResult } from '../../types/typings';
 
 interface HousingDataGridProps {
     prevData: boolean;
@@ -526,6 +527,7 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
             return updatedAnimalsState;
         }
 
+        // Otherwise: fetch cage options and return updated animal with cleared cage
         const selectedRoom = newValue.label;
         let cageOptions: Option<string>[] = [];
 
@@ -572,8 +574,6 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
         });
         onAnimalsChange(updatedAnimalsState);
         return updatedAnimalsState;
-
-        // Update condition codes as destination cage was cleared
     }, [animals, conditionCodes, onAnimalsChange]);
 
     const handleRemoveAnimal = useCallback((id: string) => {
@@ -616,6 +616,7 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
     }, [onAnimalsFound]);
 
     const processRowUpdate = useCallback(async (newRow: GridRowModel<HousingTransferData>, oldRow: GridRowModel<HousingTransferData>) => {
+        console.log("ProcessRowUpdate");
         let updatedAnimals = animals.map((row) => (row.id === newRow.id ? newRow : row));
         let finalRow = newRow;
 
@@ -626,10 +627,7 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
         } else if (newRow.destinationCage?.value !== oldRow.destinationCage?.value) {
             if (newRow.destinationCage && newRow.destinationRoom?.label &&
                 newRow.destinationCage.value !== 'Special Housing' &&
-                newRow.destinationCage.label !== 'Special Housing' &&
                 newRow.destinationCage.value !== 'In Transit' &&
-                newRow.destinationCage.label !== 'In Transit' &&
-                newRow.destinationCage.value !== '0' &&
                 newRow.destinationCage.value !== '-1') {
 
                 const destCageId = newRow.destinationCage.value;
@@ -638,7 +636,8 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
                 const weightResult = await checkCageWeightLimit(destRoomName, destCageId, plannedOccupants);
 
                 if (weightResult.isOverWeight || weightResult.hasInsufficientHeight) {
-                    const isExempt = await checkAnyAnimalBelongsToProject([newRow, ...plannedOccupants]);
+                    const movingAnimals = allAnimals.filter(a => getEffectiveCageId(a) === newRow.destinationCage.value);
+                    const isExempt = await checkAnyAnimalBelongsToProject([...movingAnimals, ...plannedOccupants]);
                     if (!isExempt) {
                         const errorDetails: string[] = [];
                         if (weightResult.isOverWeight) {

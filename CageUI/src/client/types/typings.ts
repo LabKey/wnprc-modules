@@ -493,6 +493,13 @@ export interface AnimalWeightInfo {
     weight: number | null;
 }
 
+export interface PerAnimalWeightCheck {
+    status: 'over' | 'under';
+    overWeightAnimals: { id: string; weight: number | null; limit: number | null }[];
+    totalSqftUsed: number;
+    totalSqftAvailable: number | null;
+}
+
 export interface CageWeightResult {
     room: string;
     cage: string;
@@ -506,6 +513,7 @@ export interface CageWeightResult {
     requiredSqft: number;
     requiredHeight: number;
     animals: AnimalWeightInfo[];
+    perAnimalWeightCheck?: PerAnimalWeightCheck;
 }
 
 export interface SvgSizes {

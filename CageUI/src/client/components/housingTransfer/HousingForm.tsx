@@ -31,6 +31,7 @@ import { canEditConditionPermission } from '../../utils/homeHelpers';
 import { LayoutErrors } from '../LayoutErrors';
 import { checkCageWeightLimit } from '../../utils/helpers';
 import { checkAnyAnimalBelongsToProject, getEffectiveCageId, getPlannedOccupantsForCage } from '../../utils/housingTransferHelpers';
+import { CageWeightResult } from '../../types/typings';
 
 interface HousingFormProps {
     user: Security.GetUserPermissionsResponse;
@@ -368,6 +369,7 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
     }, [allAnimals]);
 
     const validateAllCages = useCallback(async (): Promise<{ valid: boolean; errors: string[] }> => {
+        console.log("Validate");
         const validationErrors: string[] = [];
 
         // 1. Check required fields for all animals
@@ -410,13 +412,16 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
             if (destCage && destCage.value && 
                 destCage.value !== 'Special Housing' &&
                 destCage.value !== 'In Transit' &&
-                destCage.value !== '0' && 
                 destCage.value !== '-1' &&
                 !checkedCages.has(destCage.value)) {
                 
                 checkedCages.add(destCage.value);
-                const roomName = destRoom?.label || currRoom || 'Unassigned';
                 const plannedOccupants = await getPlannedOccupantsForCage(destCage.value, allAnimals);
+                // Skip validation if NO animals are moving to this cage
+                if (plannedOccupants.length === 0) {
+                    continue;
+                }
+                const roomName = destRoom?.label || currRoom || 'Unassigned';
                 const weightResult = await checkCageWeightLimit(roomName, destCage.value, plannedOccupants);
 
                 if (weightResult.isOverWeight || weightResult.hasInsufficientHeight) {

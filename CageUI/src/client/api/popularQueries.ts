@@ -15,7 +15,7 @@
  *  * limitations under the License.
  *
  */
-import { Filter, Query } from '@labkey/api';
+import { ActionURL, Filter, Query } from '@labkey/api';
 import { labkeyActionSelectWithPromise } from './labkeyActions';
 import { EHRCageMods } from '../types/homeTypes';
 import {
@@ -317,6 +317,32 @@ export const fetchCageSizeReq = async (abortSignal?: AbortSignal): Promise<CageC
  * @param abortSignal Optional AbortSignal for query cancellation
  */
 export const fetchCageDimensions = async (cageObjectId: string, abortSignal?: AbortSignal): Promise<{ sqft: number | null; height: number | null }> => {
+    const layoutChangeId: string = ActionURL.getParameter("historyId");
+    if (layoutChangeId) {
+        const historyConfig: Query.SelectRowsOptions = {
+            schemaName: 'cageui',
+            queryName: 'cage_history',
+            columns: ['cage_number', 'sqft', 'height', 'cage/objectid'],
+            filterArray: [
+                Filter.create('historyid', layoutChangeId, Filter.Types.EQUAL),
+                Filter.create('cage/objectid', cageObjectId, Filter.Types.EQUAL)
+            ]
+        };
+
+        try {
+            const histRes = await labkeyActionSelectWithPromise(historyConfig, abortSignal);
+            if (histRes.rows && histRes.rows.length > 0) {
+                const row = histRes.rows[0];
+                return {
+                    sqft: row.sqft !== null && row.sqft !== undefined ? parseFloat(row.sqft) : null,
+                    height: row.height !== null && row.height !== undefined ? parseFloat(row.height) : null
+                };
+            }
+        } catch (e) {
+            console.error('Error fetching cage dimensions from cage_history:', e);
+        }
+    }
+
     const config: Query.SelectRowsOptions = {
         schemaName: 'cageui',
         queryName: 'cages',

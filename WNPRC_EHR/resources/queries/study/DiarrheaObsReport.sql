@@ -91,17 +91,21 @@ WITH FiveYearsAgo AS (
      DiarrheaTreatmentDetails AS (
          SELECT
              t.Id,
-             t.date,
-             ct.code
-         FROM study.treatment_order t
-                  JOIN TreatmentCodeMap ct
-                       ON (t.description LIKE '%' || ct.code || '%')
+             CAST(t.date AS DATE) AS date,
+             t.code,
+             ct.code AS diarrhea_code,
+             ct.acute_or_chronic,
+             ct.type
+         FROM study.drug t
+                  LEFT JOIN TreatmentCodeMap ct
+                       ON (t.code LIKE '%' || ct.code || '%')
          WHERE t.date >= (SELECT StartDate FROM FiveYearsAgo)
-           AND ct.code IS NOT NULL
      ),
 
      DiarrheaTreatmentAnimals AS (
-         SELECT DISTINCT Id FROM DiarrheaTreatmentDetails
+         SELECT DISTINCT Id
+         FROM DiarrheaTreatmentDetails
+         WHERE acute_or_chronic IS NOT NULL
      ),
 
 
@@ -261,12 +265,10 @@ WITH FiveYearsAgo AS (
              tdt.Id,
              tdt.date,
              COUNT(*) AS treatments,
-             GROUP_CONCAT(DISTINCT tcm.acute_or_chronic, ', ') AS acute_or_chronic_list,
-             GROUP_CONCAT(DISTINCT tcm.type, ', ') AS type_list
+             GROUP_CONCAT(DISTINCT tdt.acute_or_chronic, ', ') AS acute_or_chronic_list,
+             GROUP_CONCAT(DISTINCT tdt.type, ', ') AS type_list
          FROM DiarrheaTreatmentDetails tdt
-                  LEFT JOIN TreatmentCodeMap tcm ON tdt.code = tcm.code
          WHERE tdt.Id IN (SELECT Id FROM PotentialDiarrheaAnimals)
-           AND tdt.code IS NOT NULL  -- ensure we matched a code
          GROUP BY tdt.Id, tdt.date
      )
 -- Final SELECT statement to assemble the daily report for each animal.

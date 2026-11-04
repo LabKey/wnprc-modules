@@ -331,13 +331,33 @@ export const getEffectiveCageId = (animal: HousingTransferData): string | null =
         animal.destinationCage?.value === 'In Transit' || 
         animal.destinationRoom?.label === 'In Transit' || 
         animal.destinationRoom?.value === 'In Transit' ||
-        (animal.condition && animal.condition.some(c => c.value === 'it'))) {
+        (animal.condition && animal.condition.some(c => c.value === 'it')) ||
+        animal.destinationCage?.value === '-1') {
         return null;
     }
-    if (animal.destinationRoom?.label === 'No Change' || animal.destinationRoom?.value === 'No Change') {
+    if (animal.destinationRoom?.label === 'No Change' || animal.destinationRoom?.value === 'No Change' ||
+        animal.destinationCage?.label === 'No Change' || animal.destinationCage?.value === '0') {
         return animal.currentCage?.value || null;
     }
     return animal.destinationCage?.value || null;
+};
+
+export const getEffectiveRoomName = (animal: HousingTransferData, defaultRoom?: string): string => {
+    if (!animal) return defaultRoom || 'Unassigned';
+    if (animal.destinationRoom?.label === 'No Change' || animal.destinationRoom?.value === 'No Change' ||
+        animal.destinationCage?.label === 'No Change' || animal.destinationCage?.value === '0') {
+        return animal.currentRoom?.label || defaultRoom || 'Unassigned';
+    }
+    return animal.destinationRoom?.label || defaultRoom || 'Unassigned';
+};
+
+export const getEffectiveCageLabel = (animal: HousingTransferData): string => {
+    if (!animal) return '';
+    if (animal.destinationRoom?.label === 'No Change' || animal.destinationRoom?.value === 'No Change' ||
+        animal.destinationCage?.label === 'No Change' || animal.destinationCage?.value === '0') {
+        return animal.currentCage?.label || animal.currentCage?.value || 'No Change';
+    }
+    return animal.destinationCage?.label || animal.destinationCage?.value || '';
 };
 
 export const getOriginalCageId = (animal: HousingTransferData): string | null => {

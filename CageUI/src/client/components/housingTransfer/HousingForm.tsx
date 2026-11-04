@@ -30,7 +30,7 @@ import { fetchConditionCodes } from '../../api/popularQueries';
 import { canEditConditionPermission } from '../../utils/homeHelpers';
 import { LayoutErrors } from '../LayoutErrors';
 import { checkCageWeightLimit } from '../../utils/helpers';
-import { checkAnyAnimalBelongsToProject, getEffectiveCageId, getPlannedOccupantsForCage } from '../../utils/housingTransferHelpers';
+import { checkAnyAnimalBelongsToProject, getEffectiveCageId, getEffectiveRoomName, getEffectiveCageLabel, getPlannedOccupantsForCage } from '../../utils/housingTransferHelpers';
 import { CageWeightResult } from '../../types/typings';
 
 interface HousingFormProps {
@@ -74,16 +74,18 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
             const config: Query.SelectRowsOptions = {
                 schemaName: 'study',
                 queryName: 'demographicsCurLocationNew',
-                columns: ['id', 'room', 'room/rowid', 'cage'],
+                columns: ['id', 'room', 'room/rowid', 'cage', 'cage/cage_number'],
                 filterArray: [Filter.create('id', selectedAnimals, Filter.Types.IN)]
             };
 
             labkeyActionSelectWithPromise(config).then(result => {
                 const currentLocations: Record<string, {room: Option<number>, cage: Option<string>}> = {};
                 result.rows.forEach(row => {
+                    const cageLabel = row['cage/cage_number'] || (typeof row.cage === 'object' ? row.cage?.displayValue : row.cage) || '';
+                    const cageValue = (typeof row.cage === 'object' ? row.cage?.value : row.cage) || '';
                     currentLocations[row.id] = {
                         room: { label: row.room, value: row['room/rowid'] },
-                        cage: { label: row.cage?.cage_number?.toString() || '', value: row.cage?.toString() || '' }
+                        cage: { label: cageLabel?.toString() || '', value: cageValue?.toString() || '' }
                     };
                 });
 
@@ -257,16 +259,18 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
         const config: Query.SelectRowsOptions = {
             schemaName: 'study',
             queryName: 'demographicsCurLocationNew',
-            columns: ['id', 'room', 'room/rowid', 'cage'],
+            columns: ['id', 'room', 'room/rowid', 'cage', 'cage/cage_number'],
             filterArray: [Filter.create('id', foundAnimals.map(a => a.id), Filter.Types.IN)]
         };
 
         labkeyActionSelectWithPromise(config).then(result => {
             const currentLocations: Record<string, {room: Option<string>, cage: Option<string>}> = {};
             result.rows.forEach(row => {
+                const cageLabel = row['cage/cage_number'] || (typeof row.cage === 'object' ? row.cage?.displayValue : row.cage) || '';
+                const cageValue = (typeof row.cage === 'object' ? row.cage?.value : row.cage) || '';
                 currentLocations[row.id] = {
                     room: { label: row.room, value: row.room },
-                    cage: { label: row.cage?.cage_number?.toString() || '', value: row.cage?.toString() || '' }
+                    cage: { label: cageLabel?.toString() || '', value: cageValue?.toString() || '' }
                 };
             });
 
@@ -404,35 +408,30 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
             }
         });
 
-        // 2. Check cage weight limits for all assigned destination cages
+        // 2. Check cage weight limits for all assigned destination cages (including No Change)
         const checkedCages = new Set<string>();
         for (const animal of allAnimals) {
-            const destCage = animal.destinationCage;
-            const destRoom = animal.destinationRoom;
-            if (destCage && destCage.value && 
-                destCage.value !== 'Special Housing' &&
-                destCage.value !== 'In Transit' &&
-                destCage.value !== '-1' &&
-                !checkedCages.has(destCage.value)) {
-                
-                checkedCages.add(destCage.value);
-                const plannedOccupants = await getPlannedOccupantsForCage(destCage.value, allAnimals);
+            const effectiveCageId = getEffectiveCageId(animal);
+            if (effectiveCageId && !checkedCages.has(effectiveCageId)) {
+                checkedCages.add(effectiveCageId);
+                const plannedOccupants = await getPlannedOccupantsForCage(effectiveCageId, allAnimals);
                 // Skip validation if NO animals are moving to this cage
                 if (plannedOccupants.length === 0) {
                     continue;
                 }
-                const roomName = destRoom?.label || currRoom || 'Unassigned';
-                const weightResult = await checkCageWeightLimit(roomName, destCage.value, plannedOccupants);
+                const roomName = getEffectiveRoomName(animal, currRoom || 'Unassigned');
+                const cageLabel = getEffectiveCageLabel(animal) || effectiveCageId;
+                const weightResult = await checkCageWeightLimit(roomName, effectiveCageId, plannedOccupants);
 
                 if (weightResult.isOverWeight || weightResult.hasInsufficientHeight) {
-                    const movingAnimals = allAnimals.filter(a => getEffectiveCageId(a) === destCage.value);
+                    const movingAnimals = allAnimals.filter(a => getEffectiveCageId(a) === effectiveCageId);
                     const isExempt = await checkAnyAnimalBelongsToProject([...movingAnimals, ...plannedOccupants]);
                     if (!isExempt) {
                         if (weightResult.isOverWeight) {
-                            validationErrors.push(`Cage ${destCage.label} in Room ${roomName} exceeds weight limit (Total Weight: ${weightResult.actualWeight} lbs, Allowed: ${weightResult.allowedWeight} lbs${weightResult.cageSqft ? `, Required SQFT: ${weightResult.requiredSqft}, Cage SQFT: ${weightResult.cageSqft}` : ''}). Move cannot be completed.`);
+                            validationErrors.push(`Cage ${cageLabel} in Room ${roomName} exceeds weight limit (Total Weight: ${weightResult.actualWeight} lbs, Allowed: ${weightResult.allowedWeight} lbs${weightResult.cageSqft ? `, Required SQFT: ${weightResult.requiredSqft}, Cage SQFT: ${weightResult.cageSqft}` : ''}). Move cannot be completed.`);
                         }
                         if (weightResult.hasInsufficientHeight) {
-                            validationErrors.push(`Cage ${destCage.label} in Room ${roomName} does not meet height requirement (Required Height: ${weightResult.requiredHeight} in, Cage Height: ${weightResult.cageHeight} in). Move cannot be completed.`);
+                            validationErrors.push(`Cage ${cageLabel} in Room ${roomName} does not meet height requirement (Required Height: ${weightResult.requiredHeight} in, Cage Height: ${weightResult.cageHeight} in). Move cannot be completed.`);
                         }
                     }
                 }

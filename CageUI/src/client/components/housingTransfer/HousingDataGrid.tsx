@@ -51,6 +51,8 @@ import {
     checkIsAdopted, checkIsMale, getSocialCode, checkIsMotherInDest, checkIsFatherInDest, checkIsAdoptedMotherInDest,
     checkIsAdoptedFatherInDest,
     getEffectiveCageId,
+    getEffectiveRoomName,
+    getEffectiveCageLabel,
     getOriginalCageId,
     getPlannedOccupantsForCage,
     checkAnyAnimalBelongsToProject
@@ -510,6 +512,7 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
 
         if (newValue.value === 'No Change') {
             const specialCageOption = { label: 'No Change', value: '0' };
+            const location = animalLocations?.[paramId as string];
             setRowMetadata(prev => ({
                 ...prev,
                 [paramId]: {
@@ -520,7 +523,13 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
             }));
             updatedAnimalsState = animals.map(a =>
                 a.id === paramId
-                    ? { ...a, destinationRoom: newValue, destinationCage: specialCageOption }
+                    ? {
+                        ...a,
+                        destinationRoom: newValue,
+                        destinationCage: specialCageOption,
+                        currentRoom: a.currentRoom?.value ? a.currentRoom : (location?.room || a.currentRoom),
+                        currentCage: a.currentCage?.value ? a.currentCage : (location?.cage || a.currentCage)
+                    }
                     : a
             );
             onAnimalsChange(updatedAnimalsState);
@@ -620,23 +629,41 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
         let updatedAnimals = animals.map((row) => (row.id === newRow.id ? newRow : row));
         let finalRow = newRow;
 
-        if (newRow.destinationRoom?.value !== oldRow.destinationRoom?.value ||
-            (newRow.destinationRoom?.value === null && oldRow.destinationRoom?.value !== null)) {
+        const isRoomChanged = newRow.destinationRoom?.value !== oldRow.destinationRoom?.value ||
+            (newRow.destinationRoom?.value === null && oldRow.destinationRoom?.value !== null);
+        const isCageChanged = newRow.destinationCage?.value !== oldRow.destinationCage?.value;
+
+        if (isRoomChanged) {
             updatedAnimals = await handleRoomChange(newRow.id, newRow.destinationRoom);
             finalRow = updatedAnimals.find(a => a.id === newRow.id) || newRow;
-        } else if (newRow.destinationCage?.value !== oldRow.destinationCage?.value) {
-            if (newRow.destinationCage && newRow.destinationRoom?.label &&
-                newRow.destinationCage.value !== 'Special Housing' &&
-                newRow.destinationCage.value !== 'In Transit' &&
-                newRow.destinationCage.value !== '-1') {
+        }
 
-                const destCageId = newRow.destinationCage.value;
-                const destRoomName = newRow.destinationRoom.label;
-                const plannedOccupants = await getPlannedOccupantsForCage(destCageId, allAnimals, newRow.id);
+        const isNoChange = finalRow.destinationRoom?.value === 'No Change' ||
+                           finalRow.destinationRoom?.label === 'No Change' ||
+                           finalRow.destinationCage?.value === '0' ||
+                           finalRow.destinationCage?.label === 'No Change';
+
+        const shouldValidateCage = (isRoomChanged && isNoChange) || (!isRoomChanged && isCageChanged);
+
+        if (shouldValidateCage) {
+            const destCageId = getEffectiveCageId(finalRow);
+            const destRoomName = getEffectiveRoomName(finalRow, roomLabel);
+            const destCageLabel = getEffectiveCageLabel(finalRow);
+
+            if (destCageId && destRoomName &&
+                finalRow.destinationCage?.value !== 'Special Housing' &&
+                finalRow.destinationCage?.value !== 'In Transit' &&
+                finalRow.destinationCage?.value !== '-1') {
+
+                const currentAllAnimals = allAnimals.map(a => a.id === finalRow.id ? finalRow : a);
+                if (!currentAllAnimals.some(a => a.id === finalRow.id)) {
+                    currentAllAnimals.push(finalRow);
+                }
+                const plannedOccupants = await getPlannedOccupantsForCage(destCageId, currentAllAnimals, finalRow.id);
                 const weightResult = await checkCageWeightLimit(destRoomName, destCageId, plannedOccupants);
 
                 if (weightResult.isOverWeight || weightResult.hasInsufficientHeight) {
-                    const movingAnimals = allAnimals.filter(a => getEffectiveCageId(a) === newRow.destinationCage.value);
+                    const movingAnimals = currentAllAnimals.filter(a => getEffectiveCageId(a) === destCageId);
                     const isExempt = await checkAnyAnimalBelongsToProject([...movingAnimals, ...plannedOccupants]);
                     if (!isExempt) {
                         const errorDetails: string[] = [];
@@ -646,15 +673,31 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
                         if (weightResult.hasInsufficientHeight) {
                             errorDetails.push(`Cage height requirement not met (Required Height: ${weightResult.requiredHeight} in, Cage Height: ${weightResult.cageHeight} in)`);
                         }
-                        const errorMsg = `Cannot move animal ${newRow.id} to Room ${destRoomName}, Cage ${newRow.destinationCage.label}: ${errorDetails.join(' and ')}.`;
+                        const errorMsg = `Cannot move animal ${finalRow.id} to Room ${destRoomName}, Cage ${destCageLabel}: ${errorDetails.join(' and ')}.`;
                         if (setFormErrors) {
                             setFormErrors([errorMsg]);
                         }
-                        finalRow = {
-                            ...newRow,
-                            destinationCage: { value: '', label: '' }
-                        };
-                        updatedAnimals = animals.map((row) => (row.id === newRow.id ? finalRow : row));
+                        if (isNoChange) {
+                            finalRow = {
+                                ...finalRow,
+                                destinationRoom: { value: null, label: '' },
+                                destinationCage: { value: '', label: '' }
+                            };
+                            setRowMetadata(prev => ({
+                                ...prev,
+                                [finalRow.id]: {
+                                    ...prev[finalRow.id],
+                                    cageOptions: [],
+                                    animalsInDestinationCage: []
+                                }
+                            }));
+                        } else {
+                            finalRow = {
+                                ...finalRow,
+                                destinationCage: { value: '', label: '' }
+                            };
+                        }
+                        updatedAnimals = animals.map((row) => (row.id === finalRow.id ? finalRow : row));
                         onAnimalsChange(updatedAnimals);
                         return finalRow;
                     } else {
@@ -668,7 +711,7 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
                     }
                 }
 
-                fetchAnimalsInCage(newRow.destinationRoom.label, newRow.destinationCage, newRow.id);
+                fetchAnimalsInCage(destRoomName, { value: destCageId, label: destCageLabel }, finalRow.id);
             }
         }
 
@@ -704,7 +747,7 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
 
         onAnimalsChange(updatedAnimals);
         return finalRow;
-    }, [animals, onAnimalsChange, handleRoomChange, fetchAnimalsInCage, fetchProjectOptions, rowMetadata]);
+    }, [animals, allAnimals, onAnimalsChange, handleRoomChange, fetchAnimalsInCage, fetchProjectOptions, rowMetadata, roomLabel, setFormErrors]);
 
     const getCellClassName = useCallback((params: GridCellParams<HousingTransferData>) => {
         const { field, value, row } = params;

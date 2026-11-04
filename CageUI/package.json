@@ -5,13 +5,13 @@
   "private": true,
   "scripts": {
     "build": "npm run build-dev",
-    "build-dev": "npm run clean && cross-env NODE_ENV=development webpack --config node_modules/@labkey/build/webpack/dev.config.js --color",
-    "build-ios": "npm run clean && cross-env NODE_ENV=development webpack --config ./ios-webpack/dev.config.js --color",
-    "build-prod": "npm run clean && cross-env NODE_ENV=production webpack --config node_modules/@labkey/build/webpack/prod.config.js --color --progress --profile",
+    "build-dev": "npm run clean && cross-env NODE_ENV=development rspack build --config node_modules/@labkey/build/configs/dev.config.js",
+    "build-ios": "npm run clean && cross-env NODE_ENV=development rspack build --config ./ios-webpack/dev.config.js",
+    "build-prod": "npm run clean && cross-env NODE_ENV=production rspack build --config node_modules/@labkey/build/configs/prod.config.js",
     "clean": "rimraf resources/web/gen && rimraf resources/views/gen",
     "setup": "npm ci --legacy-peer-deps",
-    "start": "cross-env NODE_ENV=development LK_MODULE=CageUI webpack serve --config node_modules/@labkey/build/webpack/watch.config.js",
-    "start-ios": "cross-env NODE_ENV=development LK_MODULE=CageUI webpack-dev-server --config ios-webpack/watch.config.js",
+    "start": "cross-env NODE_ENV=development rspack serve --config node_modules/@labkey/build/configs/watch.config.js",
+    "start-ios": "cross-env NODE_ENV=development rspack serve --config ios-webpack/watch.config.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -20,8 +20,8 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
-    "@labkey/api": "1.51.5",
-    "@labkey/components": "7.43.0",
+    "@labkey/api": "1.53.2",
+    "@labkey/components": "7.72.3",
     "@mui/icons-material": "^9.0.1",
     "@mui/material": "^9.0.1",
     "@mui/x-data-grid": "^8.28.6",
@@ -36,14 +36,13 @@
     "react-svg": "^16.4.2"
   },
   "devDependencies": {
-    "@labkey/build": "9.1.5",
+    "@labkey/build": "10.1.4",
     "@types/d3": "^7.4.3",
-    "@types/react": "~18.3.3",
+    "@types/react": "~18.3.31",
     "@types/react-bootstrap": "~0.32.37",
-    "@types/react-dom": "~18.3.0",
-    "uuid": "14.0.1"
+    "@types/react-dom": "~18.3.0"
   },
-  "overrides": {
-    "uuid": "14.0.1"
+  "allowScripts": {
+    "@parcel/watcher@2.6.0": true
   }
 }

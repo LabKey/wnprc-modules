@@ -1212,6 +1212,28 @@ export const isRoomHomogeneousDefault = (room: Room): boolean => {
     return true;
 };
 
+export const areRackObjectIdsUnique = (room: Room): boolean => {
+    if (!room || !room.rackGroups) {
+        return true;
+    }
+    const seenObjectIds = new Set<string>();
+    for (const rackGroup of room.rackGroups) {
+        if (!rackGroup.racks) continue;
+        for (const rack of rackGroup.racks) {
+            if (rack && rack.objectId) {
+                const normalizedId = rack.objectId.trim().toLowerCase();
+                if (normalizedId.length > 0) {
+                    if (seenObjectIds.has(normalizedId)) {
+                        return false;
+                    }
+                    seenObjectIds.add(normalizedId);
+                }
+            }
+        }
+    }
+    return true;
+};
+
 export const addModEntries = (
     connections: ConnectedCage[] | ConnectedRack[],
     locDir: ModLocations,

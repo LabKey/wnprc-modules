@@ -70,6 +70,7 @@ import {
 import {
     addModEntries,
     areAllRacksNonDefault,
+    areRackObjectIdsUnique,
     canOpenContextMenu,
     createEmptyUnitLoc,
     findCageInGroup,
@@ -1492,7 +1493,14 @@ export const saveRoomHelper = async (room: Room, sessionLog: SessionLog, oldTemp
             roomName: roomName,
             reason: ['Cannot save room with mix of default racks and real racks']
         };
-        ;
+    }
+
+    if (!areRackObjectIdsUnique(room)) {
+        return {
+            success: false,
+            roomName: roomName,
+            reason: ['Cannot save room with duplicate racks. Each rack must have a unique objectId.']
+        };
     }
 
     // Create default mods for new rooms.

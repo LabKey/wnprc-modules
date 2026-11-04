@@ -65,6 +65,7 @@ import org.labkey.cageui.model.ModData;
 import org.labkey.cageui.model.Option;
 import org.labkey.cageui.model.Rack;
 import org.labkey.cageui.model.RackCondition;
+import org.labkey.cageui.model.RackGroup;
 import org.labkey.cageui.model.RackSwitchOption;
 import org.labkey.cageui.model.RackTypes;
 import org.labkey.cageui.model.Room;
@@ -86,10 +87,12 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -926,6 +929,42 @@ public class CageUIController extends SpringActionController
                                 .noneMatch(rack -> rack.getType().isDefault()));
                         if(!validRealRoom){
                             errors.reject(ERROR_MSG,"Cannot save real room with default racks. Please change to real racks.");
+                        }
+                    }
+
+                    // Reject if any two rack objects share the same rack objectId
+                    if (room.getRackGroups() != null)
+                    {
+                        Set<String> seenRackObjectIds = new HashSet<>();
+                        boolean hasDuplicateRacks = false;
+                        for (RackGroup rg : room.getRackGroups())
+                        {
+                            if (rg.getRacks() != null)
+                            {
+                                for (Rack rack : rg.getRacks())
+                                {
+                                    if (rack != null && rack.getObjectId() != null)
+                                    {
+                                        String rackObjId = rack.getObjectId().trim().toLowerCase();
+                                        if (!rackObjId.isEmpty())
+                                        {
+                                            if (!seenRackObjectIds.add(rackObjId))
+                                            {
+                                                hasDuplicateRacks = true;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            if (hasDuplicateRacks)
+                            {
+                                break;
+                            }
+                        }
+                        if (hasDuplicateRacks)
+                        {
+                            errors.reject(ERROR_MSG, "Cannot save room with duplicate racks. Each rack must have a unique objectId.");
                         }
                     }
                 }

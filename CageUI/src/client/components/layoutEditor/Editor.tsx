@@ -48,6 +48,7 @@ import {
 import { LayoutTooltip } from './LayoutTooltip';
 import {
     areCagesInSameRack,
+    areRackObjectIdsUnique,
     canOpenContextMenu,
     canPlaceObject,
     checkAdjacent,
@@ -825,7 +826,15 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
     };
 
     const handleSave = async () => {
-
+        if (!areRackObjectIdsUnique(localRoom)) {
+            setStartSaving(false);
+            setShowSaveResult({
+                success: false,
+                roomName: localRoom.name,
+                reason: ['Cannot save room with duplicate racks. Each rack must have a unique objectId.']
+            });
+            return;
+        }
 
         const result = await saveRoom(templateRename);
         setStartSaving(false);
@@ -1012,6 +1021,14 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                                 id={'saveTemplateBtn'}
                                 className={'layout-toolbar-btn'}
                                 onClick={() => {
+                                    if (!areRackObjectIdsUnique(localRoom)) {
+                                        setShowSaveResult({
+                                            success: false,
+                                            roomName: localRoom.name,
+                                            reason: ['Cannot save room with duplicate racks. Each rack must have a unique objectId.']
+                                        });
+                                        return;
+                                    }
                                     setTemplateOptions(true);
                                     setShowRoomSelector(true);
                                 }}
@@ -1033,7 +1050,21 @@ const Editor: FC<EditorProps> = ({roomSize}) => {
                 <button
                     id={'saveLayoutBtn'}
                     className={'layout-toolbar-btn'}
-                    onClick={localRoom.name === 'new-layout' ? () => setShowRoomSelector(true) : () => setShowSaveConfirm(true)}
+                    onClick={() => {
+                        if (!areRackObjectIdsUnique(localRoom)) {
+                            setShowSaveResult({
+                                success: false,
+                                roomName: localRoom.name,
+                                reason: ['Cannot save room with duplicate racks. Each rack must have a unique objectId.']
+                            });
+                            return;
+                        }
+                        if (localRoom.name === 'new-layout') {
+                            setShowRoomSelector(true);
+                        } else {
+                            setShowSaveConfirm(true);
+                        }
+                    }}
                 >{localRoom.name === 'new-layout' ? 'Save Layout' : 'Update Layout'}
                 </button>
             </div>

@@ -1710,6 +1710,27 @@ public class WNPRC_EHRCustomizer extends AbstractTableCustomizer
                 _log.warn("Unable to customize column 'num_animals_assigned', 'study.assignment' dataset not found.");
             }
         }
+
+        // Add friendly request number, this number is replacing the rowid as the request number, which allows us to edit it
+        // This number right now is the asc order of the rowids.
+        SQLFragment sqlReqNum = new SQLFragment();
+        sqlReqNum.append("(");
+        sqlReqNum.append("SELECT (");
+        sqlReqNum.append("SELECT COUNT(*) FROM ");
+        sqlReqNum.append(table.getFromSQL("r2"));
+        sqlReqNum.append(" WHERE");
+        sqlReqNum.append(" r2.rowid <= r1.rowid");
+        sqlReqNum.append(") AS request_number");
+        sqlReqNum.append(" FROM ");
+        sqlReqNum.append(table.getFromSQL("r1"));
+        sqlReqNum.append(" WHERE r1.rowid = ");
+        sqlReqNum.append(ExprColumn.STR_TABLE_ALIAS);
+        sqlReqNum.append(".rowid");
+        sqlReqNum.append(")");
+        ExprColumn newColReqNum = new ExprColumn(table, "request_number", sqlReqNum, JdbcType.VARCHAR);
+        newColReqNum.setLabel("#");
+        newColReqNum.setDescription("Animal request number");
+        table.addColumn(newColReqNum);
     }
 
     private BaseColumnInfo getWrappedIdCol(UserSchema us, AbstractTableInfo ds, String name, String queryName)

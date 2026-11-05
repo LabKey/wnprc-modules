@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <etl xmlns="http://labkey.org/etl/xml">
     <name>Delete Requested EHR Records</name>
-    <description>Permanently deletes records marked 'Delete Requested' or 'Request: Denied'. Keep the EHR module's record delete runner disabled in this folder.</description>
+    <description>Permanently deletes records marked 'Delete Requested' or 'Request: Denied'.</description>
     <transforms>
         <transform id="deleteRequestedRecords" type="TaskrefTransformStep">
             <taskref ref="org.labkey.wnprc_ehr.etl.DeleteRequestedRecordsTask"/>

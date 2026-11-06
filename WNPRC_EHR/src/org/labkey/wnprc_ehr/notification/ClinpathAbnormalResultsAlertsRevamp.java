@@ -114,7 +114,7 @@ public class ClinpathAbnormalResultsAlertsRevamp extends AbstractEHRNotification
         for (HashMap<String, String> result : returnArray) {
             // Verifies 'alert status' exists before adding results.
             if (!result.get("alertStatus").isEmpty()) {
-                if (result.get("alertStatus").equals("t") && !java.util.List.of("MCV", "MCH", "MCHC", "RDW", "RDW-SD", "RDW-CV", "MPV").contains(result.get("testid"))) {
+                if ("t".equals(result.get("alertStatus")) && result.get("testid") != null && !java.util.List.of("MCV", "MCH", "MCHC", "RDW", "RDW-SD", "RDW-CV", "MPV").contains(result.get("testid"))) {
                     // Updates current location.
                     if (result.get("Id/curLocation/area").isEmpty()) {
                         result.put("Id/curLocation/area", "No Active Housing");

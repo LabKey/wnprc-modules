@@ -79,6 +79,7 @@ import org.labkey.cageui.model.RackTypes;
 import org.labkey.cageui.model.Room;
 import org.labkey.cageui.model.RoomObject;
 import org.labkey.cageui.model.SessionLog;
+import org.labkey.cageui.notification.CageUIHousingTransferNotification;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -87,6 +88,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -165,38 +167,45 @@ public class CageUIManager
     }
 
     // Helper function to wrap arraylist to labkeys List<Map<String, Object>> for data submission
-    public <E> List<Map<String, Object>> convertToMapList(ArrayList<E> objects)
+    public <E> List<Map<String, Object>> convertToMapList(
+            ArrayList<E> objects,
+            String... excludeFields)  // varargs for convenience; you can also pass List<String>
     {
-        if (objects == null)
-        {
+        if (objects == null) {
             return new ArrayList<>();
         }
 
-        try
-        {
+        try {
             ObjectMapper objectMapper = new ObjectMapper();
             objectMapper.setTimeZone(TimeZone.getDefault());
+
+            // Convert varargs or array to a Set for efficient lookup
+            Set<String> exclusionSet = excludeFields != null ?
+                    new HashSet<>(Arrays.asList(excludeFields)) :
+                    Collections.emptySet();
+
             List<Map<String, Object>> result = new ArrayList<>();
 
-            for (E object : objects)
-            {
-                if (object != null)
-                {
-                    Map<String, Object> map = objectMapper.convertValue(object, new TypeReference<Map<String, Object>>()
-                    {
-                    });
-                    result.add(map);
-                }
-                else
-                {
+            for (E object : objects) {
+                if (object != null) {
+                    Map<String, Object> rawMap = objectMapper.convertValue(object,
+                            new TypeReference<Map<String, Object>>() {});
+
+                    // Filter out excluded fields
+                    Map<String, Object> filteredMap = new LinkedHashMap<>(rawMap.size());
+                    for (Map.Entry<String, Object> entry : rawMap.entrySet()) {
+                        if (!exclusionSet.contains(entry.getKey())) {
+                            filteredMap.put(entry.getKey(), entry.getValue());
+                        }
+                    }
+                    result.add(filteredMap);
+                } else {
                     result.add(null);
                 }
             }
 
             return result;
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             throw new RuntimeException("Error converting objects to map list", e);
         }
     }
@@ -216,26 +225,38 @@ public class CageUIManager
     }
 
     // Helper function to wrap class object to labkeys List<Map<String, Object>> for data submission
-    public <E> List<Map<String, Object>> convertToMapList(E object)
-    {
-        if (object == null)
-        {
-            return Arrays.asList((Map<String, Object>) null);
+    public <E> List<Map<String, Object>> convertToMapList(E object, String... excludeFields) {
+        if (object == null) {
+            return Collections.singletonList(null); // better than Arrays.asList(null) for clarity
         }
 
-        try
-        {
+        try {
             ObjectMapper objectMapper = new ObjectMapper();
-            Map<String, Object> map = objectMapper.convertValue(object, new TypeReference<Map<String, Object>>()
             {
-            });
-            return Arrays.asList(map);
-        }
-        catch (Exception e)
-        {
-            throw new RuntimeException("Error converting object to map list", e);
+            objectMapper.setTimeZone(TimeZone.getDefault());
+
+            // Convert exclusion args to Set (handle null safely)
+            Set<String> exclusionSet = excludeFields != null
+                    ? new HashSet<>(Arrays.asList(excludeFields))
+                    : Collections.emptySet();
+
+            Map<String, Object> rawMap = objectMapper.convertValue(object,
+                    new TypeReference<Map<String, Object>>() {});
+
+            // Filter out excluded fields
+            Map<String, Object> filteredMap = new LinkedHashMap<>();
+            for (Map.Entry<String, Object> entry : rawMap.entrySet()) {
+                if (!exclusionSet.contains(entry.getKey())) {
+                    filteredMap.put(entry.getKey(), entry.getValue());
+                }
+            }
+
+            return Collections.singletonList(filteredMap);
+        } catch (Exception e) {
+            throw new RuntimeException("Error converting object to map", e);
         }
     }
+
 
     /*
         Helper function to submit the session log
@@ -314,7 +335,7 @@ public class CageUIManager
 
         try (DbScope.Transaction tx = CageUISchema.getInstance().getSchema().getScope().ensureTransaction())
         {
-            List<Map<String, Object>> housingMapList = convertToMapList(housingRecords);
+            List<Map<String, Object>> housingMapList = convertToMapList(housingRecords, "alert");
             List<Map<String, Object>> housingCodesMapList = convertToMapList(housingConditionRecords);
 
             if(layoutChangeId != null){

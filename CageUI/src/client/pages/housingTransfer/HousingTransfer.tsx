@@ -28,7 +28,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { findAnimalsInCage } from '../../api/popularQueries';
 import { HousingTransferData } from '../../types/housingFormTypes';
-import { createPrevHousingForm } from '../../utils/housingTransferHelpers';
+import { createHousingFormFromTaskId, createPrevHousingForm } from '../../utils/housingTransferHelpers';
 import { LayoutErrors } from '../../components/LayoutErrors';
 import { LoadingScreen } from '../../components/LoadingScreen';
 
@@ -38,6 +38,7 @@ export const HousingTransfer: FC = () => {
     const [firstRoom, setFirstRoom] = useState<string>();
     const [prevForm, setPrevForm] = useState<Record<string, HousingTransferData[]>>(null);
     const [layoutId, setLayoutId] = useState<string>(null);
+    const [taskId, setTaskId] = useState<string>(null);
     const [selectedAnimals, setSelectedAnimals] = useState<string[]>();
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [errors, setErrors] = useState<string[]>([]);
@@ -60,13 +61,37 @@ export const HousingTransfer: FC = () => {
         const firstRoom: string = ActionURL.getParameter('room');
         const firstCages: string[] = ActionURL.getParameterArray('cages');
         const prevFormId: string = ActionURL.getParameter('lsid');
+        const taskIdParam: string = ActionURL.getParameter('taskid') || ActionURL.getParameter('taskId');
         const layoutChangeId: string = ActionURL.getParameter('historyId'); // did the housing transfer come from a layout change?
         setLayoutId(layoutChangeId);
-        if (prevFormId) {
+        setTaskId(taskIdParam);
+
+        if (taskIdParam) {
+            setIsLoading(true);
+            createHousingFormFromTaskId(taskIdParam)
+                .then(r => {
+                    if (Object.keys(r).length === 0) {
+                        setErrors([`No housing records found for taskid: ${taskIdParam}`]);
+                    } else {
+                        setPrevForm(r);
+                    }
+                })
+                .catch(e => {
+                    setErrors([e?.message || 'Error loading housing records by taskid.']);
+                })
+                .finally(() => {
+                    setIsLoading(false);
+                });
+        }
+        else if (prevFormId) {
             setIsLoading(true);
             createPrevHousingForm(prevFormId)
                 .then(r => {
-                    setPrevForm(r);
+                    if (Object.keys(r).length === 0) {
+                        setErrors([`No housing record found for lsid: ${prevFormId}`]);
+                    } else {
+                        setPrevForm(r);
+                    }
                 })
                 .catch(e => {
                     setErrors([e?.message || 'Error loading previous housing form.']);
@@ -127,6 +152,7 @@ export const HousingTransfer: FC = () => {
                             prevForm={prevForm}
                             currRoom={firstRoom}
                             selectedAnimals={selectedAnimals}
+                            taskId={taskId}
                         />
                     </>
                 }

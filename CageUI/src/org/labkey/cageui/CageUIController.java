@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.labkey.api.action.Action;
 import org.labkey.api.action.ApiResponse;
 import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.MutatingApiAction;
@@ -44,7 +45,9 @@ import org.labkey.api.security.RequiresAnyOf;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.security.permissions.ReadPermission;
+import org.labkey.api.settings.AppProps;
 import org.labkey.api.util.JsonUtil;
+import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
 import org.labkey.cageui.action.AdoptionDataForm;
@@ -52,6 +55,7 @@ import org.labkey.cageui.action.BundledForms;
 import org.labkey.cageui.action.CageUIRecordDeleteForm;
 import org.labkey.cageui.action.CagesForm;
 import org.labkey.cageui.action.HousingConditionRecordsForm;
+import org.labkey.cageui.action.HousingNotification;
 import org.labkey.cageui.action.RackTypesForm;
 import org.labkey.cageui.action.HousingForm;
 import org.labkey.cageui.dataentry.CageUIRecordDeleteRunner;
@@ -70,6 +74,7 @@ import org.labkey.cageui.model.RackSwitchOption;
 import org.labkey.cageui.model.RackTypes;
 import org.labkey.cageui.model.Room;
 import org.labkey.cageui.model.SessionLog;
+import org.labkey.cageui.notification.CageUIHousingTransferNotification;
 import org.labkey.cageui.security.permissions.CageUIAdoptionsPermission;
 import org.labkey.cageui.security.permissions.CageUIAnimalEditorPermission;
 import org.labkey.cageui.security.permissions.CageUILayoutEditorAccessPermission;
@@ -500,8 +505,10 @@ public class CageUIController extends SpringActionController
         @Override
         public Object execute(SimpleApiJsonForm form, BindException errors) throws Exception
         {
+            ApiSimpleResponse response = new ApiSimpleResponse();
             ArrayList<HousingForm> housingRecords = new ArrayList<>();
             ArrayList<HousingConditionRecordsForm> housingConditionRecords = new ArrayList<>();
+            ArrayList<HousingNotification> housingNotifs = new ArrayList<>();
             String taskId = UUID.randomUUID().toString();
             Map<String, Object> taskRecord = new HashMap<>();
 
@@ -516,6 +523,8 @@ public class CageUIController extends SpringActionController
             for (HousingTransferData record : getHousingTransferData()) {
                 HousingForm newTransferRecord = new HousingForm();
                 HousingConditionRecordsForm newConditionRecord = new HousingConditionRecordsForm();
+                String cageNumber;
+                String condLabel;
 
                 if (isUpdate) {
                     HousingForm prevTransferRecord = CageUIManager.getPreviousHousingForm(getPrevFormLsid(), getUser(), getContainer());
@@ -550,6 +559,7 @@ public class CageUIController extends SpringActionController
                 newTransferRecord.setProject(record.getProject());
                 newTransferRecord.setPerformedBy(record.getPerformedBy());
                 newTransferRecord.setEjacConfirmed(record.isEjacConfirmed());
+                newTransferRecord.setAlert(record.isAlert());
 
                 boolean isSpecialHousing = (record.getDestinationRoom() != null && "Special Housing".equals(record.getDestinationRoom().getValue()))
                         || (record.getDestinationRoom() != null && "Special Housing".equals(record.getDestinationRoom().getLabel()))
@@ -565,15 +575,19 @@ public class CageUIController extends SpringActionController
                 if (record.getDestinationRoom() != null && "No Change".equals(record.getDestinationRoom().getValue())) { // No change (animal stays same room and cage)
                     newTransferRecord.setRoom(record.getCurrentRoom() != null ? record.getCurrentRoom().getLabel() : null);
                     newTransferRecord.setCage(record.getCurrentCage() != null ? record.getCurrentCage().getValue() : null);
+                    cageNumber = (record.getCurrentCage() != null ? record.getCurrentCage().getLabel() : null);
                 } else if (isSpecialHousing) { // Special housing
                     newTransferRecord.setRoom(record.getDestinationRoom() != null ? record.getDestinationRoom().getLabel() : null);
                     newTransferRecord.setCage(null);
+                    cageNumber = null;
                 }else if(inTransit){
                     newTransferRecord.setRoom(record.getDestinationRoom() != null ? record.getDestinationRoom().getLabel() : null);
                     newTransferRecord.setCage(null);
+                    cageNumber = null;
                 }else {
                     newTransferRecord.setRoom(record.getDestinationRoom() != null ? record.getDestinationRoom().getLabel() : null);
                     newTransferRecord.setCage(record.getDestinationCage() != null ? record.getDestinationCage().getValue() : null);
+                    cageNumber = (record.getDestinationCage() != null ? record.getDestinationCage().getLabel() : null);
                 }
 
                 HousingConditionRecordsForm populatedConditions = populateHousingConditionsStream(record.getCondition());
@@ -585,9 +599,35 @@ public class CageUIController extends SpringActionController
 
 
                 housingRecords.add(newTransferRecord);
+                if(newTransferRecord.getAlert()){
+                    HousingNotification notif = new HousingNotification();
+                    String path = "/WNPRC/EHR/cageui-housingTransfer.view";
+                    String protocol = AppProps.getInstance().getBaseServerUrl();
+                    String url = protocol + path + "?taskid=" + taskId;
+
+                    condLabel = (newConditionRecord.getCageCondition() == null ? "" : newConditionRecord.getCageCondition()) +
+                            (newConditionRecord.getPairCondition() == null ? "" : newConditionRecord.getPairCondition()) +
+                            (newConditionRecord.getSocialCondition() == null ? "" : newConditionRecord.getSocialCondition()) +
+                            (newConditionRecord.getSpecialCondition() == null ? "" : newConditionRecord.getSpecialCondition());
+                    notif.setCageNumber(cageNumber);
+                    notif.setCondLabel(condLabel);
+                    notif.setHousingRecord(newTransferRecord);
+                    notif.setUrl(url);
+                    housingNotifs.add(notif);
+                }
+
             }
 
-            return CageUIManager.get().submitHousingTransfer(housingRecords, housingConditionRecords, taskRecord, getUser(), getContainer(), getLayoutChangeId());
+            response = CageUIManager.get().submitHousingTransfer(housingRecords, housingConditionRecords, taskRecord, getUser(), getContainer(), getLayoutChangeId());
+
+            if(response.get("success").equals(true)){
+                if(!housingNotifs.isEmpty()){
+                    CageUIHousingTransferNotification triggerNotif = new CageUIHousingTransferNotification(getContainer().getSourceModule(), housingNotifs);
+                    triggerNotif.sendManually(getContainer(), getUser());
+                }
+            }
+
+            return response;
         }
     }
 

@@ -18,7 +18,7 @@
 
 
 import { Option } from '@labkey/components';
-import { fetchCurrentCageMods, fetchHousingForm, findAnimalsInCage } from '../api/popularQueries';
+import { fetchCurrentCageMods, fetchHousingForm, fetchHousingByTaskId, findAnimalsInCage } from '../api/popularQueries';
 import { ModTypes } from '../types/typings';
 import { Filter, Query } from '@labkey/api';
 import { labkeyActionSelectWithPromise } from '../api/labkeyActions';
@@ -260,65 +260,151 @@ export const checkIsAdoptedFatherInDest = async (infantId: string, animalsInCage
     }
 }
 
-export const createPrevHousingForm = async (prevFormId: string): Promise<Record<string, HousingTransferData[]>> => {
-    const prevForm = await fetchHousingForm(prevFormId);
+export const createHousingTransferDataFromHousingRecord = (
+    row: any,
+    currentLocations?: Record<string, { room: Option<string>, cage: Option<string> }>
+): HousingTransferData => {
     const conditions: ConditionCode[] = [];
 
-    if(prevForm['condNew/special_condition']){
+    const specialCond = row['cond/special_condition'] || row['condNew/special_condition'];
+    const specialTitle = row['cond/special_condition/title'] || row['condNew/special_condition/title'];
+    const specialCat = row['cond/special_condition/category'] || row['condNew/special_condition/category'];
+    if (specialCond) {
         conditions.push({
-            value: prevForm['condNew/special_condition'],
-            label: prevForm['condNew/special_condition/title'],
-            type: prevForm['condNew/special_condition/category']
+            value: specialCond,
+            label: specialTitle,
+            type: specialCat
         });
     }
 
-    if(prevForm['condNew/pair_condition']){
+    const pairCond = row['cond/pair_condition'] || row['condNew/pair_condition'];
+    const pairTitle = row['cond/pair_condition/title'] || row['condNew/pair_condition/title'];
+    const pairCat = row['cond/pair_condition/category'] || row['condNew/pair_condition/category'];
+    if (pairCond) {
         conditions.push({
-            value: prevForm['condNew/pair_condition'],
-            label: prevForm['condNew/pair_condition/title'],
-            type: prevForm['condNew/pair_condition/category']
+            value: pairCond,
+            label: pairTitle || pairCond,
+            type: pairCat
         });
     }
 
-    if(prevForm['condNew/cage_condition']){
+    const cageCond = row['cond/cage_condition'] || row['condNew/cage_condition'];
+    const cageTitle = row['cond/cage_condition/title'] || row['condNew/cage_condition/title'];
+    const cageCat = row['cond/cage_condition/category'] || row['condNew/cage_condition/category'];
+    if (cageCond) {
         conditions.push({
-            value: prevForm['condNew/cage_condition'],
-            label: prevForm['condNew/cage_condition/title'],
-            type: prevForm['condNew/cage_condition/category']
+            value: cageCond,
+            label: cageTitle || cageCond,
+            type: cageCat
         });
     }
 
-    if(prevForm['condNew/social_condition']){
+    const socialCond = row['cond/social_condition'] || row['condNew/social_condition'];
+    const socialTitle = row['cond/social_condition/title'] || row['condNew/social_condition/title'];
+    const socialCat = row['cond/social_condition/category'] || row['condNew/social_condition/category'];
+    if (socialCond) {
         conditions.push({
-            value: prevForm['condNew/social_condition'],
-            label: prevForm['condNew/social_condition/title'],
-            type: prevForm['condNew/social_condition/category']
+            value: socialCond,
+            label: socialTitle || socialCond,
+            type: socialCat
         });
     }
 
-    const isSpecial = prevForm['condNew/special_condition'] === 'x';
-    const inTransit = prevForm['condNew/special_condition'] === 'it';
+    const isSpecial = specialCond === 'x' || row.cage === 'Special Housing' || row['cage/cage_number'] === 'Special Housing';
+    const inTransit = specialCond === 'it' || row.cage === 'In Transit' || row['cage/cage_number'] === 'In Transit';
+    const cageVal = row.cage ?? row.cageNew;
+    const cageLabel = row['cage/cage_number'] ?? row['cageNew/cage_number'];
+
     const destCageOption = isSpecial
-        ? { value: 'Special Housing', label: 'Special Housing' } :
-        inTransit ? {value: 'In Transit', label: 'In Transit'}
-        : { value: prevForm.cageNew, label: prevForm['cageNew/cage_number'] };
+        ? { value: 'Special Housing', label: 'Special Housing' }
+        : inTransit
+        ? { value: 'In Transit', label: 'In Transit' }
+        : { value: cageVal ? cageVal.toString() : '', label: cageLabel ? cageLabel.toString() : '' };
 
-    const data: HousingTransferData = {
-        id: prevForm.Id,
-        inDate: dayjs(prevForm.date),
-        outDate: prevForm.enddate ? dayjs(prevForm.enddate) : null,
-        destinationRoom: { value: prevForm['room/rowid'] || prevForm.room, label: prevForm.room },
+    const reasonForMove = row.reason
+        ? row.reason.split(',').map((item: string) => ({ value: item.trim(), label: item.trim() }))
+        : [];
+
+    const animalId = row.Id || row.id;
+    const curLoc = currentLocations ? currentLocations[animalId] : null;
+
+    return {
+        id: animalId,
+        inDate: row.date ? dayjs(row.date) : dayjs(),
+        outDate: row.enddate ? dayjs(row.enddate) : null,
+        destinationRoom: { value: row['room/rowid'] || row.room, label: row.room },
         destinationCage: destCageOption,
         condition: conditions,
-        reasonForMove: prevForm.reason ? prevForm.reason.split(',').map(item => ({value: item.trim(), label: item.trim()})) : [],
-        project: prevForm.project,
-        ejacConfirmed: prevForm.ejacConfirmed,
-        remarks: prevForm.remark,
-        performedBy: prevForm.performedby,
+        reasonForMove: reasonForMove,
+        project: row.project !== null && row.project !== undefined ? row.project.toString() : null,
+        ejacConfirmed: !!row.ejacConfirmed,
+        remarks: row.remark || '',
+        performedBy: row.performedby || '',
         alert: false,
+        currentRoom: curLoc?.room || { value: row.room, label: row.room },
+        currentCage: curLoc?.cage || { value: destCageOption.value, label: destCageOption.label },
+        taskId: row.taskid || row.taskId,
+        lsid: row.lsid
+    };
+};
+
+export const createHousingFormFromTaskId = async (taskId: string): Promise<Record<string, HousingTransferData[]>> => {
+    const rows = await fetchHousingByTaskId(taskId);
+    if (!rows || rows.length === 0) {
+        return {};
     }
-    return {[prevForm.room]: [data]};
-}
+
+    const animalIds = rows.map(r => r.Id || r.id).filter(Boolean);
+    const currentLocations: Record<string, { room: Option<string>, cage: Option<string> }> = {};
+
+    if (animalIds.length > 0) {
+        try {
+            const config: Query.SelectRowsOptions = {
+                schemaName: 'study',
+                queryName: 'demographicsCurLocationNew',
+                columns: ['id', 'room', 'room/rowid', 'cage', 'cage/cage_number'],
+                filterArray: [Filter.create('id', animalIds, Filter.Types.IN)]
+            };
+            const result = await labkeyActionSelectWithPromise(config);
+            if (result?.rows) {
+                result.rows.forEach(r => {
+                    const id = r.id || r.Id;
+                    const cageLabel = r['cage/cage_number'] || (typeof r.cage === 'object' ? r.cage?.displayValue : r.cage) || '';
+                    const cageValue = (typeof r.cage === 'object' ? r.cage?.value : r.cage) || '';
+                    currentLocations[id] = {
+                        room: { label: r.room || 'Unassigned', value: r.room || 'Unassigned' },
+                        cage: { label: cageLabel?.toString() || '', value: cageValue?.toString() || '' }
+                    };
+                });
+            }
+        } catch (e) {
+            console.error('Error fetching current locations for taskId animals:', e);
+        }
+    }
+
+    const result: Record<string, HousingTransferData[]> = {};
+
+    for (const row of rows) {
+        const data = createHousingTransferDataFromHousingRecord(row, currentLocations);
+        const roomKey = row.room || 'Unassigned';
+        if (!result[roomKey]) {
+            result[roomKey] = [];
+        }
+        result[roomKey].push(data);
+    }
+
+    return result;
+};
+
+export const createPrevHousingForm = async (prevFormId: string): Promise<Record<string, HousingTransferData[]>> => {
+    const prevForm = await fetchHousingForm(prevFormId);
+    if (!prevForm) {
+        return {};
+    }
+    const data = createHousingTransferDataFromHousingRecord(prevForm);
+    const roomKey = prevForm.room || 'Unassigned';
+    return { [roomKey]: [data] };
+};
 
 export const getEffectiveCageId = (animal: HousingTransferData): string | null => {
     if (!animal) return null;

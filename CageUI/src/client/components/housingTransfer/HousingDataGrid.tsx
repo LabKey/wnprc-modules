@@ -242,6 +242,53 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
         });
     }, [animals, fetchProjectOptions]);
 
+    useEffect(() => {
+        const roomsToFetch = new Set<string>();
+        animals.forEach(animal => {
+            const roomLabel = animal.destinationRoom?.label;
+            const isSpecial = isSpecialHousing(animal);
+            const inTransit = isInTransit(animal);
+            const isNoChange = animal.destinationRoom?.value === 'No Change' || animal.destinationRoom?.label === 'No Change';
+
+            if (roomLabel && !isSpecial && !inTransit && !isNoChange && !rowMetadata[animal.id]?.cageOptions) {
+                roomsToFetch.add(roomLabel);
+            }
+        });
+
+        if (roomsToFetch.size === 0) return;
+
+        roomsToFetch.forEach(room => {
+            const config: Query.SelectRowsOptions = {
+                schemaName: 'cageui',
+                queryName: 'cagesInRoom',
+                columns: ['room', 'rack_object_id', 'rackid', 'cage_object_id', 'cage_number'],
+                filterArray: [Filter.create('room', room, Filter.Types.EQUALS)]
+            };
+
+            labkeyActionSelectWithPromise(config).then(result => {
+                const cageOptions = result.rows.map(row => ({
+                    label: row.cage_number.toString(),
+                    value: row.cage_object_id
+                })).sort((a, b) => Number(a.label) - Number(b.label));
+
+                setRowMetadata(prev => {
+                    const next = { ...prev };
+                    animals.forEach(animal => {
+                        if (animal.destinationRoom?.label === room && (!next[animal.id]?.cageOptions || next[animal.id]?.cageOptions.length === 0)) {
+                            next[animal.id] = {
+                                ...next[animal.id],
+                                cageOptions
+                            };
+                        }
+                    });
+                    return next;
+                });
+            }).catch(err => {
+                console.error('Error fetching cage options for room ' + room, err);
+            });
+        });
+    }, [animals, isSpecialHousing, isInTransit, rowMetadata]);
+
 
 
     /**

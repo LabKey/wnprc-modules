@@ -207,30 +207,15 @@ export const fetchConditionCodes = async (): Promise<ConditionCode[]> => {
     try {
         const res = await labkeyActionSelectWithPromise(config);
         const codes: ConditionCode[] = res.rows.map(row => {
-            const isIT = row.value?.toString().toLowerCase() === 'it';
             return {
-                label: isIT ? 'In Transit' : `${row.value} - ${row.category}`,
+                label: `${row.value} - ${row.title}`,
                 value: row.value.toString(),
-                type: row.category || (isIT ? ConditionTypes.special : undefined)
+                type: row.category
             };
         });
-        if (!codes.some(c => c.value === 'it')) {
-            codes.push({
-                label: 'In Transit',
-                value: 'it',
-                type: ConditionTypes.special
-            });
-        }
         return codes;
     } catch (e) {
         console.error('Error fetching condition codes:', e);
-        return [
-            {
-                label: 'In Transit',
-                value: 'it',
-                type: ConditionTypes.special
-            }
-        ];
     }
 };
 
@@ -260,7 +245,7 @@ export const fetchHousingForm = async (lsid: string): Promise<any> => {
             'cond', 'cond/special_condition','cond/pair_condition','cond/cage_condition','cond/social_condition',
             'cond/special_condition/title','cond/pair_condition/title','cond/cage_condition/title','cond/social_condition/title',
             'cond/special_condition/category','cond/pair_condition/category','cond/cage_condition/category','cond/social_condition/category',
-            'reason', 'project', 'remark', 'performedby', 'ejacConfirmed'],
+            'reason', 'project', 'remark', 'performedby', 'ejacConfirmed', 'taskid', 'lsid'],
         filterArray: [
             Filter.create('lsid', lsid, Filter.Types.EQUAL)
         ]
@@ -276,7 +261,36 @@ export const fetchHousingForm = async (lsid: string): Promise<any> => {
         console.error('Error fetching condition codes:', e);
         return null;
     }
-}
+};
+
+export const fetchHousingByTaskId = async (taskId: string): Promise<any[]> => {
+    const config: Query.SelectRowsOptions = {
+        schemaName: 'study',
+        queryName: 'housing_test',
+        columns: [
+            'Id', 'date', 'enddate', 'room', 'room/rowid', 'cage', 'cage/cage_number',
+            'cond', 'cond/special_condition', 'cond/pair_condition', 'cond/cage_condition', 'cond/social_condition',
+            'cond/special_condition/title', 'cond/pair_condition/title', 'cond/cage_condition/title', 'cond/social_condition/title',
+            'cond/special_condition/category', 'cond/pair_condition/category', 'cond/cage_condition/category', 'cond/social_condition/category',
+            'reason', 'project', 'remark', 'performedby', 'ejacConfirmed', 'taskid', 'lsid'
+        ],
+        filterArray: [
+            Filter.create('taskid', taskId, Filter.Types.EQUAL)
+        ]
+    };
+
+    try {
+        const res = await labkeyActionSelectWithPromise(config);
+        console.log("Housing Res by TaskId: ", res);
+        if (res && res.rows && res.rows.length > 0) {
+            return res.rows;
+        }
+        return [];
+    } catch (e) {
+        console.error('Error fetching housing records by taskid:', e);
+        return [];
+    }
+};
 
 /**
  * Fetches cage size requirements by weight from ehr_lookups.cageclass.

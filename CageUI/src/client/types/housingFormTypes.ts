@@ -58,6 +58,8 @@ export interface HousingTransferData {
     triggeredBy?: string; // ID of the animal that triggered this animal's addition to the grid
     currentRoom?: Option<string>;
     currentCage?: Option<string>;
+    taskId?: string;
+    lsid?: string;
 }
 
 export interface HousingFormData {

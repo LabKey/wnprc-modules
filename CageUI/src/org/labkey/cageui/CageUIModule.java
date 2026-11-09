@@ -22,6 +22,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
 import org.labkey.api.ldk.ExtendedSimpleModule;
+import org.labkey.api.ldk.notification.Notification;
+import org.labkey.api.ldk.notification.NotificationService;
 import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.query.DefaultSchema;
@@ -29,6 +31,7 @@ import org.labkey.api.query.QuerySchema;
 import org.labkey.api.security.roles.RoleManager;
 import org.labkey.api.view.WebPartFactory;
 import org.labkey.cageui.dataentry.CageUIRecordDeleteRunner;
+import org.labkey.cageui.notification.CageUIHousingTransferNotification;
 import org.labkey.cageui.query.CageUIUserSchema;
 import org.labkey.cageui.security.permissions.CageUIAdoptionsPermission;
 import org.labkey.cageui.security.permissions.CageUIAnimalEditorPermission;
@@ -46,8 +49,11 @@ import org.labkey.cageui.security.roles.CageUIModificationEditorRole;
 import org.labkey.cageui.security.roles.CageUIRoomCreatorRole;
 import org.labkey.cageui.security.roles.CageUIRoomModifierRole;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 public class CageUIModule extends ExtendedSimpleModule
@@ -84,6 +90,7 @@ public class CageUIModule extends ExtendedSimpleModule
     @Override
     protected void doStartupAfterSpringConfig(ModuleContext moduleContext)
     {
+        this.registerNotifications();
         CageUIRecordDeleteRunner.schedule();
     }
 
@@ -109,6 +116,17 @@ public class CageUIModule extends ExtendedSimpleModule
         RoleManager.registerRole(new CageUIRoomModifierRole());
         RoleManager.registerRole(new CageUIModificationEditorRole());
         RoleManager.registerRole(new CageUIAdoptionsRole());
+    }
+
+    public void registerNotifications() {
+
+        List<Notification> notifications = Arrays.asList(
+                new CageUIHousingTransferNotification(this, new ArrayList<>())
+        );
+
+        for (Notification notification : notifications) {
+            NotificationService.get().registerNotification(notification);
+        }
     }
 
     @Override

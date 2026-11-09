@@ -39,10 +39,11 @@ interface HousingFormProps {
     prevForm?: Record<string, HousingTransferData[]>;
     currRoom?: string;
     selectedAnimals?: string[];
+    taskId?: string;
 }
 
 export const HousingForm: FC<HousingFormProps> = (props) => {
-    const { selectedAnimals, currRoom, user, prevForm, layoutChangeId } = props;
+    const { selectedAnimals, currRoom, user, prevForm, layoutChangeId, taskId } = props;
     const [animalsByRoom, setAnimalsByRoom] = useState<Record<string, HousingTransferData[]>>(currRoom ? {[currRoom]: [] } : null);
     const [centerAnimals, setCenterAnimals] = useState<string[]>([]);
     const [animalLocations, setAnimalLocations] = useState<Record<string, { room: Option<string>, cage: Option<string> }>>({});
@@ -62,6 +63,7 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
     useEffect(() => {
         if(prevForm){
             setAnimalsByRoom(prevForm);
+            setAutoConditions(false);
         }
     }, [prevForm]);
 

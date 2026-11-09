@@ -50,6 +50,7 @@ public class HousingForm
     @JsonProperty("lsid")
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String lsid;
+    private boolean alert;
 
     public String getId()
     {
@@ -189,5 +190,15 @@ public class HousingForm
     public void setLsid(String lsid)
     {
         this.lsid = lsid;
+    }
+
+    public boolean getAlert()
+    {
+        return alert;
+    }
+
+    public void setAlert(boolean alert)
+    {
+        this.alert = alert;
     }
 }

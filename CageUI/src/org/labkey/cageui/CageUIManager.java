@@ -232,7 +232,7 @@ public class CageUIManager
 
         try {
             ObjectMapper objectMapper = new ObjectMapper();
-            {
+            
             objectMapper.setTimeZone(TimeZone.getDefault());
 
             // Convert exclusion args to Set (handle null safely)

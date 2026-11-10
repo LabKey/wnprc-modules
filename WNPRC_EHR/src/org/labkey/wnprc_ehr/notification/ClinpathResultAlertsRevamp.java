@@ -91,7 +91,7 @@ public class ClinpathResultAlertsRevamp extends AbstractEHRNotification {
 
         // Creates filter.
         SimpleFilter myFilter = new SimpleFilter("qcstate/PublicData", true, CompareType.EQUAL);
-        myFilter.addCondition("taskid/datecompleted", dateToolkit.getDateXDaysFromNow(-1), CompareType.DATE_GTE);
+        myFilter.addCondition("taskid/datecompleted", dateToolkit.getDateXDaysFromNow(-200), CompareType.DATE_GTE); // Change -200 to -1
         myFilter.addCondition("taskid/datecompleted", "", CompareType.NONBLANK);
         // Creates sort.
         Sort mySort = new Sort("Id,date");
@@ -169,7 +169,6 @@ public class ClinpathResultAlertsRevamp extends AbstractEHRNotification {
                     messageBody.append("<br>\n" + currentRoom + ":\n");
                     // Reformats the hashmap into a String[] List (to be compatible with the table creation function).
                     ArrayList<String []> currentTableData = new ArrayList<>();
-                    ArrayList<String> rowColorsList = new ArrayList<>();
                     for (HashMap<String, String> currentRow : filteredResults.get(currentArea).get(currentRoom)) {
                         String[] newTableRow = new String[] {
                                 currentRow.get("Id"),
@@ -180,18 +179,10 @@ public class ClinpathResultAlertsRevamp extends AbstractEHRNotification {
                                 currentRow.get("reviewedBy"),
                         };
                         currentTableData.add(newTableRow);
-
-                        if (currentRow.get("reviewedBy").isBlank()) {
-                            rowColorsList.add("red");
-                        }
-                        else {
-                            rowColorsList.add("white");
-                        }
                     }
 
                     // Displays table.
                     NotificationToolkit.NotificationRevampTable myTable = new NotificationToolkit.NotificationRevampTable(tableColumns, currentTableData);
-                    myTable.rowColors = rowColorsList;
                     messageBody.append(myTable.createBasicHTMLTable());
                 }
             }

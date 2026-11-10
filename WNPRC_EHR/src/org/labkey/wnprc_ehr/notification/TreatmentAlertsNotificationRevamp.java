@@ -23,6 +23,7 @@ import org.labkey.api.module.Module;
 import org.labkey.api.security.User;
 
 import java.lang.reflect.Array;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -39,11 +40,15 @@ public class TreatmentAlertsNotificationRevamp extends AbstractEHRNotification {
 
 
     // Constructors
+    private final Module owner;
     /**
      * This constructor is used to register the notification in WNPRC_EHRModule.java.
      * @param owner
      */
-    public TreatmentAlertsNotificationRevamp(Module owner) {super(owner);}
+    public TreatmentAlertsNotificationRevamp(Module owner) {
+        super(owner);
+        this.owner = owner;
+    }
 
 
 
@@ -64,11 +69,11 @@ public class TreatmentAlertsNotificationRevamp extends AbstractEHRNotification {
     }
     @Override
     public String getScheduleDescription() {
-        return "Daily at 6:00AM, 10:00AM, 1:00PM, 3:00PM, 5:00PM, 7:00PM";
+        return "Daily at 10:00AM, 1:00PM, 3:00PM, 5:00PM, 7:00PM, 11:00PM";
     }
     @Override
     public String getCronString() {
-        return notificationToolkit.createCronString("0", "6,10,13,15,17,19", "*");
+        return notificationToolkit.createCronString("0", "10,13,15,17,19,23", "*");
     }
     @Override
     public String getCategory() {
@@ -215,8 +220,17 @@ public class TreatmentAlertsNotificationRevamp extends AbstractEHRNotification {
         // 7. Checks for missing In Rooms after 2:30pm, as specified in the SOP.
         if (!myTreatmentAlertsObject.missingInRoomsAfterTwoThirty.isEmpty()) {
             messageBody.append("<b>WARNING: There are " + myTreatmentAlertsObject.missingInRoomsAfterTwoThirty.size() + " " + notificationToolkit.createHyperlink("animals without In Rooms", myTreatmentAlertsObject.missingInRoomsAfterTwoThirtyUrlView) + ".</b>");
+            messageBody.append("<hr>\n");
         }
 
+        // 8. Checks for any animals that did not get any water for today and the last five days.
+        WaterMonitoringNotification waterMonitoringFunctions = new WaterMonitoringNotification(owner);
+        int numDays = 1;
+        final Date now = new Date();
+        waterMonitoringFunctions.findAnimalsWithWaterEntries(c,u,messageBody,numDays);
+        waterMonitoringFunctions.findWaterOrdersNotCompleted(c,u,messageBody, LocalDateTime.now(), false);
+        waterMonitoringFunctions.findWaterOrdersNotCompleted(c,u,messageBody,LocalDateTime.now(), true);
+        waterMonitoringFunctions.findAnimalsWithEnoughWater(c,u,messageBody,10);
 
         return messageBody.toString();
     }

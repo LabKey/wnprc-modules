@@ -3275,6 +3275,11 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest
 
     }
 
+    private void selectVirologyFile(String fileName)
+    {
+        click(Locator.xpath("//span[text()=" + Locator.xq(fileName) + "]/ancestor::td[1]/preceding-sibling::td[1]//input[@name='fileselection']"));
+    }
+
     @Test
     public void testClinpathVirologyBulkUpload() throws IOException, CommandException
     {
@@ -3285,11 +3290,12 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest
         waitForText("Import Results from File");
         _extHelper.clickMenuButton("Import Results from File");
         waitForText("Please select a file to import results from");
-        click(Locator.radioButtonByNameAndValue("fileselection","1"));
+        selectVirologyFile(CORRECT_SAMPLE_FILE_NAME);
         //for this one the click works but the function times out for some reason
         //_extHelper.clickExtButton("Import");
         click(Locator.extButton("Import"));
-        waitForElement(Locator.button("Submit Final"), WAIT_FOR_JAVASCRIPT);
+        // The import window closes only after the async import adds the results rows
+        waitForTextToDisappear("Please select a file to import results from", WAIT_FOR_JAVASCRIPT);
         click(Locator.extButton("Submit Final"));
         click(Locator.extButton("Yes"));
 
@@ -3325,7 +3331,7 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest
         waitForText("Import Results from File");
         _extHelper.clickMenuButton("Import Results from File");
         waitForText("Please select a file to import results from");
-        click(Locator.radioButtonByNameAndValue("fileselection","2"));
+        selectVirologyFile(NO_MATCHING_RECORDS_SAMPLE_FILE_NAME);
         click(Locator.extButton("Import"));
         Assert.assertEquals("No matching clinpath records found.",waitForElement(Locator.id("clinpath-virology-err")).getText());
     }
@@ -3340,13 +3346,13 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest
         waitForText("Import Results from File");
         _extHelper.clickMenuButton("Import Results from File");
         waitForText("Please select a file to import results from");
-        click(Locator.radioButtonByNameAndValue("fileselection","0"));
+        selectVirologyFile(INCORRECT_FORMAT_SAMPLE_FILE_NAME);
         //for this one the click works but the function times out for some reason
         //_extHelper.clickExtButton("Import");
-        waitForText("Preview");
-        click(Locator.extButton("Preview"));
+        waitAndClick(Locator.extButton("Preview"));
         switchToWindow(1);
-        Assert.assertEquals("Bad date format. Set the date column format to 'Date'.",waitForElement(Locator.id("bad-date-preview-err")).getText());
+        Assert.assertEquals("Bad date format. Set the date column format to 'Date'.", waitForElement(Locator.id("bad-date-preview-err")).getText());
+        getDriver().close();
         switchToMainWindow();
     }
 
@@ -3360,11 +3366,10 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest
         waitForText("Import Results from File");
         _extHelper.clickMenuButton("Import Results from File");
         waitForText("Please select a file to import results from");
-        click(Locator.radioButtonByNameAndValue("fileselection","0"));
+        selectVirologyFile(INCORRECT_FORMAT_SAMPLE_FILE_NAME);
         //for this one the click works but the function times out for some reason
         //_extHelper.clickExtButton("Import");
-        waitForText("Import");
-        click(Locator.extButton("Import"));
+        waitAndClick(Locator.extButton("Import"));
         Assert.assertEquals("Bad date format. Set the date column format to 'Date'.",waitForElement(Locator.id("clinpath-virology-err")).getText());
     }
 

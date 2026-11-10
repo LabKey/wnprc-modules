@@ -13,6 +13,14 @@ function onInit(event, helper) {
 function onUpsert(helper, scriptErrors, row, oldRow){
     let breedingDataSaved = helper.getProperty('breedingEncountersSaved');
 
+    if (row.date){
+        row.date.setSeconds(0);
+    }
+
+    if (row.enddate){
+        row.enddate.setSeconds(0);
+    }
+
     if (row.reason) {
         let reasons = row.reason.split(',');
         let breeding = false;

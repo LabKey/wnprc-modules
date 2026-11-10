@@ -1657,7 +1657,7 @@ export const checkCageWeightLimit = async (
             animalWeightStatus.push({
                 animalId: animal.id,
                 weight: weight,
-                maxAllowedWeight: null,
+                maxAllowedWeight: 0,
                 isOver: false
             });
             continue;
@@ -1682,7 +1682,7 @@ export const checkCageWeightLimit = async (
 
     // 4. Calculate cage-level SQFT-based allowed weight: only for reporting (e.g., "most animals fit under X lbs")
     let cageSqft = cageDimensions.sqft ?? null;
-    let allowedWeight: number | null = null;
+    let allowedWeight: number = 0;
 
     if (cageSqft && cageClassList.length > 0) {
         const fittingTiers = cageClassList.filter(c => c.sqft <= cageSqft);
@@ -1690,7 +1690,7 @@ export const checkCageWeightLimit = async (
             allowedWeight = Math.max(...fittingTiers.map(t => t.high));
         } else {
             // Cage too small even for smallest tier — allow nothing? Or cap at lowest tier's high?
-            allowedWeight = cageClassList[0]?.high ?? null;
+            allowedWeight = cageClassList[0]?.high ?? 0;
         }
     }
 

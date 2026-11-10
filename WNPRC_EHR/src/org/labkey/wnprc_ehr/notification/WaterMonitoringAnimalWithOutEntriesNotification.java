@@ -60,12 +60,12 @@ public class WaterMonitoringAnimalWithOutEntriesNotification extends WaterMonito
     }
 
     @Override
-    public String getCronString() { return "0 0 15,19 * * ?"; }
+    public String getCronString() { return "0 0 17,19 * * ?"; }
 
     @Override
     public String getScheduleDescription()
     {
-        return "every day at 1500 and 1900";
+        return "every day at 1700 and 1900";
     }
 
     @Override

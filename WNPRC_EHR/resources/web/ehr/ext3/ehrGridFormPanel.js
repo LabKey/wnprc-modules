@@ -1085,6 +1085,8 @@ EHR.ext.GridFormPanel = Ext.extend(Ext.Panel,
                             }
                         }
                         Promise.all(promises).then((res)=> {
+                            // files fill in getFileHistory completion order; sort so the list is stable
+                            files.sort(function(a, b) { return a.name.localeCompare(b.name); });
                             Ext.Msg.hide();
                             importFromFileWindow.show();
                             selectFilePanel.removeAll();

@@ -21,32 +21,6 @@ WITH FiveYearsAgo AS (
     SELECT TIMESTAMPADD('SQL_TSI_YEAR', -5, NOW()) AS StartDate
 ),
 
--- CTE for animals with diarrhea-related treatments in the last 5 years (Condition 2.5)
-     /*DiarrheaTreatmentDetails AS (
-         SELECT
-             t.Id,
-             CAST(t.date AS DATE) AS treatment_date,
-             SUBSTRING(t.description, '(@?[a-zA-Z]+-[0-9a-zA-Z]+)') AS extracted_code
-         FROM study.treatment_order t
-         WHERE t.date >= (SELECT StartDate FROM FiveYearsAgo)
-           AND (
-             t.description LIKE '%w-10980%' OR t.description LIKE '%c-54620%' OR t.description LIKE '%w-10942%' OR
-             t.description LIKE '%w-10944%' OR t.description LIKE '%c-54630%' OR t.description LIKE '%c-52a68%' OR
-             t.description LIKE '%w-10044%' OR t.description LIKE '%c-52a20%' OR t.description LIKE '%c-93040%' OR
-             t.description LIKE '%c-a0111%' OR t.description LIKE '%c-52a10%' OR t.description LIKE '%w-10226%' OR
-             t.description LIKE '%f-61c7b%' OR t.description LIKE '%c-55020%' OR t.description LIKE '%c-d1507%' OR
-             t.description LIKE '%c-52a00%' OR t.description LIKE '%t-59666%' OR t.description LIKE '%c-d4657%' OR
-             t.description LIKE '%r-f94e9%' OR t.description LIKE '%c-b0158%' OR t.description LIKE '%w-10587%' OR
-             t.description LIKE '%w-10757%' OR t.description LIKE '%c-d3739%' OR t.description LIKE '%w-10222%' OR
-             t.description LIKE '%c-84540%' OR t.description LIKE '%w-10975%' OR t.description LIKE '%c-52040%' OR
-             t.description LIKE '%c-5205d%' OR t.description LIKE '%c-84232%' OR t.description LIKE '%c-56101%' OR
-             t.description LIKE '%c-56a50%' OR t.description LIKE '%@e-85350%' OR t.description LIKE '%c-a01b0%' OR
-             t.description LIKE '%f-61e1f%' OR t.description LIKE '%c-84812%' OR t.description LIKE '%w-10908%' OR
-             t.description LIKE '%w-10882%' OR t.description LIKE '%c-0026e%' OR t.description LIKE '%c-55001%' OR
-             t.description LIKE '%c-52340%'
-             )
-     ),*/
-
      TreatmentCodeMap AS (
          SELECT 'w-10980' AS code, 'chronic' AS acute_or_chronic, 'supplement' AS type UNION ALL
          SELECT 'w-10942', 'acute', 'antiboitic' UNION ALL
@@ -227,9 +201,11 @@ WITH FiveYearsAgo AS (
          SELECT
              Id,
              CAST(date AS DATE) AS date,
-             COUNT(*) AS treatments
+             COUNT(*) AS treatments,
+             GROUP_CONCAT(code, ', ') AS treatment_codes  -- comma-separated list of ALL codes
          FROM study.drug
          WHERE Id IN (SELECT Id FROM PotentialDiarrheaAnimals)
+            AND code IS NOT NULL
          GROUP BY Id, CAST(date AS DATE)
      ),
 
@@ -264,7 +240,6 @@ WITH FiveYearsAgo AS (
          SELECT
              tdt.Id,
              tdt.date,
-             COUNT(*) AS treatments,
              GROUP_CONCAT(DISTINCT tdt.acute_or_chronic, ', ') AS acute_or_chronic_list,
              GROUP_CONCAT(DISTINCT tdt.type, ', ') AS type_list
          FROM DiarrheaTreatmentDetails tdt
@@ -277,15 +252,17 @@ SELECT
     pda.gender,
     ds.date,
     COALESCE(dhc.housing_changes, 0) AS "housing_changes (Cumulative)",
-    COALESCE(dtda.treatments, 0) AS "treatments (Cumulative)",
-    COALESCE(dtda.acute_or_chronic_list, '') AS "acute or chronic",
-    COALESCE(dtda.type_list, '') AS "type",
+    dt.treatment_codes AS "treatments (Values)",
+    COALESCE(dt.treatmentS,0) AS "treatments (Cumulative)",
+    COALESCE(dtda.acute_or_chronic_list, '') AS "acute or chronic (Value)",
+    COALESCE(dtda.type_list, '') AS "type (Value)",
     COALESCE(dds.diarrhea_status, 0) AS "diarrhea_status (Value)",
     COALESCE(dco.cage_obs, 0.0) AS "Cage Obs (Value)"
 FROM PotentialDiarrheaAnimals pda
          CROSS JOIN DateSeries ds
          LEFT JOIN DailyHousingChanges dhc ON pda.Id = dhc.Id AND ds.date = dhc.date
          LEFT JOIN DailyTreatmentDetailsAgg dtda ON pda.Id = dtda.id AND ds.date = dtda.date
+         LEFT JOIN DailyTreatments dt ON pda.Id = dt.id AND ds.date = dt.date
          LEFT JOIN DailyDiarrheaStatus dds ON pda.Id = dds.Id AND ds.date = dds.dateOnly
          LEFT JOIN DailyCageObs dco ON pda.Id = dco.Id AND ds.date = dco.dateOnly
 WHERE ds.date >= CAST(pda.birth AS DATE)

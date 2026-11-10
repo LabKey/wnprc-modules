@@ -72,6 +72,7 @@ import org.labkey.test.util.PostgresOnlyTest;
 import org.labkey.test.util.SchemaHelper;
 import org.labkey.test.util.TestLogger;
 import org.labkey.test.util.TextSearcher;
+import org.labkey.test.util.di.DataIntegrationHelper;
 import org.labkey.test.util.ehr.EHRTestHelper;
 import org.labkey.test.util.ext4cmp.Ext4ComboRef;
 import org.labkey.test.util.ext4cmp.Ext4FieldRef;
@@ -4893,5 +4894,13 @@ public class WNPRC_EHRTest extends AbstractGenericEHRTest implements PostgresOnl
         WebElement comboEl = ExtHelper.Locators.formItemWithLabel(label).notHidden().findElement(getDriver());
         WebElement input = Locator.xpath(".//input[contains(@class, 'x-form-field')]").findElement(comboEl);
         return getFormElement(input);
+    }
+
+    @Test
+    public void testDeleteRequestedRecordsEtl() throws Exception
+    {
+        DataIntegrationHelper diHelper = new DataIntegrationHelper("/" + EHR_FOLDER_PATH);
+        String jobId = diHelper.runTransformAndWait("{WNPRC_EHR}/deleteRequestedRecords").getJobId();
+        assertEquals("Delete requested records ETL status", "COMPLETE", diHelper.getTransformStatus(jobId).toUpperCase());
     }
 }

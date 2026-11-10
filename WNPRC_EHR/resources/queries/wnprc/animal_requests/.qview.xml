@@ -1,0 +1,67 @@
+<!--
+  ~ /*
+  ~  * Copyright (c) 2026 Board of Regents of the University of Wisconsin System
+  ~  *
+  ~  * Licensed under the Apache License, Version 2.0 (the "License");
+  ~  * you may not use this file except in compliance with the License.
+  ~  * You may obtain a copy of the License at
+  ~  *
+  ~  *     http://www.apache.org/licenses/LICENSE-2.0
+  ~  *
+  ~  * Unless required by applicable law or agreed to in writing, software
+  ~  * distributed under the License is distributed on an "AS IS" BASIS,
+  ~  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  * See the License for the specific language governing permissions and
+  ~  * limitations under the License.
+  ~  */
+  -->
+
+<customView xmlns="http://labkey.org/data/xml/queryCustomView">
+    <columns>
+        <column name="rowid"/>
+        <column name="request_number"/>
+        <column name="date"/>
+        <column name="createdBy"/>
+        <column name="principalinvestigator"/>
+        <column name="numberofanimals"/>
+        <column name="speciesneeded"/>
+        <column name="originneeded"/>
+        <column name="sex"/>
+        <column name="age"/>
+        <column name="weight"/>
+        <column name="mhctype"/>
+        <column name="viralstatus"/>
+        <column name="infectiousdisease"/>
+        <column name="majorsurgery"/>
+        <column name="pregnantanimalsrequired"/>
+        <column name="pregnantanimalsrequiredterminfant"/>
+        <column name="pregnantanimalsrequiredtermdam"/>
+        <column name="disposition"/>
+        <column name="previousexposures"/>
+        <column name="executivecommitteeapproval"/>
+        <column name="optionalproject"/>
+        <column name="project"/>
+        <column name="account"/>
+        <column name="protocol"/>
+        <column name="comments"/>
+        <column name="anticipatedstartdate"/>
+        <column name="anticipatedenddate"/>
+        <column name="QCState"/>
+        <column name="dateapprovedordenied"/>
+        <column name="dateordered"/>
+        <column name="datearrival"/>
+        <column name="animalidstooffer"/>
+        <column name="animalsorigin"/>
+        <column name="contacts"/>
+        <column name="internalthreadrowid"/>
+        <column name="requestid"/>
+        <column name="taskid"/>
+        <column name="container"/>
+        <column name="created"/>
+        <column name="modifiedby"/>
+        <column name="modified"/>
+        <column name="edit"/>
+        <column name="animal_history_link"/>
+        <column name="num_animals_assigned"/>
+    </columns>
+</customView>

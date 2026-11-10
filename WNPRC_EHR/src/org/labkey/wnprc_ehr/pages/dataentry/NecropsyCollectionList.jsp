@@ -26,7 +26,9 @@
 <%@ page import="org.labkey.webutils.api.json.NumberKeyComparator" %>
 <%@ page import="org.labkey.wnprc_ehr.schemas.enum_lookups.NecropsySampleDeliveryDestination" %>
 <%@ page import="java.sql.Timestamp" %>
+<%@ page import="java.text.DecimalFormat" %>
 <%@ page import="java.text.SimpleDateFormat" %>
+<%@ page import="java.util.Date" %>
 <%@ page import="java.util.List" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 
@@ -89,6 +91,54 @@
         List<JSONObject> tissueSamples = JsonUtil.toJSONObjectList(queryFactory.selectRows("study", "tissue_samples", taskFilter));
         List<JSONObject> organWeights  = JsonUtil.toJSONObjectList(queryFactory.selectRows("study", "organ_weights",  taskFilter));
 
+        String animalId = necropsy.optString("id", necropsy.optString("Id", ""));
+        String weightDisplay = "No Weight Found";
+        if (!animalId.isEmpty()) {
+            SimpleFilter weightFilter = new SimpleFilter();
+            weightFilter.addCondition("Id", animalId, CompareType.EQUAL);
+            List<JSONObject> weightRecords = JsonUtil.toJSONObjectList(queryFactory.selectRows("study", "weight", weightFilter));
+
+            JSONObject mostRecentWeightRecord = null;
+            Date maxDate = null;
+            for (JSONObject weightRecord : weightRecords) {
+                if (weightRecord.has("weight") && !weightRecord.isNull("weight") && !weightRecord.optString("weight", "").isEmpty()) {
+                    Date d = null;
+                    Object dateObj = weightRecord.opt("date") != null ? weightRecord.opt("date") : weightRecord.opt("Date");
+                    if (dateObj instanceof Date) {
+                        d = (Date) dateObj;
+                    } else if (dateObj instanceof String) {
+                        try {
+                            d = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse((String) dateObj);
+                        } catch (Exception e) {
+                            try {
+                                d = new SimpleDateFormat("yyyy-MM-dd").parse((String) dateObj);
+                            } catch (Exception ignored) {}
+                        }
+                    }
+
+                    if (d != null) {
+                        if (maxDate == null || d.compareTo(maxDate) >= 0) {
+                            maxDate = d;
+                            mostRecentWeightRecord = weightRecord;
+                        }
+                    } else if (mostRecentWeightRecord == null) {
+                        mostRecentWeightRecord = weightRecord;
+                    }
+                }
+            }
+
+            if (mostRecentWeightRecord != null) {
+                String w = mostRecentWeightRecord.optString("weight", mostRecentWeightRecord.optString("Weight", ""));
+                if (!w.isEmpty()) {
+                    try {
+                        double dVal = Double.parseDouble(w);
+                        w = new DecimalFormat("0.##").format(dVal);
+                    } catch (Exception ignored) {}
+                    weightDisplay = w.toLowerCase().endsWith("kg") ? w : (w + " kg");
+                }
+            }
+        }
+
         Timestamp necropsyDate = (Timestamp) necropsy.get("date");
         String necropsyDisplayDate;
         if (necropsyDate != null) {
@@ -124,6 +174,13 @@
             <dl class="dl-horizontal">
                 <dt>Perfusion</dt>
                 <dd><%=h(necropsy.optString("perfusion_area_fs_value", "-- None --"))%></dd>
+            </dl>
+        </div>
+
+        <div class="col-sm-6">
+            <dl class="dl-horizontal">
+                <dt>Weight</dt>
+                <dd><%=h(weightDisplay)%></dd>
             </dl>
         </div>
     </div>

@@ -2822,22 +2822,18 @@ public class TriggerScriptHelper {
                             if (errorArray != null){
                                 errorArray.put(returnErrors);
                             }
-                            String objectid =rs.getString("objectId");
-                            Map<String, Object> toUpdate = new CaseInsensitiveHashMap<>();
-                            Map<String,Object> keyMap = new CaseInsensitiveHashMap<>();
-                            toUpdate.put("qcstate", EHRService.QCSTATES.DeleteRequested.getQCState(getContainer()).getRowId());
-                            toUpdate.put("objectid",objectid);
-                            rowTobeUpdated.add(toUpdate);
 
+                            String objectid = rs.getString("objectId");
+                            Map<String,Object> keyMap = new CaseInsensitiveHashMap<>();
                             keyMap.put("objectid", objectid);
                             oldKeys.add(keyMap);
 
                         }
                     });
-                    //Table.update(getUser(),waterAmount,toUpdate, objectid);
-                    if (waterAmount.getUpdateService()!=null){
-                        BatchValidationException errors = new BatchValidationException();
-                        waterAmount.getUpdateService().updateRows(user, container,rowTobeUpdated,oldKeys,errors,null,null);
+
+                    if (waterAmount.getUpdateService() != null)
+                    {
+                        waterAmount.getUpdateService().deleteRows(user, container, oldKeys, null, null);
                     }
                 }
             }

@@ -333,7 +333,7 @@ Ext4.define('wnprc_ehr.window.AddScheduledWaterWindow', {
 
             });
 
-            tempModel.phantom = false;
+            //tempModel.phantom = false;
             waterRecord.set(Id,tempModel);
 
             if ( row.getValue('provideFruit') != 'none' && row.getValue('provideFruit') != null){
@@ -350,7 +350,7 @@ Ext4.define('wnprc_ehr.window.AddScheduledWaterWindow', {
                     model:              'fruitRecord'
 
                 });
-                fruitModel.phantom = false;
+                //fruitModel.phantom = false;
                 waterRecord.set(Id+'fruit',fruitModel);
 
             }

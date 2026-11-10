@@ -601,9 +601,7 @@ public class CageUIController extends SpringActionController
                 housingRecords.add(newTransferRecord);
                 if(newTransferRecord.getAlert()){
                     HousingNotification notif = new HousingNotification();
-                    String path = "/WNPRC/EHR/cageui-housingTransfer.view";
-                    String protocol = AppProps.getInstance().getBaseServerUrl();
-                    String url = protocol + path + "?taskid=" + taskId;
+
 
                     condLabel = (newConditionRecord.getCageCondition() == null ? "" : newConditionRecord.getCageCondition()) +
                             (newConditionRecord.getPairCondition() == null ? "" : newConditionRecord.getPairCondition()) +
@@ -612,16 +610,22 @@ public class CageUIController extends SpringActionController
                     notif.setCageNumber(cageNumber);
                     notif.setCondLabel(condLabel);
                     notif.setHousingRecord(newTransferRecord);
-                    notif.setUrl(url);
                     housingNotifs.add(notif);
                 }
 
             }
 
+
             response = CageUIManager.get().submitHousingTransfer(housingRecords, housingConditionRecords, taskRecord, getUser(), getContainer(), getLayoutChangeId());
 
             if(response.get("success").equals(true)){
                 if(!housingNotifs.isEmpty()){
+                    String path = "/WNPRC/EHR/cageui-housingTransfer.view";
+                    String protocol = AppProps.getInstance().getBaseServerUrl();
+                    for (HousingNotification notif : housingNotifs) {
+                        String url = protocol + path + "?lsid=" + notif.getHousingRecord().getLsid();
+                        notif.setUrl(url);
+                    }
                     CageUIHousingTransferNotification triggerNotif = new CageUIHousingTransferNotification(getContainer().getSourceModule(), housingNotifs);
                     triggerNotif.sendManually(getContainer(), getUser());
                 }

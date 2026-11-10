@@ -316,6 +316,8 @@ public class CageUIManager
         QueryUpdateService cageUIHousingConditionQus = cageUIHousingConditionTable.getUpdateService();
         QueryUpdateService cageUIAllHistoryQus = cageUIAllHistoryTable.getUpdateService();
 
+        List<Map<String, Object>> insertedHousingRows;
+
         if (studyHousingQus == null)
         {
             throw new IllegalStateException(studyHousingTable.getName() + " query update service");
@@ -351,7 +353,7 @@ public class CageUIManager
             }
 
             if (isUpdate) {
-                studyHousingQus.updateRows(user, container, housingMapList, null, batchErrors, null, null);
+                insertedHousingRows = studyHousingQus.updateRows(user, container, housingMapList, null, batchErrors, null, null);
                 if (!housingCodesMapList.isEmpty()) {
                     cageUIHousingConditionQus.updateRows(user, container, housingCodesMapList, null, batchErrors, null, null);
                 }
@@ -364,7 +366,7 @@ public class CageUIManager
                     throw new IllegalStateException(ehrTasksTable.getName() + " query update service");
                 }
 
-                studyHousingQus.insertRows(user, container, housingMapList, batchErrors, null, null);
+                insertedHousingRows = studyHousingQus.insertRows(user, container, housingMapList, batchErrors, null, null);
                 if (!housingCodesMapList.isEmpty()) {
                     cageUIHousingConditionQus.insertRows(user, container, housingCodesMapList, batchErrors, null, null);
                 }
@@ -377,6 +379,21 @@ public class CageUIManager
                 response.put("errors", batchErrors);
                 return response;
             }
+
+            // Map the generated LSIDs back into the HousingForm objects
+            if (insertedHousingRows != null)
+            {
+                for (int i = 0; i < housingRecords.size(); i++)
+                {
+                    Map<String, Object> rowMap = insertedHousingRows.get(i);
+                    Object lsid = rowMap.get("lsid");
+                    if (lsid != null)
+                    {
+                        housingRecords.get(i).setLsid(lsid.toString());
+                    }
+                }
+            }
+
             tx.commit();
             response.put("success", true);
         }

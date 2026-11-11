@@ -1467,6 +1467,7 @@ public class NotificationToolkit {
         String[] tableColumns;                      //The names of the columns.
         ArrayList<String[]> tableData;              //A 3D array of the table data. (ArrayList of rows, each containing a string array of column data.)
         ArrayList<String> rowColors;                //An optional list of colors for each row.  Must be the same size as 'tableData'.
+        ArrayList<String[]> cellColors;
 
         /**
          * This is the constructor for this object.
@@ -1478,6 +1479,7 @@ public class NotificationToolkit {
             this.tableColumns = TableColumns;
             this.tableData = TableData;
             this.rowColors = null;
+            this.cellColors = null;
         }
 
         /**
@@ -1505,10 +1507,14 @@ public class NotificationToolkit {
             {
                 tempTable.append("<tr>");
                 //Cycles through each column in the current row.
-                for (String currentColumn : currentRow)
-                {
-                    //Updates row data.
-                    if (this.rowColors == null)
+                Integer colTracker = 0;
+                for (String currentColumn : currentRow) {
+                    // Updates the cell data with its own color.
+                    if (this.cellColors != null && this.cellColors.get(rowTracker)[colTracker] != null) {
+                        tempTable.append("<td bgcolor=" + this.cellColors.get(rowTracker)[colTracker] + ">" + currentColumn + "</td>");
+                    }
+                    // Updates the row data.
+                    else if (this.rowColors == null)
                     {
                         tempTable.append("<td>" + currentColumn + "</td>");
                     }
@@ -1517,6 +1523,7 @@ public class NotificationToolkit {
                     {
                         tempTable.append("<td bgcolor=" + rowColors.get(rowTracker) + ">" + currentColumn + "</td>");
                     }
+                    colTracker++;
                 }
                 tempTable.append("</tr>");
                 rowTracker++;

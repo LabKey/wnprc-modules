@@ -76,6 +76,7 @@ public class WaterOrdersAlertNotification extends WaterMonitoringNotification
     public String getMessageBodyHTML(Container c, User u)
     {
         StringBuilder msg = new StringBuilder();
+        StringBuilder msg2 = new StringBuilder();
         int numDays = 1;
 
         final Date now = new Date();
@@ -85,6 +86,12 @@ public class WaterOrdersAlertNotification extends WaterMonitoringNotification
         findAnimalsWithWaterEntries(c,u,msg,numDays);
         findWaterOrdersNotCompleted(c,u,msg,LocalDateTime.now(), false);
         findWaterOrdersNotCompleted(c,u,msg,LocalDateTime.now(), true);
+        findAnimalsWithEnoughWater(c,u,msg2,10);
+        if (msg2.isEmpty()) {
+            msg.append("<br>All regulated animals received at least 10ml/kg<br>");
+        } else {
+            msg.append(msg2);
+        }
 
         return msg.toString();
 

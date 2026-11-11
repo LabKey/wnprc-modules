@@ -339,6 +339,8 @@ public class CageUIManager
         {
             List<Map<String, Object>> housingMapList = convertToMapList(housingRecords, "alert");
             List<Map<String, Object>> housingCodesMapList = convertToMapList(housingConditionRecords);
+            Map<String, Object> housingExtraContext = new HashMap<>();
+            housingExtraContext.put("housingRows", housingMapList);
 
             if(layoutChangeId != null){
                 AllHistoryForm formToClose = getAllHistoryFromId(layoutChangeId);
@@ -353,7 +355,9 @@ public class CageUIManager
             }
 
             if (isUpdate) {
-                insertedHousingRows = studyHousingQus.updateRows(user, container, housingMapList, null, batchErrors, null, null);
+                housingExtraContext.put("event", "update");
+
+                insertedHousingRows = studyHousingQus.updateRows(user, container, housingMapList, null, batchErrors, null, housingExtraContext);
                 if (!housingCodesMapList.isEmpty()) {
                     cageUIHousingConditionQus.updateRows(user, container, housingCodesMapList, null, batchErrors, null, null);
                 }
@@ -365,8 +369,8 @@ public class CageUIManager
                 {
                     throw new IllegalStateException(ehrTasksTable.getName() + " query update service");
                 }
-
-                insertedHousingRows = studyHousingQus.insertRows(user, container, housingMapList, batchErrors, null, null);
+                housingExtraContext.put("event", "insert");
+                insertedHousingRows = studyHousingQus.insertRows(user, container, housingMapList, batchErrors, null, housingExtraContext);
                 if (!housingCodesMapList.isEmpty()) {
                     cageUIHousingConditionQus.insertRows(user, container, housingCodesMapList, batchErrors, null, null);
                 }

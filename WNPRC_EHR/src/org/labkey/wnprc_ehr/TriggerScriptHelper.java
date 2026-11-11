@@ -422,25 +422,27 @@ public class TriggerScriptHelper {
         //Filter out any rows that aren't related to breeding
         List<Map<String, Object>> filteredHousingRows = new ArrayList<>();
         for (Map<String, Object> housingRow : housingRows) {
-            String reasonField = (String) housingRow.get("reason");
+            Map<String, Object> newHousingRow = new HashMap<>(housingRow);
+            newHousingRow.put("Id", newHousingRow.get("id"));
+            String reasonField = (String) newHousingRow.get("reason");
             String[] reasons = reasonField != null ? reasonField.split(",") : new String[0];
             boolean breeding = false;
             for (String reason : reasons) {
                 if ("Breeding".equals(reason) || "Breeding ended".equals(reason)) {
                     breeding = true;
-                    housingRow.put("reason", reason);
+                    newHousingRow.put("reason", reason);
                     break;
                 }
             }
             if (breeding) {
                 for(String field : requiredFields) {
-                    if (housingRow.get(field) == null) {
+                    if (newHousingRow.get(field) == null) {
                         errorStrings.add(getError(field, "Field '" + field + "' is required.", "ERROR"));
                         stopExecution = true;
                     }
                 }
-                housingRow.put("sex", EHRDemographicsService.get().getAnimal(container, (String) housingRow.get("Id")).getOrigGender());
-                filteredHousingRows.add(housingRow);
+                newHousingRow.put("sex", EHRDemographicsService.get().getAnimal(container, (String) newHousingRow.get("Id")).getOrigGender());
+                filteredHousingRows.add(newHousingRow);
             }
         }
 
@@ -511,7 +513,7 @@ public class TriggerScriptHelper {
                 }
             }
         }
-        return errorStrings;
+        return errorStrings; 
     }
 
     public String lookupValue(String key, String study, String queryName, String keyCol, String displayColumn) {

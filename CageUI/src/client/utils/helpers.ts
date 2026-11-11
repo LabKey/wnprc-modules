@@ -1623,27 +1623,49 @@ export const checkCageWeightLimit = async (
     // 2. Fetch current weights for the animals in the cage
     const animals = await fetchDemographicsWeights(targetAnimalIds, abortSignal);
 
-    // 3. Compute actual total weight of animals currently in the cage
-    let totalRequiredSqft = 0;
+    // 3. Determine cage-level allowed weight and dimensions
+    const cageSqft = cageDimensions.sqft ?? null;
+    const cageHeight = cageDimensions.height ?? null;
+    let allowedWeight: number | null = null;
+
+    if (cageSqft !== null && cageSqft !== undefined && cageClassList.length > 0) {
+        const fittingTiers = cageClassList.filter(c => c.sqft <= cageSqft);
+        if (fittingTiers.length > 0) {
+            allowedWeight = Math.max(...fittingTiers.map(t => t.high));
+        } else {
+            allowedWeight = 0;
+        }
+    }
+
+    // 4. Check each animal individually against the cage limits (we do not combine animals)
+    let maxRequiredSqft = 0;
     let maxRequiredHeight = 0;
-    const animalWeightStatus: { animalId: string; weight: number | null; maxAllowedWeight: number | null; isOver: boolean; tier?: any }[] = [];
+    const animalWeightStatus: {
+        animalId: string;
+        weight: number | null;
+        maxAllowedWeight: number | null;
+        isOver: boolean;
+        hasInsufficientHeight: boolean;
+        tier?: CageClassRecord | null;
+    }[] = [];
 
     for (const animal of animals) {
         const weight = animal.weight ?? null;
-        const isOverWeight = weight !== null && weight !== undefined;
 
-        // Find appropriate tier for this animal
-        let tier: any = null;
+        // Find appropriate tier for this animal based on weight
+        let tier: CageClassRecord | null = null;
 
-        if (weight !== null && weight !== undefined) {
+        if (weight !== null && weight !== undefined && cageClassList.length > 0) {
             tier = cageClassList.find(c =>
-                (c.low <= weight && weight < c.high) ||
-                (c.low < weight && weight <= c.high) ||
-                (c.low <= weight && weight <= c.high)
+                (c.low === 0 ? weight >= c.low : weight > c.low) && weight <= c.high
             );
 
+            if (!tier) {
+                tier = cageClassList.find(c => c.low <= weight && weight <= c.high);
+            }
+
             // Fallback: if weight is >= highest tier, use highest
-            if (!tier && cageClassList.length > 0) {
+            if (!tier) {
                 const highestTier = cageClassList[cageClassList.length - 1];
                 if (weight >= highestTier.high) {
                     tier = highestTier;
@@ -1651,92 +1673,81 @@ export const checkCageWeightLimit = async (
             }
         }
 
-        // If we couldn't determine a tier, assume animal doesn't require weight/space (or skip validation)
-        if (!tier) {
-            // Add placeholder entry: no weight limit applied
-            animalWeightStatus.push({
-                animalId: animal.id,
-                weight: weight,
-                maxAllowedWeight: 0,
-                isOver: false
-            });
-            continue;
+        if (tier) {
+            if (tier.sqft > maxRequiredSqft) {
+                maxRequiredSqft = tier.sqft;
+            }
+            if (tier.height > maxRequiredHeight) {
+                maxRequiredHeight = tier.height;
+            }
         }
 
-        // Track required SQFT & height
-        totalRequiredSqft += tier.sqft;
-        if (tier.height > maxRequiredHeight) maxRequiredHeight = tier.height;
+        // Per-animal check: can this animal fit inside the cage?
+        // Weight check: animal weight must not exceed the cage allowed weight
+        const isAnimalOverWeight = weight !== null && allowedWeight !== null && weight > allowedWeight;
 
-        // Per-animal weight check
-        const maxAllowedWeight = tier.high;
-        const isOver = weight > maxAllowedWeight;
+        // Height check: animal required height must not exceed the cage height
+        const isAnimalInsufficientHeight = Boolean(
+            cageHeight !== null &&
+            cageHeight !== undefined &&
+            tier &&
+            tier.height > cageHeight
+        );
 
         animalWeightStatus.push({
             animalId: animal.id,
             weight,
-            maxAllowedWeight,
-            isOver,
+            maxAllowedWeight: allowedWeight !== null ? allowedWeight : 0,
+            isOver: isAnimalOverWeight,
+            hasInsufficientHeight: isAnimalInsufficientHeight,
             tier
         });
     }
 
-    // 4. Calculate cage-level SQFT-based allowed weight: only for reporting (e.g., "most animals fit under X lbs")
-    let cageSqft = cageDimensions.sqft ?? null;
-    let allowedWeight: number = 0;
-
-    if (cageSqft && cageClassList.length > 0) {
-        const fittingTiers = cageClassList.filter(c => c.sqft <= cageSqft);
-        if (fittingTiers.length > 0) {
-            allowedWeight = Math.max(...fittingTiers.map(t => t.high));
-        } else {
-            // Cage too small even for smallest tier — allow nothing? Or cap at lowest tier's high?
-            allowedWeight = cageClassList[0]?.high ?? 0;
-        }
-    }
-
-    // 5. Actual total weight (for display only — not used for validation)
+    // 5. Actual total weight (for display / reporting purposes)
     const actualWeight = animals.reduce((sum, a) => sum + (a.weight || 0), 0);
 
-    // 6. Determine overall status
-    const hasOverweightAnimal = animalWeightStatus.some(a => a.isOver);
-    const cageHeight = cageDimensions.height ?? null;
-    const hasInsufficientHeight = cageHeight !== null && cageHeight !== undefined && maxRequiredHeight > 0 && maxRequiredHeight > cageHeight;
-    const hasInsufficientSqft = cageSqft !== null && totalRequiredSqft > cageSqft;
-
-    const isOverWeight = hasOverweightAnimal || hasInsufficientSqft;
+    // 6. Overall status: as long as all animals are under the limit, we are okay
+    const isOverWeight = animalWeightStatus.some(a => a.isOver);
+    const hasInsufficientHeight = animalWeightStatus.some(a => a.hasInsufficientHeight);
 
     let status: 'over' | 'under' | 'equal' = 'under';
     if (isOverWeight || hasInsufficientHeight) {
         status = 'over';
-    } else if (animals.length > 0 && actualWeight > 0 && actualWeight === Math.round(actualWeight * 100) / 100 && allowedWeight !== null) {
-        // Rough equality check for display (though not used for validation)
+    } else if (
+        animals.length > 0 &&
+        allowedWeight !== null &&
+        animalWeightStatus.some(a => a.weight !== null && a.weight === allowedWeight)
+    ) {
         status = 'equal';
     }
 
-    // 7. Build detailed per-animal result (optional, but useful for UI)
-    const overWeightAnimals = animalWeightStatus.filter(a => a.isOver).map(a => ({
-        id: a.animalId,
-        weight: a.weight,
-        limit: a.maxAllowedWeight
-    }));
+    // 7. Build detailed per-animal result
+    const overWeightAnimals = animalWeightStatus
+        .filter(a => a.isOver)
+        .map(a => ({
+            id: a.animalId,
+            weight: a.weight,
+            limit: a.maxAllowedWeight
+        }));
 
     return {
         room,
         cage,
-        allowedWeight, // *cage-level* max weight (for reporting)
+        allowedWeight: allowedWeight !== null ? allowedWeight : 0,
         actualWeight: Math.round(actualWeight * 100) / 100,
-        isOverWeight: isOverWeight, // true if any animal over its limit OR not enough SQFT
+        isOverWeight,
         hasInsufficientHeight,
         status,
         cageSqft,
         cageHeight,
-        requiredSqft: Math.round(totalRequiredSqft * 100) / 100,
+        requiredSqft: Math.round(maxRequiredSqft * 100) / 100,
         requiredHeight: Math.round(maxRequiredHeight * 100) / 100,
         animals,
         perAnimalWeightCheck: {
             status: isOverWeight ? 'over' : 'under',
             overWeightAnimals,
-            totalSqftUsed: totalRequiredSqft,
+            totalSqftUsed: Math.round(maxRequiredSqft * 100) / 100,
             totalSqftAvailable: cageSqft
         }
     };

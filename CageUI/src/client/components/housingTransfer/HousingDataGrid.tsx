@@ -715,7 +715,11 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
                     if (!isExempt) {
                         const errorDetails: string[] = [];
                         if (weightResult.isOverWeight) {
-                            errorDetails.push(`Cage weight limit exceeded (Total Weight: ${weightResult.actualWeight} lbs, Allowed: ${weightResult.allowedWeight} lbs${weightResult.cageSqft ? `, Required SQFT: ${weightResult.requiredSqft}, Cage SQFT: ${weightResult.cageSqft}` : ''})`);
+                            const animalLabel = (weightResult.perAnimalWeightCheck?.overWeightAnimals?.length ?? 0) > 1 ? 'Animals' : 'Animal';
+                            const overWeightDetails = weightResult.perAnimalWeightCheck?.overWeightAnimals?.length
+                                ? `${animalLabel} ${weightResult.perAnimalWeightCheck.overWeightAnimals.map(a => `${a.id} (${a.weight} lbs)`).join(', ')}`
+                                : `Weight: ${weightResult.actualWeight} lbs`;
+                            errorDetails.push(`Cage weight limit exceeded (${overWeightDetails}, Allowed: ${weightResult.allowedWeight} lbs${weightResult.cageSqft ? `, Required SQFT: ${weightResult.requiredSqft}, Cage SQFT: ${weightResult.cageSqft}` : ''})`);
                         }
                         if (weightResult.hasInsufficientHeight) {
                             errorDetails.push(`Cage height requirement not met (Required Height: ${weightResult.requiredHeight} in, Cage Height: ${weightResult.cageHeight} in)`);
@@ -964,6 +968,7 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
                     <AutoCompleteEditCell
                         {...params}
                         required={true}
+                        returnValueOnly={true}
                         options={metadata?.projectOptions || []}
                     />
                 );

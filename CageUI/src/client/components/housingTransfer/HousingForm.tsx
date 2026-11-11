@@ -430,7 +430,11 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
                     const isExempt = await checkAnyAnimalBelongsToProject([...movingAnimals, ...plannedOccupants]);
                     if (!isExempt) {
                         if (weightResult.isOverWeight) {
-                            validationErrors.push(`Cage ${cageLabel} in Room ${roomName} exceeds weight limit (Total Weight: ${weightResult.actualWeight} lbs, Allowed: ${weightResult.allowedWeight} lbs${weightResult.cageSqft ? `, Required SQFT: ${weightResult.requiredSqft}, Cage SQFT: ${weightResult.cageSqft}` : ''}). Move cannot be completed.`);
+                            const animalLabel = (weightResult.perAnimalWeightCheck?.overWeightAnimals?.length ?? 0) > 1 ? 'Animals' : 'Animal';
+                            const overWeightDetails = weightResult.perAnimalWeightCheck?.overWeightAnimals?.length
+                                ? `${animalLabel} ${weightResult.perAnimalWeightCheck.overWeightAnimals.map(a => `${a.id} (${a.weight} lbs)`).join(', ')}`
+                                : `Weight: ${weightResult.actualWeight} lbs`;
+                            validationErrors.push(`Cage ${cageLabel} in Room ${roomName} exceeds weight limit (${overWeightDetails}, Allowed: ${weightResult.allowedWeight} lbs${weightResult.cageSqft ? `, Required SQFT: ${weightResult.requiredSqft}, Cage SQFT: ${weightResult.cageSqft}` : ''}). Move cannot be completed.`);
                         }
                         if (weightResult.hasInsufficientHeight) {
                             validationErrors.push(`Cage ${cageLabel} in Room ${roomName} does not meet height requirement (Required Height: ${weightResult.requiredHeight} in, Cage Height: ${weightResult.cageHeight} in). Move cannot be completed.`);

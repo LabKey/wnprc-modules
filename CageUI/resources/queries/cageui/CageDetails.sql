@@ -2,7 +2,7 @@ SELECT
     (h.room || '-' || TO_CHAR(c.cage_number, '0000')) AS Location,
     h.room AS Room,
     c.cage_number AS Cage,
-    rt.name AS "Rack Type",
+    rt.displayName AS "Rack Type",
     c.length AS Length,
     c.width AS Width,
     c.height AS Height

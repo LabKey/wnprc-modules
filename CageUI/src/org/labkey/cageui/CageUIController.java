@@ -24,7 +24,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.labkey.api.action.Action;
 import org.labkey.api.action.ApiResponse;
 import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.MutatingApiAction;
@@ -47,7 +46,6 @@ import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.settings.AppProps;
 import org.labkey.api.util.JsonUtil;
-import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
 import org.labkey.cageui.action.AdoptionDataForm;
@@ -528,23 +526,23 @@ public class CageUIController extends SpringActionController
 
                 if (isUpdate) {
                     HousingForm prevTransferRecord = CageUIManager.getPreviousHousingForm(getPrevFormLsid(), getUser(), getContainer());
-                    HousingConditionRecordsForm prevConditionRecordForm = CageUIManager.getPreviousHousingConditionRecordForm(prevTransferRecord.getCond(), getUser(), getContainer());
+                    HousingConditionRecordsForm prevConditionRecordForm = CageUIManager.getPreviousHousingConditionRecordForm(prevTransferRecord.getCondNew(), getUser(), getContainer());
                     if (prevTransferRecord == null) {
                         errors.reject(ERROR_MSG, "Previous housing form not found for lsid: " + getPrevFormLsid());
                         return null;
                     }
                     if (prevConditionRecordForm == null) {
-                        errors.reject(ERROR_MSG, "Previous housing condition record form not found for objectId: " + prevTransferRecord.getCond());
+                        errors.reject(ERROR_MSG, "Previous housing condition record form not found for objectId: " + prevTransferRecord.getCondNew());
                         return null;
                     }
                     taskId = prevTransferRecord.getTaskId();
                     newTransferRecord.setLsid(prevTransferRecord.getLsid());
-                    newTransferRecord.setCond(prevConditionRecordForm.getObjectId());
+                    newTransferRecord.setCondNew(prevConditionRecordForm.getObjectId());
                     newConditionRecord.setObjectId(prevConditionRecordForm.getObjectId());
                 } else {
                     String recordObjectId = UUID.randomUUID().toString();
                     newConditionRecord.setObjectId(recordObjectId);
-                    newTransferRecord.setCond(recordObjectId);
+                    newTransferRecord.setCondNew(recordObjectId);
                 }
 
                 newTransferRecord.setId(record.getId());
@@ -574,19 +572,19 @@ public class CageUIController extends SpringActionController
 
                 if (record.getDestinationRoom() != null && "No Change".equals(record.getDestinationRoom().getValue())) { // No change (animal stays same room and cage)
                     newTransferRecord.setRoom(record.getCurrentRoom() != null ? record.getCurrentRoom().getLabel() : null);
-                    newTransferRecord.setCage(record.getCurrentCage() != null ? record.getCurrentCage().getValue() : null);
+                    newTransferRecord.setCageNew(record.getCurrentCage() != null ? record.getCurrentCage().getValue() : null);
                     cageNumber = (record.getCurrentCage() != null ? record.getCurrentCage().getLabel() : null);
                 } else if (isSpecialHousing) { // Special housing
                     newTransferRecord.setRoom(record.getDestinationRoom() != null ? record.getDestinationRoom().getLabel() : null);
-                    newTransferRecord.setCage(null);
+                    newTransferRecord.setCageNew(null);
                     cageNumber = null;
                 }else if(inTransit){
                     newTransferRecord.setRoom(record.getDestinationRoom() != null ? record.getDestinationRoom().getLabel() : null);
-                    newTransferRecord.setCage(null);
+                    newTransferRecord.setCageNew(null);
                     cageNumber = null;
                 }else {
                     newTransferRecord.setRoom(record.getDestinationRoom() != null ? record.getDestinationRoom().getLabel() : null);
-                    newTransferRecord.setCage(record.getDestinationCage() != null ? record.getDestinationCage().getValue() : null);
+                    newTransferRecord.setCageNew(record.getDestinationCage() != null ? record.getDestinationCage().getValue() : null);
                     cageNumber = (record.getDestinationCage() != null ? record.getDestinationCage().getLabel() : null);
                 }
 

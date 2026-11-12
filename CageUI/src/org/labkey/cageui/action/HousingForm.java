@@ -36,10 +36,10 @@ public class HousingForm
     private Date endDate;
     private Integer qcState;
     private String room;
-    @JsonProperty("cage")
-    private String cage;
-    @JsonProperty("cond")
-    private String cond;
+    @JsonProperty("cageNew")
+    private String cageNew;
+    @JsonProperty("condNew")
+    private String condNew;
     private String reason;
     private String remark;
     private Integer project;
@@ -162,24 +162,24 @@ public class HousingForm
         this.ejacConfirmed = ejacConfirmed;
     }
 
-    public String getCage()
+    public String getCageNew()
     {
-        return this.cage;
+        return this.cageNew;
     }
 
-    public void setCage(String cage)
+    public void setCageNew(String cageNew)
     {
-        this.cage = cage;
+        this.cageNew = cageNew;
     }
 
-    public String getCond()
+    public String getCondNew()
     {
-        return cond;
+        return condNew;
     }
 
-    public void setCond(String cond)
+    public void setCondNew(String condNew)
     {
-        this.cond = cond;
+        this.condNew = condNew;
     }
 
     public String getLsid()

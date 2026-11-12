@@ -241,10 +241,10 @@ export const fetchHousingForm = async (lsid: string): Promise<any> => {
     const config: Query.SelectRowsOptions = {
         schemaName: 'study',
         queryName: 'housing_test',
-        columns: ['Id', 'date', 'enddate', 'room','room/rowid', 'cage', 'cage/cage_number',
-            'cond', 'cond/special_condition','cond/pair_condition','cond/cage_condition','cond/social_condition',
-            'cond/special_condition/title','cond/pair_condition/title','cond/cage_condition/title','cond/social_condition/title',
-            'cond/special_condition/category','cond/pair_condition/category','cond/cage_condition/category','cond/social_condition/category',
+        columns: ['Id', 'date', 'enddate', 'room','room/rowid', 'cageNew', 'cageNew/cage_number',
+            'condNew', 'condNew/special_condition','condNew/pair_condition','condNew/cage_condition','condNew/social_condition',
+            'condNew/special_condition/title','condNew/pair_condition/title','condNew/cage_condition/title','condNew/social_condition/title',
+            'condNew/special_condition/category','condNew/pair_condition/category','condNew/cage_condition/category','condNew/social_condition/category',
             'reason', 'project', 'remark', 'performedby', 'ejacConfirmed', 'taskid', 'lsid'],
         filterArray: [
             Filter.create('lsid', lsid, Filter.Types.EQUAL)
@@ -268,10 +268,10 @@ export const fetchHousingByTaskId = async (taskId: string): Promise<any[]> => {
         schemaName: 'study',
         queryName: 'housing_test',
         columns: [
-            'Id', 'date', 'enddate', 'room', 'room/rowid', 'cage', 'cage/cage_number',
-            'cond', 'cond/special_condition', 'cond/pair_condition', 'cond/cage_condition', 'cond/social_condition',
-            'cond/special_condition/title', 'cond/pair_condition/title', 'cond/cage_condition/title', 'cond/social_condition/title',
-            'cond/special_condition/category', 'cond/pair_condition/category', 'cond/cage_condition/category', 'cond/social_condition/category',
+            'Id', 'date', 'enddate', 'room', 'room/rowid', 'cageNew', 'cageNew/cage_number',
+            'condNew', 'condNew/special_condition', 'condNew/pair_condition', 'condNew/cage_condition', 'condNew/social_condition',
+            'condNew/special_condition/title', 'condNew/pair_condition/title', 'condNew/cage_condition/title', 'condNew/social_condition/title',
+            'condNew/special_condition/category', 'condNew/pair_condition/category', 'condNew/cage_condition/category', 'condNew/social_condition/category',
             'reason', 'project', 'remark', 'performedby', 'ejacConfirmed', 'taskid', 'lsid'
         ],
         filterArray: [
@@ -393,10 +393,10 @@ export const fetchAnimalsInActiveHousingCage = async (room: string, cageObjectId
     const config: Query.SelectRowsOptions = {
         schemaName: 'study',
         queryName: 'housing_test',
-        columns: ['Id', 'room', 'cage', 'enddate'],
+        columns: ['Id', 'room', 'cageNew', 'enddate'],
         filterArray: [
             Filter.create('room', room, Filter.Types.EQUAL),
-            Filter.create('cage', cageObjectId, Filter.Types.EQUAL),
+            Filter.create('cageNew', cageObjectId, Filter.Types.EQUAL),
             Filter.create('enddate', null, Filter.Types.ISBLANK)
         ]
     };

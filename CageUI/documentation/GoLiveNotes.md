@@ -116,7 +116,7 @@ Run this script to update the old housing condition code pc to pcp.
         LABKEY.Query.selectRows({
             schemaName: 'study',
             queryName: 'housing_test',
-            columns: 'room,cageOld,lsid,cage', // ensure cageOld is selected
+            columns: 'room,cage,lsid,cageNew', // ensure cageOld is selected
             success: function(housingData) {
                 housingData = housingData || {};
                 housingData.rows = housingData.rows || [];
@@ -140,13 +140,13 @@ Run this script to update the old housing condition code pc to pcp.
                         // Prepare rows to update
                         let rowsToUpdate = [];
                         for (let h of housingData.rows) {
-                            let key = h.room + '|' + parseInt(h.cageOld);
+                            let key = h.room + '|' + parseInt(h.cage);
                             let newCageObjId = cageLookup[key];
 
                             if (newCageObjId) {
                                 rowsToUpdate.push({
                                     lsid: h.lsid,
-                                    cage: newCageObjId
+                                    cageNew: newCageObjId
                                 });
                             }
                         }
@@ -166,8 +166,8 @@ Run this script to update the old housing condition code pc to pcp.
                                     $('<tr/>')
                                         .append($('<th/>').text('#'))
                                         .append($('<th/>').text('room'))
-                                        .append($('<th/>').text('cageOld'))
-                                        .append($('<th/>').text('new cage (cage_object_id)'))
+                                        .append($('<th/>').text('cage'))
+                                        .append($('<th/>').text('new cageNew (cage_object_id)'))
                                 ))
                         );
 
@@ -180,8 +180,8 @@ Run this script to update the old housing condition code pc to pcp.
                                 $('<tr/>')
                                     .append($('<td/>').text(i + 1))
                                     .append($('<td/>').text(origRow ? origRow.room : 'N/A'))
-                                    .append($('<td/>').text(origRow ? origRow.cageOld : 'N/A'))
-                                    .append($('<td/>').text(row.cage))
+                                    .append($('<td/>').text(origRow ? origRow.cage : 'N/A'))
+                                    .append($('<td/>').text(row.cageNew))
                             );
                         }
                         $content.find('table').append($tbody);
@@ -243,7 +243,7 @@ Run this script to update the old housing condition code pc to pcp.
 6. Update condNew and add current conditions to cageui.housing_condition_records.
 
 ```
-<button id="executeButton"> Update housing_condition_records & cond </button>
+<button id="executeButton"> Update housing_condition_records & condNew </button>
 <div id="js-content" style="margin-top: 1rem;"></div>
 
 <script type="text/javascript" nonce="<%=scriptNonce%>">
@@ -320,7 +320,7 @@ Run this script to update the old housing condition code pc to pcp.
         LABKEY.Query.selectRows({
             schemaName: 'study',
             queryName: 'housing_test',
-            columns: 'objectid,condOld,lsid',
+            columns: 'objectid,cond,lsid',
             success: function(housingData) {
                 housingData = housingData || {};
                 housingData.rows = housingData.rows || [];
@@ -330,7 +330,7 @@ Run this script to update the old housing condition code pc to pcp.
                 let housingUpdates = [];
 
                 for (let h of housingData.rows) {
-                    let decoded = decodeCond(h.condOld);
+                    let decoded = decodeCond(h.cond);
                     let hasCondition = Object.values(decoded).some(v => v !== null);
 
                     if (!hasCondition) {
@@ -355,7 +355,7 @@ Run this script to update the old housing condition code pc to pcp.
                     housingUpdates.push({
                         objectid: h.objectid,
                         lsid: h.lsid,
-                        cond: newObjId // placeholder
+                        condNew: newObjId // placeholder
                     });
                 }
 
@@ -382,13 +382,13 @@ Run this script to update the old housing condition code pc to pcp.
                 let $tbody = $('<tbody/>');
                 for (let i = 0; i < newRows.length; i++) {
                     let row = newRows[i];
-                    let orig = housingUpdates.find(r => r.cond === row.objectid);
-                    let d = decodeCond(orig.condOld);
+                    let orig = housingUpdates.find(r => r.condNew === row.objectid);
+                    let d = decodeCond(orig.cond);
                     $tbody.append(
                             $('<tr/>')
                                     .append($('<td/>').text(i + 1))
                                     .append($('<td/>').text(row.objectid))
-                                    .append($('<td/>').text(orig.condOld || '(null)'))
+                                    .append($('<td/>').text(orig.cond || '(null)'))
                                     .append($('<td/>').text(
                                             [d.special, d.pair, d.cage, d.social].join('/')
                                     ))
@@ -419,7 +419,7 @@ Run this script to update the old housing condition code pc to pcp.
                                                 return;
                                             }
 
-                                            // Now update housing_test.cond
+                                            // Now update housing_test.condNew
                                             LABKEY.Query.updateRows({
                                                 schemaName: 'study',
                                                 queryName: 'housing_test',
@@ -430,14 +430,14 @@ Run this script to update the old housing condition code pc to pcp.
                                                             $('<div/>')
                                                                     .append($('<h4/>').text('✅ Success!'))
                                                                     .append($('<p/>').text('Inserted ' + insertData.rows.length + ' condition records into housing_condition_records'))
-                                                                    .append($('<p/>').text('Updated cond in ' + updateData.rows.length + ' housing_test rows'))
+                                                                    .append($('<p/>').text('Updated condNew in ' + updateData.rows.length + ' housing_test rows'))
                                                     );
                                                 },
                                                 failure: function(error) {
                                                     console.error('Update failed:', error);
                                                     $content.append(
                                                             $('<span/>', { style: 'color: red;' })
-                                                                    .text('❌ Update of housing_test.cond failed. See console.')
+                                                                    .text('❌ Update of housing_test.condNew failed. See console.')
                                                     );
                                                 }
                                             });

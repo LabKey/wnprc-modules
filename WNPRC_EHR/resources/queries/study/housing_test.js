@@ -66,7 +66,7 @@ function onUpsert(helper, scriptErrors, row, oldRow){
                     !rowObj.enddate &&  // falsy: null/undefined
                     rowObj.reason &&
                     rowObj.room &&
-                    rowObj.cage &&
+                    rowObj.cageNew &&
                     rowObj.date &&
                     rowObj.id
             ) {

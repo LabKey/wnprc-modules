@@ -12745,7 +12745,7 @@
       </column>
       <column columnName="cageNew">
         <datatype>varchar</datatype>
-        <columnTitle>Cage New</columnTitle>
+        <columnTitle>Cage</columnTitle>
         <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
         <url replaceMissing="blankValue"><![CDATA[/wnprc_ehr/cageDetails.view?room=${room}&cage=${cageNew}&]]></url>
         <facetingBehavior>ALWAYS_OFF</facetingBehavior>
@@ -12753,7 +12753,7 @@
       </column>
       <column columnName="cage">
         <datatype>varchar</datatype>
-        <columnTitle>Cage</columnTitle>
+        <columnTitle>Cage Old</columnTitle>
         <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
         <url replaceMissing="blankValue"><![CDATA[/EHR/cageDetails.view?room=${room}&cage=${cage}&]]></url>
         <facetingBehavior>ALWAYS_OFF</facetingBehavior>
@@ -12761,7 +12761,7 @@
       </column>
       <column columnName="cond">
         <datatype>varchar</datatype>
-        <columnTitle>Condition</columnTitle>
+        <columnTitle>Condition Old</columnTitle>
         <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
         <dimension>false</dimension>
         <fk>
@@ -12773,7 +12773,7 @@
       </column>
       <column columnName="condNew">
         <datatype>varchar</datatype>
-        <columnTitle>Condition New</columnTitle>
+        <columnTitle>Condition</columnTitle>
         <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
         <dimension>false</dimension>
         <fk>
@@ -12953,6 +12953,286 @@
       </column>
     </columns>
     <tableTitle>Housing</tableTitle>
+    <indices>
+      <index type="non-unique">
+        <column>participantsequencenum</column>
+      </index>
+      <index type="non-unique">
+        <column>requestid</column>
+      </index>
+      <index type="non-unique">
+        <column>objectid</column>
+      </index>
+      <index type="non-unique">
+        <column>taskid</column>
+      </index>
+      <index type="non-unique">
+        <column>parentid</column>
+      </index>
+    </indices>
+  </table>
+  <table tableName="housing_test" tableDbType="TABLE">
+    <description>Contains up to one row of housing data for each Animal/Date/objectid combination.</description>
+    <columns>
+      <column columnName="Id">
+        <datatype>varchar</datatype>
+        <columnTitle>Id</columnTitle>
+        <description>Subject identifier</description>
+        <propertyURI>http://cpas.labkey.com/Study#ParticipantId</propertyURI>
+        <conceptURI>http://cpas.labkey.com/Study#ParticipantId</conceptURI>
+        <nullable>false</nullable>
+        <url replaceMissing="blankValue">/ehr/participantView.view?participantId=${id}</url>
+        <importAliases>
+          <importAlias>ptid</importAlias>
+          <importAlias>participantid</importAlias>
+        </importAliases>
+        <fk>
+          <fkDbSchema>study</fkDbSchema>
+          <fkTable>Animal</fkTable>
+          <fkColumnName>Id</fkColumnName>
+        </fk>
+        <facetingBehavior>ALWAYS_OFF</facetingBehavior>
+        <scale>32</scale>
+      </column>
+      <column columnName="date">
+        <datatype>timestamp</datatype>
+        <columnTitle>In Date</columnTitle>
+        <propertyURI>http://cpas.labkey.com/Study#VisitDate</propertyURI>
+        <conceptURI>http://cpas.labkey.com/Study#VisitDate</conceptURI>
+        <nullable>false</nullable>
+        <formatString>yyyy-MM-dd HH:mm</formatString>
+      </column>
+      <column columnName="enddate">
+        <datatype>timestamp</datatype>
+        <columnTitle>Out Date</columnTitle>
+        <propertyURI>urn:ehr.labkey.org/#EndDate</propertyURI>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#dateTime</rangeURI>
+        <formatString>yyyy-MM-dd HH:mm</formatString>
+      </column>
+      <column columnName="room">
+        <datatype>varchar</datatype>
+        <columnTitle>Room</columnTitle>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+        <nullable>false</nullable>
+        <dimension>false</dimension>
+        <url replaceMissing="blankValue"><![CDATA[/wnprc_ehr/cageDetails.view?room=${room}&]]></url>
+        <fk>
+          <fkDbSchema>ehr_lookups</fkDbSchema>
+          <fkTable>rooms</fkTable>
+          <fkColumnName>room</fkColumnName>
+        </fk>
+        <scale>0</scale>
+      </column>
+      <column columnName="cageNew">
+        <datatype>varchar</datatype>
+        <columnTitle>Cage</columnTitle>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+        <url replaceMissing="blankValue"><![CDATA[/wnprc_ehr/cageDetails.view?room=${room}&cage=${cageNew}&]]></url>
+        <facetingBehavior>ALWAYS_OFF</facetingBehavior>
+        <scale>0</scale>
+      </column>
+      <column columnName="cage">
+        <datatype>varchar</datatype>
+        <columnTitle>Cage Old</columnTitle>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+        <url replaceMissing="blankValue"><![CDATA[/EHR/cageDetails.view?room=${room}&cage=${cage}&]]></url>
+        <facetingBehavior>ALWAYS_OFF</facetingBehavior>
+        <scale>0</scale>
+      </column>
+      <column columnName="cond">
+        <datatype>varchar</datatype>
+        <columnTitle>Condition Old</columnTitle>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+        <dimension>false</dimension>
+        <fk>
+          <fkDbSchema>ehr_lookups</fkDbSchema>
+          <fkTable>housing_condition_codes</fkTable>
+          <fkColumnName>value</fkColumnName>
+        </fk>
+        <scale>0</scale>
+      </column>
+      <column columnName="condNew">
+        <datatype>varchar</datatype>
+        <columnTitle>Condition</columnTitle>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+        <dimension>false</dimension>
+        <fk>
+          <fkDbSchema>cageui</fkDbSchema>
+          <fkTable>housing_condition_records</fkTable>
+          <fkColumnName>housing</fkColumnName>
+          <fkDisplayColumnName>final_condition</fkDisplayColumnName>
+        </fk>
+        <scale>0</scale>
+      </column>
+      <column columnName="reason">
+        <datatype>varchar</datatype>
+        <columnTitle>Reason For Move</columnTitle>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+        <dimension>false</dimension>
+        <fk>
+          <fkDbSchema>ehr_lookups</fkDbSchema>
+          <fkTable>housing_reason</fkTable>
+          <fkColumnName>title</fkColumnName>
+        </fk>
+        <defaultValueType>FIXED_EDITABLE</defaultValueType>
+        <scale>0</scale>
+      </column>
+      <column columnName="ejacConfirmed">
+        <datatype>boolean</datatype>
+        <columnTitle>Ejaculation Confirmed</columnTitle>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#boolean</rangeURI>
+        <isHidden>true</isHidden>
+        <defaultValueType>FIXED_EDITABLE</defaultValueType>
+      </column>
+      <column columnName="restraintType">
+        <datatype>varchar</datatype>
+        <columnTitle>Restraint Type</columnTitle>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+        <dimension>false</dimension>
+        <fk>
+          <fkDbSchema>ehr_lookups</fkDbSchema>
+          <fkTable>restraint_type</fkTable>
+          <fkColumnName>type</fkColumnName>
+        </fk>
+        <defaultValueType>FIXED_EDITABLE</defaultValueType>
+        <scale>0</scale>
+      </column>
+      <column columnName="cagesJoined">
+        <datatype>integer</datatype>
+        <columnTitle># of Connected Cages</columnTitle>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#int</rangeURI>
+        <isHidden>true</isHidden>
+        <measure>true</measure>
+        <defaultValueType>FIXED_EDITABLE</defaultValueType>
+      </column>
+      <column columnName="isTemp">
+        <datatype>boolean</datatype>
+        <columnTitle>Is Temporary</columnTitle>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#boolean</rangeURI>
+        <shownInInsertView>false</shownInInsertView>
+        <shownInUpdateView>false</shownInUpdateView>
+      </column>
+      <column columnName="project">
+        <datatype>integer</datatype>
+        <columnTitle>Project</columnTitle>
+        <propertyURI>urn:ehr.labkey.org/#Project</propertyURI>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#int</rangeURI>
+        <isHidden>true</isHidden>
+        <measure>true</measure>
+        <formatString>00000000</formatString>
+        <fk>
+          <fkDbSchema>ehr</fkDbSchema>
+          <fkTable>project</fkTable>
+          <fkColumnName>project</fkColumnName>
+        </fk>
+      </column>
+      <column columnName="objectid">
+        <datatype>entityid</datatype>
+        <columnTitle>Key</columnTitle>
+        <propertyURI>urn:ehr.labkey.org/#ObjectId</propertyURI>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+        <isHidden>true</isHidden>
+        <shownInInsertView>false</shownInInsertView>
+        <shownInUpdateView>false</shownInUpdateView>
+        <shownInDetailsView>false</shownInDetailsView>
+        <scale>100</scale>
+        <isKeyField>true</isKeyField>
+      </column>
+      <column columnName="remark">
+        <datatype>varchar</datatype>
+        <inputType>textarea</inputType>
+        <columnTitle>Remark</columnTitle>
+        <propertyURI>urn:ehr.labkey.org/#Remark</propertyURI>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#multiLine</rangeURI>
+        <facetingBehavior>ALWAYS_OFF</facetingBehavior>
+        <scale>-1</scale>
+      </column>
+      <column columnName="parentid">
+        <datatype>varchar</datatype>
+        <columnTitle>Encounter Id</columnTitle>
+        <propertyURI>urn:ehr.labkey.org/#ParentId</propertyURI>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+        <isHidden>true</isHidden>
+        <shownInUpdateView>false</shownInUpdateView>
+        <shownInDetailsView>false</shownInDetailsView>
+        <fk>
+          <fkDbSchema>study</fkDbSchema>
+          <fkTable>encounters</fkTable>
+          <fkColumnName>objectid</fkColumnName>
+        </fk>
+        <facetingBehavior>ALWAYS_OFF</facetingBehavior>
+        <scale>400</scale>
+      </column>
+      <column columnName="description">
+        <datatype>varchar</datatype>
+        <inputType>textarea</inputType>
+        <columnTitle>Description</columnTitle>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#multiLine</rangeURI>
+        <shownInInsertView>false</shownInInsertView>
+        <shownInUpdateView>false</shownInUpdateView>
+        <shownInDetailsView>false</shownInDetailsView>
+        <facetingBehavior>ALWAYS_OFF</facetingBehavior>
+        <scale>4000</scale>
+      </column>
+      <column columnName="ts">
+        <datatype>timestamp</datatype>
+        <columnTitle>Last Changed</columnTitle>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#dateTime</rangeURI>
+        <isHidden>true</isHidden>
+        <shownInInsertView>false</shownInInsertView>
+        <shownInUpdateView>false</shownInUpdateView>
+        <shownInDetailsView>false</shownInDetailsView>
+      </column>
+      <column columnName="taskid">
+        <datatype>varchar</datatype>
+        <columnTitle>Task Id</columnTitle>
+        <propertyURI>urn:ehr.labkey.org/#TaskId</propertyURI>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+        <shownInUpdateView>false</shownInUpdateView>
+        <shownInDetailsView>false</shownInDetailsView>
+        <dimension>false</dimension>
+        <url replaceMissing="blankValue"><![CDATA[/ehr/taskDetails.view?formtype=${taskid/formtype}&taskid=${taskid}]]></url>
+        <fk>
+          <fkDbSchema>ehr</fkDbSchema>
+          <fkTable>tasks</fkTable>
+          <fkColumnName>taskid</fkColumnName>
+        </fk>
+        <facetingBehavior>ALWAYS_OFF</facetingBehavior>
+        <scale>100</scale>
+      </column>
+      <column columnName="account">
+        <datatype>varchar</datatype>
+        <columnTitle>Account</columnTitle>
+        <propertyURI>urn:ehr.labkey.org/#Account</propertyURI>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+        <scale>4000</scale>
+      </column>
+      <column columnName="performedby">
+        <datatype>varchar</datatype>
+        <columnTitle>Performed By</columnTitle>
+        <propertyURI>urn:ehr.labkey.org/#PerformedBy</propertyURI>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+        <scale>64</scale>
+      </column>
+      <column columnName="requestid">
+        <datatype>varchar</datatype>
+        <columnTitle>Request Id</columnTitle>
+        <propertyURI>urn:ehr.labkey.org/#RequestId</propertyURI>
+        <rangeURI>http://www.w3.org/2001/XMLSchema#string</rangeURI>
+        <shownInUpdateView>false</shownInUpdateView>
+        <shownInDetailsView>false</shownInDetailsView>
+        <dimension>false</dimension>
+        <url replaceMissing="blankValue"><![CDATA[/ehr/requestDetails.view?formtype=${requestid/formtype}&requestid=${requestid}]]></url>
+        <fk>
+          <fkDbSchema>ehr</fkDbSchema>
+          <fkTable>requests</fkTable>
+          <fkColumnName>requestid</fkColumnName>
+        </fk>
+        <facetingBehavior>ALWAYS_OFF</facetingBehavior>
+        <scale>100</scale>
+      </column>
+    </columns>
+    <tableTitle>Housing Test</tableTitle>
     <indices>
       <index type="non-unique">
         <column>participantsequencenum</column>

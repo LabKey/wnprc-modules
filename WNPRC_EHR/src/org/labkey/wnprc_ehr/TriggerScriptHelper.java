@@ -416,7 +416,7 @@ public class TriggerScriptHelper {
         requiredFields.add("Id");
         requiredFields.add("date");
         requiredFields.add("room");
-        requiredFields.add("cage");
+        requiredFields.add("cageNew");
         requiredFields.add("reason");
 
         //Filter out any rows that aren't related to breeding

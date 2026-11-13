@@ -19,7 +19,6 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.Sort;
 import org.labkey.api.module.Module;
 import org.labkey.api.security.User;
-import org.labkey.api.util.Path;
 import org.labkey.api.view.ActionURL;
 
 import java.util.ArrayList;
@@ -124,12 +123,18 @@ public class AnimalRequestNotificationRevamp extends AbstractEHRNotification
         String currentDate = AbstractEHRNotification._dateFormat.format(now);
         String currentTime = AbstractEHRNotification._timeFormat.format(now);
         //Creates 'single request' URL.
-        Path singleRequestURL = new Path(ActionURL.getBaseServerURLWithContextPath(), "ehr", c.getPath(), "");
-        String singleRequestUrlAsString = singleRequestURL.toString() + "manageRecord.view?schemaName=wnprc&queryName=animal_requests&title=Animal%20Requests&keyField=rowid&key=" + rowId;
+        String singleRequestUrlAsString = new ActionURL("ehr", "manageRecord", c)
+                .addParameter("schemaName", "wnprc")
+                .addParameter("queryName", "animal_requests")
+                .addParameter("title", "Animal Requests")
+                .addParameter("keyField", "rowid")
+                .addParameter("key", String.valueOf(rowId))
+                .getURIString();
         String singleRequestHyperlink = notificationToolkit.createHyperlink("here", singleRequestUrlAsString);
         //Creates 'all requests' URL.
-        Path allRequestsURL = new Path(ActionURL.getBaseServerURLWithContextPath(), "ehr", c.getPath(), "");
-        String allRequestsUrlAsString = allRequestsURL.toString() + "dataEntry.view?#topTab:Requests&activeReport:AnimalRequests\"";
+        String allRequestsUrlAsString = new ActionURL("ehr", "dataEntry", c)
+                .setFragment("topTab:Requests&activeReport:AnimalRequests")
+                .getURIString();
         String allRequestsHyperlink = notificationToolkit.createHyperlink("here", allRequestsUrlAsString);
 
         //Creates message info.

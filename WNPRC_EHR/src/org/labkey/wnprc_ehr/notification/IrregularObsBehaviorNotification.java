@@ -28,7 +28,6 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.security.User;
 import org.labkey.api.util.HtmlString;
-import org.labkey.api.util.Path;
 import org.labkey.api.view.ActionURL;
 
 import java.sql.SQLException;
@@ -161,9 +160,9 @@ public class IrregularObsBehaviorNotification extends AbstractEHRNotification
                     String behaviors = getBehaviorString(behaviorCodesTableInfo, rs.getRowMap());
 
                     HtmlString animalEncoded = HtmlString.of((String)row.get("Id"));
-                    StringBuilder hrefForAnimalAbstract = new StringBuilder();
-                    hrefForAnimalAbstract.append(new Path(ActionURL.getBaseServerURLWithContextPath(), "ehr", c.getPath(), "animalHistory.view")).toString();
-                    hrefForAnimalAbstract.append("?#subjects:").append(animalEncoded).append("&inputType:singleSubject&showReport:1&activeReport:abstract");
+                    String hrefForAnimalAbstract = new ActionURL("ehr", "animalHistory", c)
+                            .setFragment("subjects:" + animalEncoded + "&inputType:singleSubject&showReport:1&activeReport:abstract")
+                            .getURIString();
                     StringBuilder animalId = new StringBuilder();
                     animalId.append("<a href='").append(hrefForAnimalAbstract).append("'>");
                     animalId.append(animalEncoded);

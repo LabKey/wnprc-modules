@@ -23,7 +23,6 @@ import org.labkey.api.data.TableInfo;
 import org.labkey.api.module.Module;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.security.User;
-import org.labkey.api.util.Path;
 import org.labkey.api.view.ActionURL;
 import org.labkey.wnprc_ehr.TriggerScriptHelper;
 
@@ -147,11 +146,17 @@ public class AnimalRequestUpdateNotificationRevamp extends AbstractEHRNotificati
 
         if (hasData) {
             //Creates 'single request' URL.
-            Path singleRequestURL = new Path(ActionURL.getBaseServerURLWithContextPath(), "ehr", c.getPath(), "");
-            String singleRequestUrlAsString = singleRequestURL.toString() + "manageRecord.view?schemaName=wnprc&queryName=animal_requests&title=Animal%20Requests&keyField=rowid&key=" + this.rowID;
+            String singleRequestUrlAsString = new ActionURL("ehr", "manageRecord", c)
+                    .addParameter("schemaName", "wnprc")
+                    .addParameter("queryName", "animal_requests")
+                    .addParameter("title", "Animal Requests")
+                    .addParameter("keyField", "rowid")
+                    .addParameter("key", String.valueOf(this.rowID))
+                    .getURIString();
             //Creates 'all requests' URL.
-            Path allRequestsURL = new Path(ActionURL.getBaseServerURLWithContextPath(), "ehr", c.getPath(), "");
-            String allRequestsUrlAsString = allRequestsURL.toString() + "dataEntry.view?#topTab:Requests&activeReport:AnimalRequests\"";
+            String allRequestsUrlAsString = new ActionURL("ehr", "dataEntry", c)
+                    .setFragment("topTab:Requests&activeReport:AnimalRequests")
+                    .getURIString();
 
             // Creates variables.
             final StringBuilder msg = new StringBuilder();

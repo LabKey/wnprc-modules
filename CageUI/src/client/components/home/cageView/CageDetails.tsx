@@ -33,7 +33,6 @@ export const CageDetails: FC<CageDetailsProps> = (props) => {
 
     useEffect(() => {
         if(!cageWeights) return;
-        console.log("Weights: ", cageWeights)
     }, [cageWeights]);
 
     return (
@@ -81,18 +80,24 @@ export const CageDetails: FC<CageDetailsProps> = (props) => {
                             </div>
                         </div>
                         <div className="dimension-item">
-                            <span className="dimension-label">Current Weight:</span>
+                            <span className="dimension-label">Occupied SqFt:</span>
                             <div className="dimension-value-container">
                                 <div className="dimension-value-container">
-                                    <span className="dimension-value-text">{cageWeights?.actualWeight} lbs</span>
+                                    <span className="dimension-value-text" data-unit={'ft'}>
+                                        <span className="unit-with-squared">
+                                            {Math.round(cageWeights?.requiredSqft * 100) / 100} ft
+                                        </span>
+                                    </span>
                                 </div>
                             </div>
                         </div>
                         <div className="dimension-item">
-                            <span className="dimension-label">Available Weight:</span>
+                            <span className="dimension-label">Available SqFt:</span>
                             <div className="dimension-value-container">
                                 <div className="dimension-value-container">
-                                    <span className="dimension-value-text">{Math.round((cageWeights?.allowedWeight - cageWeights?.actualWeight) * 100) / 100} lbs</span>
+                                    <span className="dimension-value-text" data-unit={'ft'}>
+                                        <span className="unit-with-squared">{Math.round((cageWeights?.cageSqft - cageWeights?.requiredSqft) * 100) / 100} ft</span>
+                                    </span>
                                 </div>
                             </div>
                         </div>

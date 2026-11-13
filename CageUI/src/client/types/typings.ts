@@ -493,28 +493,28 @@ export interface AnimalWeightInfo {
     weight: number | null;
 }
 
+// Only include fields needed for error messages
 export interface PerAnimalWeightCheck {
     status: 'over' | 'under';
     overWeightAnimals: { id: string; weight: number | null; limit: number | null }[];
-    totalSqftUsed: number;
-    totalSqftAvailable: number | null;
+    overHeightAnimals: { id: string; limit: number | null }[];
 }
 
 export interface CageWeightResult {
     room: string;
     cage: string;
-    allowedWeight: number | null;
-    actualWeight: number;
-    isOverWeight: boolean;
-    hasInsufficientHeight: boolean;
-    status: 'over' | 'under' | 'equal';
+    actualWeight: number;         // sum of animal weights
+    isOverWeight: boolean;        // true if total sqft > cage.sqft
+    hasInsufficientHeight: boolean; // true if max required height > cage.height
+    status: 'over' | 'under' | 'equal'; // for completeness (can be derived)
     cageSqft: number | null;
     cageHeight: number | null;
-    requiredSqft: number;
-    requiredHeight: number;
+    requiredSqft: number;         // total required sqft (sum per animal)
+    requiredHeight: number;       // max required height (per animal)
     animals: AnimalWeightInfo[];
     perAnimalWeightCheck?: PerAnimalWeightCheck;
 }
+
 
 export interface SvgSizes {
     value: string;

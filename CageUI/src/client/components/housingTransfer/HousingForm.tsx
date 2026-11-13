@@ -430,12 +430,17 @@ export const HousingForm: FC<HousingFormProps> = (props) => {
                     const isExempt = await checkAnyAnimalBelongsToProject([...movingAnimals, ...plannedOccupants]);
                     if (!isExempt) {
                         if (weightResult.isOverWeight) {
-                            const animalLabel = (weightResult.perAnimalWeightCheck?.overWeightAnimals?.length ?? 0) > 1 ? 'Animals' : 'Animal';
-                            const overWeightDetails = weightResult.perAnimalWeightCheck?.overWeightAnimals?.length
-                                ? `${animalLabel} ${weightResult.perAnimalWeightCheck.overWeightAnimals.map(a => `${a.id} (${a.weight} lbs)`).join(', ')}`
-                                : `Weight: ${weightResult.actualWeight} lbs`;
-                            validationErrors.push(`Cage ${cageLabel} in Room ${roomName} exceeds weight limit (${overWeightDetails}, Allowed: ${weightResult.allowedWeight} lbs${weightResult.cageSqft ? `, Required SQFT: ${weightResult.requiredSqft}, Cage SQFT: ${weightResult.cageSqft}` : ''}). Move cannot be completed.`);
+                            const overAnimals = weightResult.perAnimalWeightCheck?.overWeightAnimals;
+                            const totalRequired = weightResult.requiredSqft;
+                            const cageAvailable = weightResult.cageSqft ?? 0;
+
+                            const details = overAnimals?.length
+                                ? `${overAnimals.length === 1 ? 'Animal' : 'Animals'} ${overAnimals.map(a => a.id).join(', ')} each require sqft exceeding available`
+                                : `Required sqft (${totalRequired}) exceeds cage capacity (${cageAvailable})`;
+
+                            validationErrors.push(`Cage space limit exceeded (${details}: Required ${totalRequired} sqft, Available ${cageAvailable} sqft)`);
                         }
+
                         if (weightResult.hasInsufficientHeight) {
                             validationErrors.push(`Cage ${cageLabel} in Room ${roomName} does not meet height requirement (Required Height: ${weightResult.requiredHeight} in, Cage Height: ${weightResult.cageHeight} in). Move cannot be completed.`);
                         }

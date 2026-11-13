@@ -715,11 +715,15 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
                     if (!isExempt) {
                         const errorDetails: string[] = [];
                         if (weightResult.isOverWeight) {
-                            const animalLabel = (weightResult.perAnimalWeightCheck?.overWeightAnimals?.length ?? 0) > 1 ? 'Animals' : 'Animal';
-                            const overWeightDetails = weightResult.perAnimalWeightCheck?.overWeightAnimals?.length
-                                ? `${animalLabel} ${weightResult.perAnimalWeightCheck.overWeightAnimals.map(a => `${a.id} (${a.weight} lbs)`).join(', ')}`
-                                : `Weight: ${weightResult.actualWeight} lbs`;
-                            errorDetails.push(`Cage weight limit exceeded (${overWeightDetails}, Allowed: ${weightResult.allowedWeight} lbs${weightResult.cageSqft ? `, Required SQFT: ${weightResult.requiredSqft}, Cage SQFT: ${weightResult.cageSqft}` : ''})`);
+                            const overAnimals = weightResult.perAnimalWeightCheck?.overWeightAnimals;
+                            const totalRequired = weightResult.requiredSqft;
+                            const cageAvailable = weightResult.cageSqft ?? 0;
+
+                            const details = overAnimals?.length
+                                ? `${overAnimals.length === 1 ? 'Animal' : 'Animals'} ${overAnimals.map(a => a.id).join(', ')} each require sqft exceeding available`
+                                : `Required sqft (${totalRequired}) exceeds cage capacity (${cageAvailable})`;
+
+                            errorDetails.push(`Cage space limit exceeded (${details}: Required ${totalRequired} sqft, Available ${cageAvailable} sqft)`);
                         }
                         if (weightResult.hasInsufficientHeight) {
                             errorDetails.push(`Cage height requirement not met (Required Height: ${weightResult.requiredHeight} in, Cage Height: ${weightResult.cageHeight} in)`);

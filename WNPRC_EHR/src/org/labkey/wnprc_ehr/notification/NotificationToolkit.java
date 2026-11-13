@@ -43,7 +43,6 @@ import org.labkey.api.query.QueryService;
 import org.labkey.api.security.User;
 import org.labkey.api.security.UserPrincipal;
 import org.labkey.api.util.MailHelper;
-import org.labkey.api.util.Path;
 import org.labkey.api.view.ActionURL;
 import org.labkey.wnprc_ehr.WNPRC_EHRModule;
 
@@ -940,11 +939,8 @@ public class NotificationToolkit {
             }
         }
 
-        //Creates URL to return.
-        Path returnUrl = new Path(new ActionURL().getBaseServerURI(), queryURL.toString());
-
         //Returns URL.
-        return returnUrl.toString();
+        return queryURL.getURIString();
     }
 
     public String createFormURL(Container c, String formType, String taskID) {
@@ -954,29 +950,20 @@ public class NotificationToolkit {
         formURL.addParameter("formType", formType);
         formURL.addParameter("taskid", taskID);
 
-        // Creates path.
-        Path returnUrl = new Path(new ActionURL().getBaseServerURI(), formURL.toString());
-
         // Returns URL.
-        return returnUrl.toString();
+        return formURL.getURIString();
     }
 
     public String createAnimalHistoryURL(Container c, String subject) {
         // Creates URL.
         ActionURL animalHistoryURL = new ActionURL();
         animalHistoryURL = new ActionURL("ehr", "animalHistory.view", c);
-        String animalHistoryURLWithID = animalHistoryURL.toString() + "#subjects:" + subject;   // TODO: Try and get commented code below to work instaed of hardcoding this.  For some reason, adding parameter gives me '#subjects=' instead of '#subjects:'.
+        return animalHistoryURL.getURIString() + "#subjects:" + subject;   // TODO: Try and get commented code below to work instaed of hardcoding this.  For some reason, adding parameter gives me '#subjects=' instead of '#subjects:'.
 
 //        animalHistoryURL.addParameter("#subjects", subject);
 //        animalHistoryURL.addParameter("inputType", "singleSubject");
 //        animalHistoryURL.addParameter("showReport", "0");
 //        animalHistoryURL.addParameter("activeReport", "abstract");
-
-        // Creates path.
-        Path returnUrl = new Path(new ActionURL().getBaseServerURI(), animalHistoryURLWithID);
-
-        // Returns URL.
-        return returnUrl.toString();
     }
 
     // TODO: COMMENT!!!

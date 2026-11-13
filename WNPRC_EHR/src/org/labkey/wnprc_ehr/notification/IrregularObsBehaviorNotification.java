@@ -32,8 +32,6 @@ import org.labkey.api.util.Path;
 import org.labkey.api.view.ActionURL;
 
 import java.sql.SQLException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -164,7 +162,7 @@ public class IrregularObsBehaviorNotification extends AbstractEHRNotification
 
                     HtmlString animalEncoded = HtmlString.of((String)row.get("Id"));
                     StringBuilder hrefForAnimalAbstract = new StringBuilder();
-                    hrefForAnimalAbstract.append(new Path(ActionURL.getBaseServerURL(), "ehr", c.getPath(), "animalHistory.view")).toString();
+                    hrefForAnimalAbstract.append(new Path(ActionURL.getBaseServerURLWithContextPath(), "ehr", c.getPath(), "animalHistory.view")).toString();
                     hrefForAnimalAbstract.append("?#subjects:").append(animalEncoded).append("&inputType:singleSubject&showReport:1&activeReport:abstract");
                     StringBuilder animalId = new StringBuilder();
                     animalId.append("<a href='").append(hrefForAnimalAbstract).append("'>");

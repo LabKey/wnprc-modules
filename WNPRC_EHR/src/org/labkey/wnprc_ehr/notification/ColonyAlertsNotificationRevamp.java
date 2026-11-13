@@ -21,7 +21,6 @@ import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Sort;
 import org.labkey.api.module.Module;
 import org.labkey.api.security.User;
-import org.labkey.api.util.Path;
 import org.labkey.api.view.ActionURL;
 
 import java.text.ParseException;
@@ -939,7 +938,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
             queryURL.addParameter("schemaName", "study");
             queryURL.addParameter("query.queryName", "HousingCheck");
             queryURL.addParameter("query.param.MINDATE", todayCalendarDate);
-            String viewQueryURL = (new Path(new ActionURL().getBaseServerURI(), queryURL.toString())).toString();
+            String viewQueryURL = queryURL.getURIString();
 
             //Returns data.
             this.nonContiguousHousingRecords = returnArray;

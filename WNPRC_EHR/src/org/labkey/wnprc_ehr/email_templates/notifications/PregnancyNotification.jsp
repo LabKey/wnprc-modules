@@ -47,7 +47,7 @@
     String gender  = demographicsInfo.getString("gender_fs_meaning");
 
     // Construct the href for the animal abstract link.
-    String hrefForAnimalAbstract = (new Path(ActionURL.getBaseServerURL(), "ehr", getContainer().getPath(), "animalHistory.view")).toString();
+    String hrefForAnimalAbstract = (new Path(ActionURL.getBaseServerURLWithContextPath(), "ehr", getContainer().getPath(), "animalHistory.view")).toString();
     hrefForAnimalAbstract += "?#subjects:" + Id + "&inputType:singleSubject&showReport:1&activeReport:abstract";
 %>
 

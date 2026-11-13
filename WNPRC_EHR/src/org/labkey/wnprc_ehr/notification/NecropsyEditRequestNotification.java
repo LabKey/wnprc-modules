@@ -19,8 +19,6 @@ import org.labkey.api.data.Container;
 import org.labkey.api.module.Module;
 import org.labkey.api.query.DetailsURL;
 import org.labkey.api.security.User;
-import org.labkey.api.util.Path;
-import org.labkey.api.view.ActionURL;
 
 import java.util.ArrayList;
 
@@ -102,7 +100,7 @@ public class NecropsyEditRequestNotification extends AbstractEHRNotification {
             DetailsURL details = DetailsURL.fromString("ehr-dataEntryForm.view?formType=NecropsyRequest&requestid=" + this.requestId, c);
             messageBody.append("<p>The following changes are requested:</p>");
             messageBody.append("<p>" + this.message+ "</p>");
-            String editNecropsyRequestUrl = (new Path(new ActionURL().getBaseServerURI(), details.getActionURL().toString())).toString();
+            String editNecropsyRequestUrl = details.getActionURL().getURIString();
             messageBody.append("<p>You can edit the necropsy request " + notificationToolkit.createHyperlink("here", editNecropsyRequestUrl) + ".</p>");
 
             // Returns message info.

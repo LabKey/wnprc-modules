@@ -70,7 +70,7 @@
     }
 
     // Construct the href for the animal abstract link.
-    String hrefForAnimalAbstract = (new Path(ActionURL.getBaseServerURL(), "ehr", getContainer().getPath(), "animalHistory.view")).toString();
+    String hrefForAnimalAbstract = (new Path(ActionURL.getBaseServerURLWithContextPath(), "ehr", getContainer().getPath(), "animalHistory.view")).toString();
     hrefForAnimalAbstract += "?#subjects:" + Id + "&inputType:singleSubject&showReport:1&activeReport:abstract";
 %>
 
@@ -187,7 +187,7 @@
     <tr>
         <td>Task ID:</td>
         <td>
-            <a href="<%=h(ActionURL.getBaseServerURL() + "/ehr/" + getContainer().getPath() + "/taskDetails.view?formtype=" + necropsy.getString("taskid_fs_formtype") + "&taskid=" + taskid)%>">
+            <a href="<%=h(ActionURL.getBaseServerURLWithContextPath() + "/ehr/" + getContainer().getPath() + "/taskDetails.view?formtype=" + necropsy.getString("taskid_fs_formtype") + "&taskid=" + taskid)%>">
                 <%=h(necropsy.getString("taskid_fs_rowid"))%>
             </a>
         </td>

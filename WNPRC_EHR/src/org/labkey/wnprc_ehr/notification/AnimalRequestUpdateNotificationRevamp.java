@@ -20,17 +20,12 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Sort;
 import org.labkey.api.data.TableInfo;
-import org.labkey.api.data.queryprofiler.Query;
 import org.labkey.api.module.Module;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.security.User;
-import org.labkey.api.util.Path;
-import org.labkey.api.view.ActionURL;
 import org.labkey.wnprc_ehr.TriggerScriptHelper;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -150,11 +145,9 @@ public class AnimalRequestUpdateNotificationRevamp extends AbstractEHRNotificati
 
         if (hasData) {
             //Creates 'single request' URL.
-            Path singleRequestURL = new Path(ActionURL.getBaseServerURL(), "ehr", c.getPath(), "");
-            String singleRequestUrlAsString = singleRequestURL.toString() + "manageRecord.view?schemaName=wnprc&queryName=animal_requests&title=Animal%20Requests&keyField=rowid&key=" + this.rowID;
+            String singleRequestUrlAsString = NotificationToolkit.createAnimalRequestURL(c, this.rowID);
             //Creates 'all requests' URL.
-            Path allRequestsURL = new Path(ActionURL.getBaseServerURL(), "ehr", c.getPath(), "");
-            String allRequestsUrlAsString = allRequestsURL.toString() + "dataEntry.view?#topTab:Requests&activeReport:AnimalRequests\"";
+            String allRequestsUrlAsString = NotificationToolkit.createAllAnimalRequestsURL(c);
 
             // Creates variables.
             final StringBuilder msg = new StringBuilder();

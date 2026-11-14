@@ -43,7 +43,7 @@ import org.labkey.api.query.QueryService;
 import org.labkey.api.security.User;
 import org.labkey.api.security.UserPrincipal;
 import org.labkey.api.util.MailHelper;
-import org.labkey.api.util.Path;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.wnprc_ehr.WNPRC_EHRModule;
 
@@ -317,7 +317,7 @@ public class NotificationToolkit {
      * @return              An String containing an HTML-formatted hyperlink.
      */
     public String createHyperlink(String displayText, String url) {
-        return("<a href=\"" + url + "\">" + displayText + "</a>");
+        return("<a href=\"" + PageFlowUtil.filter(url) + "\">" + displayText + "</a>");
     }
 
 //    /**
@@ -940,43 +940,50 @@ public class NotificationToolkit {
             }
         }
 
-        //Creates URL to return.
-        Path returnUrl = new Path(new ActionURL().getBaseServerURI(), queryURL.toString());
-
         //Returns URL.
-        return returnUrl.toString();
+        return queryURL.getURIString();
     }
 
     public String createFormURL(Container c, String formType, String taskID) {
         // Creates URL.
         ActionURL formURL = new ActionURL();
         formURL = new ActionURL("ehr", "taskDetails.view", c);
-        formURL.addParameter("formType", formType);
+        formURL.addParameter("formtype", formType);
         formURL.addParameter("taskid", taskID);
 
-        // Creates path.
-        Path returnUrl = new Path(new ActionURL().getBaseServerURI(), formURL.toString());
-
         // Returns URL.
-        return returnUrl.toString();
+        return formURL.getURIString();
     }
 
     public String createAnimalHistoryURL(Container c, String subject) {
-        // Creates URL.
-        ActionURL animalHistoryURL = new ActionURL();
-        animalHistoryURL = new ActionURL("ehr", "animalHistory.view", c);
-        String animalHistoryURLWithID = animalHistoryURL.toString() + "#subjects:" + subject;   // TODO: Try and get commented code below to work instaed of hardcoding this.  For some reason, adding parameter gives me '#subjects=' instead of '#subjects:'.
+        return animalHistoryURL(c, subject, "");
+    }
 
-//        animalHistoryURL.addParameter("#subjects", subject);
-//        animalHistoryURL.addParameter("inputType", "singleSubject");
-//        animalHistoryURL.addParameter("showReport", "0");
-//        animalHistoryURL.addParameter("activeReport", "abstract");
+    public static String createAnimalAbstractURL(Container c, String subject) {
+        return animalHistoryURL(c, subject, "&inputType:singleSubject&showReport:1&activeReport:abstract");
+    }
 
-        // Creates path.
-        Path returnUrl = new Path(new ActionURL().getBaseServerURI(), animalHistoryURLWithID);
+    // LDK's TabbedReportPanel splits the hash on '&' and ':', then decodes each part
+    private static String animalHistoryURL(Container c, String subject, String extraHashParams) {
+        return new ActionURL("ehr", "animalHistory", c)
+                .setFragment("subjects:" + PageFlowUtil.encodeURIComponent(subject) + extraHashParams)
+                .getURIString();
+    }
 
-        // Returns URL.
-        return returnUrl.toString();
+    public static String createAnimalRequestURL(Container c, Integer rowId) {
+        return new ActionURL("ehr", "manageRecord", c)
+                .addParameter("schemaName", "wnprc")
+                .addParameter("queryName", "animal_requests")
+                .addParameter("title", "Animal Requests")
+                .addParameter("keyField", "rowid")
+                .addParameter("key", String.valueOf(rowId))
+                .getURIString();
+    }
+
+    public static String createAllAnimalRequestsURL(Container c) {
+        return new ActionURL("ehr", "dataEntry", c)
+                .setFragment("topTab:Requests&activeReport:AnimalRequests")
+                .getURIString();
     }
 
     // TODO: COMMENT!!!

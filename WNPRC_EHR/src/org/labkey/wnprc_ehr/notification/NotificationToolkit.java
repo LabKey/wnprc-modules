@@ -948,7 +948,7 @@ public class NotificationToolkit {
         // Creates URL.
         ActionURL formURL = new ActionURL();
         formURL = new ActionURL("ehr", "taskDetails.view", c);
-        formURL.addParameter("formType", formType);
+        formURL.addParameter("formtype", formType);
         formURL.addParameter("taskid", taskID);
 
         // Returns URL.

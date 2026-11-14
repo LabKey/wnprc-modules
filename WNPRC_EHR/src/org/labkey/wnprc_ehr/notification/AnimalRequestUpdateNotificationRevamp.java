@@ -23,7 +23,6 @@ import org.labkey.api.data.TableInfo;
 import org.labkey.api.module.Module;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.security.User;
-import org.labkey.api.view.ActionURL;
 import org.labkey.wnprc_ehr.TriggerScriptHelper;
 
 import java.util.ArrayList;
@@ -146,17 +145,9 @@ public class AnimalRequestUpdateNotificationRevamp extends AbstractEHRNotificati
 
         if (hasData) {
             //Creates 'single request' URL.
-            String singleRequestUrlAsString = new ActionURL("ehr", "manageRecord", c)
-                    .addParameter("schemaName", "wnprc")
-                    .addParameter("queryName", "animal_requests")
-                    .addParameter("title", "Animal Requests")
-                    .addParameter("keyField", "rowid")
-                    .addParameter("key", String.valueOf(this.rowID))
-                    .getURIString();
+            String singleRequestUrlAsString = NotificationToolkit.createAnimalRequestURL(c, this.rowID);
             //Creates 'all requests' URL.
-            String allRequestsUrlAsString = new ActionURL("ehr", "dataEntry", c)
-                    .setFragment("topTab:Requests&activeReport:AnimalRequests")
-                    .getURIString();
+            String allRequestsUrlAsString = NotificationToolkit.createAllAnimalRequestsURL(c);
 
             // Creates variables.
             final StringBuilder msg = new StringBuilder();

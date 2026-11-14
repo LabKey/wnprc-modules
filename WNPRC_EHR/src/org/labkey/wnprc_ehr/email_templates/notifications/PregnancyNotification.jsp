@@ -18,9 +18,9 @@
 <%@ page import="org.json.JSONArray" %>
 <%@ page import="org.json.JSONObject" %>
 <%@ page import="org.labkey.api.data.CompareType" %>
-<%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.dbutils.api.SimpleQueryFactory" %>
 <%@ page import="org.labkey.dbutils.api.SimplerFilter" %>
+<%@ page import="org.labkey.wnprc_ehr.notification.NotificationToolkit" %>
 <%@ page import="org.labkey.wnprc_ehr.notification.PregnancyNotification" %>
 <%@ page import="org.labkey.api.util.JsonUtil" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
@@ -46,9 +46,7 @@
     String gender  = demographicsInfo.getString("gender_fs_meaning");
 
     // Construct the href for the animal abstract link.
-    String hrefForAnimalAbstract = new ActionURL("ehr", "animalHistory", getContainer())
-            .setFragment("subjects:" + Id + "&inputType:singleSubject&showReport:1&activeReport:abstract")
-            .getURIString();
+    String hrefForAnimalAbstract = NotificationToolkit.createAnimalAbstractURL(getContainer(), Id);
 %>
 
 <style type="text/css">

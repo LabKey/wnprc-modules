@@ -43,6 +43,7 @@ import org.labkey.api.query.QueryService;
 import org.labkey.api.security.User;
 import org.labkey.api.security.UserPrincipal;
 import org.labkey.api.util.MailHelper;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.wnprc_ehr.WNPRC_EHRModule;
 
@@ -316,7 +317,7 @@ public class NotificationToolkit {
      * @return              An String containing an HTML-formatted hyperlink.
      */
     public String createHyperlink(String displayText, String url) {
-        return("<a href=\"" + url + "\">" + displayText + "</a>");
+        return("<a href=\"" + PageFlowUtil.filter(url) + "\">" + displayText + "</a>");
     }
 
 //    /**
@@ -955,15 +956,34 @@ public class NotificationToolkit {
     }
 
     public String createAnimalHistoryURL(Container c, String subject) {
-        // Creates URL.
-        ActionURL animalHistoryURL = new ActionURL();
-        animalHistoryURL = new ActionURL("ehr", "animalHistory.view", c);
-        return animalHistoryURL.getURIString() + "#subjects:" + subject;   // TODO: Try and get commented code below to work instaed of hardcoding this.  For some reason, adding parameter gives me '#subjects=' instead of '#subjects:'.
+        return animalHistoryURL(c, subject, "");
+    }
 
-//        animalHistoryURL.addParameter("#subjects", subject);
-//        animalHistoryURL.addParameter("inputType", "singleSubject");
-//        animalHistoryURL.addParameter("showReport", "0");
-//        animalHistoryURL.addParameter("activeReport", "abstract");
+    public static String createAnimalAbstractURL(Container c, String subject) {
+        return animalHistoryURL(c, subject, "&inputType:singleSubject&showReport:1&activeReport:abstract");
+    }
+
+    // LDK's TabbedReportPanel splits the hash on '&' and ':', then decodes each part
+    private static String animalHistoryURL(Container c, String subject, String extraHashParams) {
+        return new ActionURL("ehr", "animalHistory", c)
+                .setFragment("subjects:" + PageFlowUtil.encodeURIComponent(subject) + extraHashParams)
+                .getURIString();
+    }
+
+    public static String createAnimalRequestURL(Container c, Integer rowId) {
+        return new ActionURL("ehr", "manageRecord", c)
+                .addParameter("schemaName", "wnprc")
+                .addParameter("queryName", "animal_requests")
+                .addParameter("title", "Animal Requests")
+                .addParameter("keyField", "rowid")
+                .addParameter("key", String.valueOf(rowId))
+                .getURIString();
+    }
+
+    public static String createAllAnimalRequestsURL(Container c) {
+        return new ActionURL("ehr", "dataEntry", c)
+                .setFragment("topTab:Requests&activeReport:AnimalRequests")
+                .getURIString();
     }
 
     // TODO: COMMENT!!!

@@ -17,8 +17,8 @@ package org.labkey.wnprc_ehr.notification;
 
 import org.labkey.api.data.Container;
 import org.labkey.api.module.Module;
-import org.labkey.api.query.DetailsURL;
 import org.labkey.api.security.User;
+import org.labkey.api.view.ActionURL;
 
 import java.util.ArrayList;
 
@@ -97,10 +97,9 @@ public class NecropsyEditRequestNotification extends AbstractEHRNotification {
         if (this.message!= null) {
             // message info.
             messageBody.append("<p>The pathology group is requesting changes for " + this.animalId + "</p>");
-            DetailsURL details = DetailsURL.fromString("ehr-dataEntryForm.view?formType=NecropsyRequest&requestid=" + this.requestId, c);
             messageBody.append("<p>The following changes are requested:</p>");
             messageBody.append("<p>" + this.message+ "</p>");
-            String editNecropsyRequestUrl = details.getActionURL().getURIString();
+            String editNecropsyRequestUrl = new ActionURL("ehr", "dataEntryForm", c).addParameter("formType", "NecropsyRequest").addParameter("requestid", this.requestId).getURIString();
             messageBody.append("<p>You can edit the necropsy request " + notificationToolkit.createHyperlink("here", editNecropsyRequestUrl) + ".</p>");
 
             // Returns message info.

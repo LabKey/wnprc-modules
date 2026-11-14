@@ -19,7 +19,6 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.Sort;
 import org.labkey.api.module.Module;
 import org.labkey.api.security.User;
-import org.labkey.api.view.ActionURL;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -123,19 +122,9 @@ public class AnimalRequestNotificationRevamp extends AbstractEHRNotification
         String currentDate = AbstractEHRNotification._dateFormat.format(now);
         String currentTime = AbstractEHRNotification._timeFormat.format(now);
         //Creates 'single request' URL.
-        String singleRequestUrlAsString = new ActionURL("ehr", "manageRecord", c)
-                .addParameter("schemaName", "wnprc")
-                .addParameter("queryName", "animal_requests")
-                .addParameter("title", "Animal Requests")
-                .addParameter("keyField", "rowid")
-                .addParameter("key", String.valueOf(rowId))
-                .getURIString();
-        String singleRequestHyperlink = notificationToolkit.createHyperlink("here", singleRequestUrlAsString);
+        String singleRequestHyperlink = notificationToolkit.createHyperlink("here", NotificationToolkit.createAnimalRequestURL(c, rowId));
         //Creates 'all requests' URL.
-        String allRequestsUrlAsString = new ActionURL("ehr", "dataEntry", c)
-                .setFragment("topTab:Requests&activeReport:AnimalRequests")
-                .getURIString();
-        String allRequestsHyperlink = notificationToolkit.createHyperlink("here", allRequestsUrlAsString);
+        String allRequestsHyperlink = notificationToolkit.createHyperlink("here", NotificationToolkit.createAllAnimalRequestsURL(c));
 
         //Creates message info.
         msg.append("<p>There was a new animal request submitted on: " + currentDate + " at " + currentTime + ".</p>");

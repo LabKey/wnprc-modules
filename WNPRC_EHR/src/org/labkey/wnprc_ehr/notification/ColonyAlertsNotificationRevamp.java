@@ -942,7 +942,7 @@ public class ColonyAlertsNotificationRevamp extends AbstractEHRNotification {
 
             //Returns data.
             this.nonContiguousHousingRecords = returnArray;
-            this.nonContiguousHousingRecordsURLView = viewQueryURL.toString();
+            this.nonContiguousHousingRecordsURLView = viewQueryURL;
         }
 
         // Find birth records in the past 90 days missing a gender.

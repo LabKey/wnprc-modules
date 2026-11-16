@@ -226,7 +226,7 @@ public class DeathNotificationRevamp extends AbstractEHRNotification {
 
                 //Creates task id with hyperlink.
                 String necropsyTaskID = animalNecropsy.get(0).get("taskid");
-                String taskUrlAsString = notificationToolkit.createFormURL(c, "necropsy", necropsyTaskID);
+                String taskUrlAsString = notificationToolkit.createFormURL(c, necropsyTaskID);
 
                 // Creates filter.
                 SimpleFilter myTaskFilter = new SimpleFilter("taskid", necropsyTaskID, CompareType.EQUAL);

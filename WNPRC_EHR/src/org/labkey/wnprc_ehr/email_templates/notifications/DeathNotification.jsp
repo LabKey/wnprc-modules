@@ -18,11 +18,11 @@
 <%@ page import="org.json.JSONArray" %>
 <%@ page import="org.json.JSONObject" %>
 <%@ page import="org.labkey.api.data.CompareType" %>
-<%@ page import="org.labkey.api.util.Path" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.dbutils.api.SimpleQueryFactory" %>
 <%@ page import="org.labkey.dbutils.api.SimplerFilter" %>
 <%@ page import="org.labkey.wnprc_ehr.TriggerScriptHelper" %>
+<%@ page import="org.labkey.wnprc_ehr.notification.NotificationToolkit" %>
 <%@ page import="org.labkey.api.util.JsonUtil" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
@@ -70,8 +70,7 @@
     }
 
     // Construct the href for the animal abstract link.
-    String hrefForAnimalAbstract = (new Path(ActionURL.getBaseServerURL(), "ehr", getContainer().getPath(), "animalHistory.view")).toString();
-    hrefForAnimalAbstract += "?#subjects:" + Id + "&inputType:singleSubject&showReport:1&activeReport:abstract";
+    String hrefForAnimalAbstract = NotificationToolkit.createAnimalAbstractURL(getContainer(), Id);
 %>
 
 <style type="text/css">
@@ -187,7 +186,7 @@
     <tr>
         <td>Task ID:</td>
         <td>
-            <a href="<%=h(ActionURL.getBaseServerURL() + "/ehr/" + getContainer().getPath() + "/taskDetails.view?formtype=" + necropsy.getString("taskid_fs_formtype") + "&taskid=" + taskid)%>">
+            <a href="<%=h(new ActionURL("ehr", "taskDetails", getContainer()).addParameter("formtype", necropsy.getString("taskid_fs_formtype")).addParameter("taskid", taskid).getURIString())%>">
                 <%=h(necropsy.getString("taskid_fs_rowid"))%>
             </a>
         </td>

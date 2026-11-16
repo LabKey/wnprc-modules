@@ -28,12 +28,8 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.security.User;
 import org.labkey.api.util.HtmlString;
-import org.labkey.api.util.Path;
-import org.labkey.api.view.ActionURL;
 
 import java.sql.SQLException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -162,12 +158,11 @@ public class IrregularObsBehaviorNotification extends AbstractEHRNotification
                     Map<String, Object> row = rs.getRowMap();
                     String behaviors = getBehaviorString(behaviorCodesTableInfo, rs.getRowMap());
 
-                    HtmlString animalEncoded = HtmlString.of((String)row.get("Id"));
-                    StringBuilder hrefForAnimalAbstract = new StringBuilder();
-                    hrefForAnimalAbstract.append(new Path(ActionURL.getBaseServerURL(), "ehr", c.getPath(), "animalHistory.view")).toString();
-                    hrefForAnimalAbstract.append("?#subjects:").append(animalEncoded).append("&inputType:singleSubject&showReport:1&activeReport:abstract");
+                    String id = (String)row.get("Id");
+                    HtmlString animalEncoded = HtmlString.of(id);
+                    String hrefForAnimalAbstract = NotificationToolkit.createAnimalAbstractURL(c, id);
                     StringBuilder animalId = new StringBuilder();
-                    animalId.append("<a href='").append(hrefForAnimalAbstract).append("'>");
+                    animalId.append("<a href='").append(HtmlString.of(hrefForAnimalAbstract)).append("'>");
                     animalId.append(animalEncoded);
                     animalId.append("</a>");
 

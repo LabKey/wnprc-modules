@@ -31,8 +31,8 @@ import org.labkey.api.module.Module;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.security.User;
-import org.labkey.api.settings.AppProps;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.view.ActionURL;
 
 import java.text.DecimalFormat;
 import java.util.Calendar;
@@ -688,7 +688,7 @@ public class ColonyAlertsNotification extends AbstractEHRNotification
 
     protected String getParticipantURL(Container c, String id)
     {
-        return AppProps.getInstance().getBaseServerUrl() + AppProps.getInstance().getContextPath() + "/ehr" + c.getPath() + "/participantView.view?participantId=" + id;
+        return new ActionURL("ehr", "participantView", c).addParameter("participantId", id).getURIString();
     }
 
     protected void assignmentsWithoutReleaseCondition(final Container c, User u, final StringBuilder msg)

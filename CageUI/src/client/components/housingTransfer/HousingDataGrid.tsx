@@ -57,7 +57,7 @@ import {
     getPlannedOccupantsForCage,
     checkAnyAnimalBelongsToProject
 } from '../../utils/housingTransferHelpers';
-import { checkCageWeightLimit } from '../../utils/helpers';
+import { checkCageWeightLimit, canForceSubmit } from '../../utils/helpers';
 import { CageWeightResult } from '../../types/typings';
 
 interface HousingDataGridProps {
@@ -732,29 +732,31 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
                         if (setFormErrors) {
                             setFormErrors([errorMsg]);
                         }
-                        if (isNoChange) {
-                            finalRow = {
-                                ...finalRow,
-                                destinationRoom: { value: null, label: '' },
-                                destinationCage: { value: '', label: '' }
-                            };
-                            setRowMetadata(prev => ({
-                                ...prev,
-                                [finalRow.id]: {
-                                    ...prev[finalRow.id],
-                                    cageOptions: [],
-                                    animalsInDestinationCage: []
-                                }
-                            }));
-                        } else {
-                            finalRow = {
-                                ...finalRow,
-                                destinationCage: { value: '', label: '' }
-                            };
+                        if (!canForceSubmit(user)) {
+                            if (isNoChange) {
+                                finalRow = {
+                                    ...finalRow,
+                                    destinationRoom: { value: null, label: '' },
+                                    destinationCage: { value: '', label: '' }
+                                };
+                                setRowMetadata(prev => ({
+                                    ...prev,
+                                    [finalRow.id]: {
+                                        ...prev[finalRow.id],
+                                        cageOptions: [],
+                                        animalsInDestinationCage: []
+                                    }
+                                }));
+                            } else {
+                                finalRow = {
+                                    ...finalRow,
+                                    destinationCage: { value: '', label: '' }
+                                };
+                            }
+                            updatedAnimals = animals.map((row) => (row.id === finalRow.id ? finalRow : row));
+                            onAnimalsChange(updatedAnimals);
+                            return finalRow;
                         }
-                        updatedAnimals = animals.map((row) => (row.id === finalRow.id ? finalRow : row));
-                        onAnimalsChange(updatedAnimals);
-                        return finalRow;
                     } else {
                         if (setFormErrors) {
                             setFormErrors([]);
@@ -802,7 +804,7 @@ export const HousingDataGrid: FC<HousingDataGridProps> = (props) => {
 
         onAnimalsChange(updatedAnimals);
         return finalRow;
-    }, [animals, allAnimals, onAnimalsChange, handleRoomChange, fetchAnimalsInCage, fetchProjectOptions, rowMetadata, roomLabel, setFormErrors]);
+    }, [animals, allAnimals, onAnimalsChange, handleRoomChange, fetchAnimalsInCage, fetchProjectOptions, rowMetadata, roomLabel, setFormErrors, user]);
 
     const getCellClassName = useCallback((params: GridCellParams<HousingTransferData>) => {
         const { field, value, row } = params;

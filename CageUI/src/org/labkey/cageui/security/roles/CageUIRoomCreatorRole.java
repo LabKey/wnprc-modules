@@ -23,6 +23,7 @@ import org.labkey.api.security.roles.AbstractRole;
 import org.labkey.cageui.CageUIModule;
 import org.labkey.cageui.security.permissions.CageUIAnimalEditorPermission;
 import org.labkey.cageui.security.permissions.CageUIAnimalReviewerPermission;
+import org.labkey.cageui.security.permissions.CageUIForceSubmitPermission;
 import org.labkey.cageui.security.permissions.CageUILayoutEditorAccessPermission;
 import org.labkey.cageui.security.permissions.CageUIModificationEditorPermission;
 import org.labkey.cageui.security.permissions.CageUINotesEditorPermission;
@@ -42,7 +43,8 @@ public class CageUIRoomCreatorRole extends AbstractRole
                 CageUIAnimalReviewerPermission.class,
                 CageUIModificationEditorPermission.class,
                 CageUILayoutEditorAccessPermission.class,
-                CageUINotesEditorPermission.class
+                CageUINotesEditorPermission.class,
+                CageUIForceSubmitPermission.class
         );
     }
 

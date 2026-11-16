@@ -113,6 +113,11 @@ export const isCageModifier = (user: Security.GetUserPermissionsResponse) => {
     return Security.hasEffectivePermission(user.container.effectivePermissions, 'org.labkey.cageui.security.permissions.CageUIModificationEditorPermission');
 };
 
+export const canForceSubmit = (user: Security.GetUserPermissionsResponse) => {
+    if (!user || !user.container || !user.container.effectivePermissions) return false;
+    return Security.hasEffectivePermission(user.container.effectivePermissions, 'org.labkey.cageui.security.permissions.CageUIForceSubmitPermission');
+};
+
 // Converts JS date object to labkey java friendly date object so it can be mapped properly from JS -> Java
 export const toLabKeyDate = (date: Date): string => {
     const pad = (n: number, cnt: number) => n.toString().padStart(cnt, '0');

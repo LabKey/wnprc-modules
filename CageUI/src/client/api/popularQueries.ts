@@ -169,7 +169,6 @@ export const fetchRack = async (objectId: string): Promise<RackData> => {
     }
 };
 
-// TODO update this query with cageNew
 export const findAnimalsInCage = async (cage: string): Promise<AnimalInCage[]> => {
     const config: Query.SelectRowsOptions = {
         schemaName: 'study',
@@ -179,6 +178,7 @@ export const findAnimalsInCage = async (cage: string): Promise<AnimalInCage[]> =
     };
 
     try {
+        console.log("Config: ", config);
         const res = await labkeyActionSelectWithPromise(config);
         const animalsInCage: AnimalInCage[] = [];
         if (res.rows.length > 0) {
@@ -191,7 +191,7 @@ export const findAnimalsInCage = async (cage: string): Promise<AnimalInCage[]> =
         return animalsInCage;
     }
     catch (e) {
-        throw new Error('Error fetching animals in cage: ' + (e as Error).message);
+        throw new Error('Error fetching animals in cage: ' + (e as Error).stack);
     }
 }
 

@@ -302,6 +302,10 @@ public class CageUIManager
         Helper function to submit the housing transfer
      */
     public ApiSimpleResponse submitHousingTransfer(ArrayList<HousingForm> housingRecords, ArrayList<HousingConditionRecordsForm> housingConditionRecords, Map<String, Object> taskRecord, User user, Container container, String layoutChangeId) throws Exception {
+        return submitHousingTransfer(housingRecords, housingConditionRecords, taskRecord, user, container, layoutChangeId, false);
+    }
+
+    public ApiSimpleResponse submitHousingTransfer(ArrayList<HousingForm> housingRecords, ArrayList<HousingConditionRecordsForm> housingConditionRecords, Map<String, Object> taskRecord, User user, Container container, String layoutChangeId, boolean isForceSubmit) throws Exception {
         BatchValidationException batchErrors = new BatchValidationException();
         ApiSimpleResponse response = new ApiSimpleResponse();
 
@@ -342,6 +346,8 @@ public class CageUIManager
             List<Map<String, Object>> housingCodesMapList = convertToMapList(housingConditionRecords);
             Map<String, Object> housingExtraContext = new HashMap<>();
             housingExtraContext.put("housingRows", housingMapList);
+            housingExtraContext.put("isForceSubmit", isForceSubmit);
+            housingExtraContext.put("forceSubmit", isForceSubmit);
 
             if(layoutChangeId != null){
                 AllHistoryForm formToClose = getAllHistoryFromId(layoutChangeId);

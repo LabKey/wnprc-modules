@@ -36,6 +36,7 @@ import org.labkey.cageui.query.CageUIUserSchema;
 import org.labkey.cageui.security.permissions.CageUIAdoptionsPermission;
 import org.labkey.cageui.security.permissions.CageUIAnimalEditorPermission;
 import org.labkey.cageui.security.permissions.CageUIAnimalReviewerPermission;
+import org.labkey.cageui.security.permissions.CageUIForceSubmitPermission;
 import org.labkey.cageui.security.permissions.CageUILayoutEditorAccessPermission;
 import org.labkey.cageui.security.permissions.CageUIModificationEditorPermission;
 import org.labkey.cageui.security.permissions.CageUINotesEditorPermission;
@@ -45,6 +46,7 @@ import org.labkey.cageui.security.permissions.CageUITemplateCreatorPermission;
 import org.labkey.cageui.security.permissions.CageUIUserPermission;
 import org.labkey.cageui.security.roles.CageUIAdminRole;
 import org.labkey.cageui.security.roles.CageUIAdoptionsRole;
+import org.labkey.cageui.security.roles.CageUIHousingTransferAdminRole;
 import org.labkey.cageui.security.roles.CageUIModificationEditorRole;
 import org.labkey.cageui.security.roles.CageUIRoomCreatorRole;
 import org.labkey.cageui.security.roles.CageUIRoomModifierRole;
@@ -106,6 +108,7 @@ public class CageUIModule extends ExtendedSimpleModule
         RoleManager.registerPermission(new CageUINotesEditorPermission());
         RoleManager.registerPermission(new CageUIUserPermission());
         RoleManager.registerPermission(new CageUIAdoptionsPermission());
+        RoleManager.registerPermission(new CageUIForceSubmitPermission());
 
     }
 
@@ -116,6 +119,7 @@ public class CageUIModule extends ExtendedSimpleModule
         RoleManager.registerRole(new CageUIRoomModifierRole());
         RoleManager.registerRole(new CageUIModificationEditorRole());
         RoleManager.registerRole(new CageUIAdoptionsRole());
+        RoleManager.registerRole(new CageUIHousingTransferAdminRole());
     }
 
     public void registerNotifications() {

@@ -75,6 +75,7 @@ import org.labkey.cageui.model.SessionLog;
 import org.labkey.cageui.notification.CageUIHousingTransferNotification;
 import org.labkey.cageui.security.permissions.CageUIAdoptionsPermission;
 import org.labkey.cageui.security.permissions.CageUIAnimalEditorPermission;
+import org.labkey.cageui.security.permissions.CageUIForceSubmitPermission;
 import org.labkey.cageui.security.permissions.CageUILayoutEditorAccessPermission;
 import org.labkey.cageui.security.permissions.CageUIRoomCreatorPermission;
 import org.labkey.cageui.security.permissions.CageUIRoomModifierPermission;
@@ -394,6 +395,17 @@ public class CageUIController extends SpringActionController
 
         String prevFormLsid = null;
         String layoutChangeId = null;
+        boolean forceSubmit = false;
+
+        public boolean isForceSubmit()
+        {
+            return this.forceSubmit;
+        }
+
+        public void setForceSubmit(boolean forceSubmit)
+        {
+            this.forceSubmit = forceSubmit;
+        }
 
         public String getPrevFormLsid(){
             return this.prevFormLsid;
@@ -430,6 +442,10 @@ public class CageUIController extends SpringActionController
 
         public static HousingConditionRecordsForm populateHousingConditionsStream(ConditionCode[] conditions) {
             HousingConditionRecordsForm form = new HousingConditionRecordsForm();
+            if (conditions == null)
+            {
+                return form;
+            }
 
             // Group conditions by type
             Map<ConditionType, List<ConditionCode>> conditionsByType = Arrays.stream(conditions)
@@ -483,6 +499,11 @@ public class CageUIController extends SpringActionController
                 layoutChangeId = json.getString("layoutChangeId");
                 setLayoutChangeId(layoutChangeId);
             }
+            if (json.has("isForceSubmit")) {
+                setForceSubmit(json.getBoolean("isForceSubmit"));
+            } else if (json.has("forceSubmit")) {
+                setForceSubmit(json.getBoolean("forceSubmit"));
+            }
             ObjectMapper mapper = JsonUtil.createDefaultMapper();
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
@@ -503,6 +524,15 @@ public class CageUIController extends SpringActionController
         @Override
         public Object execute(SimpleApiJsonForm form, BindException errors) throws Exception
         {
+            if (isForceSubmit())
+            {
+                if (!getContainer().hasPermission(getUser(), CageUIForceSubmitPermission.class) && !getContainer().hasPermission(getUser(), AdminPermission.class))
+                {
+                    errors.reject(ERROR_MSG, "You do not have permission to force submit housing transfers.");
+                    return null;
+                }
+            }
+
             ApiSimpleResponse response = new ApiSimpleResponse();
             ArrayList<HousingForm> housingRecords = new ArrayList<>();
             ArrayList<HousingConditionRecordsForm> housingConditionRecords = new ArrayList<>();
@@ -547,7 +577,14 @@ public class CageUIController extends SpringActionController
 
                 newTransferRecord.setId(record.getId());
                 newTransferRecord.setTaskId(taskId);
-                newTransferRecord.setDate(Date.from(record.getInDate().atZone(ZoneId.systemDefault()).toInstant()));
+                if (record.getInDate() != null)
+                {
+                    newTransferRecord.setDate(Date.from(record.getInDate().atZone(ZoneId.systemDefault()).toInstant()));
+                }
+                else
+                {
+                    newTransferRecord.setDate(new Date());
+                }
                 if(record.getOutDate() != null){
                     newTransferRecord.setEndDate(Date.from(record.getOutDate().atZone(ZoneId.systemDefault()).toInstant()));
                 }
@@ -614,7 +651,7 @@ public class CageUIController extends SpringActionController
             }
 
 
-            response = CageUIManager.get().submitHousingTransfer(housingRecords, housingConditionRecords, taskRecord, getUser(), getContainer(), getLayoutChangeId());
+            response = CageUIManager.get().submitHousingTransfer(housingRecords, housingConditionRecords, taskRecord, getUser(), getContainer(), getLayoutChangeId(), isForceSubmit());
 
             if(response.get("success").equals(true)){
                 if(!housingNotifs.isEmpty()){

@@ -58,7 +58,7 @@ export const canEditLayout = (user: Security.GetUserPermissionsResponse) => {
 }
 
 export const canEditConditionPermission = (user: Security.GetUserPermissionsResponse) => {
-    return Security.hasEffectivePermission(user.container.effectivePermissions, 'org.labkey.cageui.security.permissions.CageUIRoomCreatorPermission');
+    return Security.hasEffectivePermission(user.container.effectivePermissions, 'org.labkey.cageui.security.permissions.CageUIForceSubmitPermission');
 };
 
 // takes a cage number and returns it in a display friendly format, ex: cage-1 -> Cage 1

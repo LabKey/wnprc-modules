@@ -215,7 +215,7 @@ export function startAdoptionSubmission(animals: AdoptionData[]): Promise<{
 }
 
 // This function is for submitting a housing transfer.
-export function startHousingTransfer(animals: HousingTransferData[], prevFormLsid?: string, layoutChangeId?: string): Promise<{
+export function startHousingTransfer(animals: HousingTransferData[], prevFormLsid?: string, layoutChangeId?: string, isForceSubmit?: boolean): Promise<{
     success: boolean,
     errors: any[]
 }> {
@@ -228,11 +228,13 @@ export function startHousingTransfer(animals: HousingTransferData[], prevFormLsi
             jsonData: {
                 transferData: animals.map(a => ({
                     ...a,
-                    inDate: a.inDate.format('YYYY-MM-DD HH:mm:ss'),
-                    outDate: a?.outDate?.format('YYYY-MM-DD HH:mm:ss')
+                    inDate: a?.inDate ? (typeof a.inDate.format === 'function' ? a.inDate.format('YYYY-MM-DD HH:mm:ss') : a.inDate) : null,
+                    outDate: a?.outDate ? (typeof a.outDate.format === 'function' ? a.outDate.format('YYYY-MM-DD HH:mm:ss') : a.outDate) : null
                 })),
                 prevFormLsid: prevFormLsid,
-                layoutChangeId: layoutChangeId
+                layoutChangeId: layoutChangeId,
+                isForceSubmit: !!isForceSubmit,
+                forceSubmit: !!isForceSubmit
             },
         });
     });

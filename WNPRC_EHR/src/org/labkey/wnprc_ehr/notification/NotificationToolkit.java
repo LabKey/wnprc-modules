@@ -944,11 +944,9 @@ public class NotificationToolkit {
         return queryURL.getURIString();
     }
 
-    public String createFormURL(Container c, String formType, String taskID) {
-        // Creates URL.
-        ActionURL formURL = new ActionURL();
-        formURL = new ActionURL("ehr", "taskDetails.view", c);
-        formURL.addParameter("formtype", formType);
+    public String createFormURL(Container c, String taskID) {
+        // Omit formtype: taskDetails reads it from the task, and the form-type lookups are case-sensitive
+        ActionURL formURL = new ActionURL("ehr", "taskDetails.view", c);
         formURL.addParameter("taskid", taskID);
 
         // Returns URL.

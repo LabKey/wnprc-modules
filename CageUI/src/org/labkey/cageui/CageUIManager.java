@@ -317,6 +317,7 @@ public class CageUIManager
         QueryUpdateService cageUIAllHistoryQus = cageUIAllHistoryTable.getUpdateService();
 
         List<Map<String, Object>> insertedHousingRows;
+        List<Map<String, Object>> insertedTask = List.of();
 
         if (studyHousingQus == null)
         {
@@ -374,7 +375,7 @@ public class CageUIManager
                 if (!housingCodesMapList.isEmpty()) {
                     cageUIHousingConditionQus.insertRows(user, container, housingCodesMapList, batchErrors, null, null);
                 }
-                ehrTasksQus.insertRows(user, container, convertToMapList(taskRecord), batchErrors, null, null);
+                insertedTask = ehrTasksQus.insertRows(user, container, convertToMapList(taskRecord), batchErrors, null, null);
             }
 
             if (batchErrors.hasErrors())
@@ -384,7 +385,7 @@ public class CageUIManager
                 return response;
             }
 
-            // Map the generated LSIDs back into the HousingForm objects
+            // Map the generated LSIDs back into the HousingForm objects to use for notifications.
             if (insertedHousingRows != null)
             {
                 for (int i = 0; i < housingRecords.size(); i++)
@@ -394,6 +395,10 @@ public class CageUIManager
                     if (lsid != null)
                     {
                         housingRecords.get(i).setLsid(lsid.toString());
+                    }
+                    // For the task we overwrite the previous tasks UUID with the tasks rowid for the notifications.
+                    if(insertedTask != null && !insertedTask.isEmpty() && insertedTask.get(0).get("taskid") != null){
+                        housingRecords.get(i).setTaskId(String.valueOf(insertedTask.get(0).get("rowid")));
                     }
                 }
             }

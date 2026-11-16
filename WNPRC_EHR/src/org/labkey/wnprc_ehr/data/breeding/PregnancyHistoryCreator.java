@@ -26,8 +26,8 @@ import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.dataiterator.DataIteratorBuilder;
 import org.labkey.api.dataiterator.DataIteratorContext;
-import org.labkey.api.dataiterator.ListofMapsDataIterator;
 import org.labkey.api.dataiterator.LoggingDataIterator;
+import org.labkey.api.dataiterator.MapDataIterator;
 import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.DuplicateKeyException;
 import org.labkey.api.query.QueryService;
@@ -138,8 +138,7 @@ public final class PregnancyHistoryCreator
 
                     DataIteratorContext context = getDataIteratorContext(errors, InsertOption.INSERT, configParameters);
                     DataIteratorBuilder builder = createImportDIB(user, container,
-                            new DataIteratorBuilder.Wrapper(LoggingDataIterator.wrap(
-                                    new ListofMapsDataIterator(rows.get(0).keySet(), rows))), context);
+                            LoggingDataIterator.wrap(MapDataIterator.of(rows.getFirst().keySet(), rows)), context);
 
                     ArrayList<Map<String, Object>> output = new ArrayList<>();
                     int count = _pump(builder, output, context);

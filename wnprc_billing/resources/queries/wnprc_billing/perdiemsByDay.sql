@@ -34,7 +34,7 @@ FROM
      FROM (
           SELECT timestampadd('SQL_TSI_DAY', i.value, CAST(COALESCE(CAST(StartDate as date), curdate()) AS TIMESTAMP)) as date
           FROM ldk.integers i
-          WHERE i.value < (TIMESTAMPDIFF('SQL_TSI_DAY', EndDate, StartDate)+1)
+          WHERE i.value < (TIMESTAMPDIFF('SQL_TSI_DAY', StartDate, EndDate)+1)
      ) i
   )dr --version of ldk.dateRange
 

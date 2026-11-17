@@ -83,7 +83,9 @@
                 <column columnName="state"/>
                 <column columnName="zip"/>
                 <column columnName="billing_contact_info"/>
-                <column columnName="comments"/>
+                <column columnName="comments">
+                    <columnTitle>Budget Notes re Lease/Use Fees</columnTitle>
+                </column>
                 <column columnName="po_number"/>
                 <column columnName="po_amount">
                     <formatString>$###,##0.00</formatString>
@@ -118,8 +120,12 @@
                     <shownInInsertView>false</shownInInsertView>
                 </column>
                 <column columnName="faSchedule">
+                    <columnTitle>Working Group</columnTitle>
                     <isHidden>true</isHidden>
                     <shownInInsertView>false</shownInInsertView>
+                </column>
+                <column columnName="aliasType">
+                    <columnTitle>SPID</columnTitle>
                 </column>
             </columns>
             </table>

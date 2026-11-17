@@ -74,8 +74,8 @@ public class CageUIRecordDeleteRunner implements Job
     public static final String PROPERTY_DOMAIN = "org.labkey.wnprc_ehr.cageui.recorddeletion";
     public static final String ENABLED_PROP = "isEnabled";
     private static final Logger _log = LogManager.getLogger(CageUIRecordDeleteRunner.class);
-    private static final int _hour = 15;
-    private static final int _minute = 40;
+    private static final int _hour = 23;
+    private static final int _minute = 30;
 
     public CageUIRecordDeleteRunner()
     {

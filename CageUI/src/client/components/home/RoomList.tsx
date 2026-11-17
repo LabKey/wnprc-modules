@@ -61,22 +61,46 @@ export const RoomList: FC = () => {
         if (allRooms.length !== 0) {
             return;
         }
-        labkeyActionSelectWithPromise({
+
+        const roomsPromise = labkeyActionSelectWithPromise({
             schemaName: 'ehr_lookups',
             queryName: 'rooms',
             columns: ['room'],
             filterArray: [Filter.create('room', "template", Filter.Types.CONTAINS_NONE_OF)]
-        }).then((res) => {
-            if (res.rowCount > 0) {
+        });
+
+        const blacklistPromise = labkeyActionSelectWithPromise({
+            schemaName: 'ehr_lookups',
+            queryName: 'cageui_room_blacklist',
+            columns: ['value']
+        });
+
+        Promise.all([roomsPromise, blacklistPromise]).then(([roomsRes, blacklistRes]) => {
+            const blacklist = new Set<string>();
+            if (blacklistRes && blacklistRes.rows) {
+                blacklistRes.rows.forEach((row) => {
+                    const roomName = row.room ?? row.room_name ?? row.name ?? row.value;
+                    if (roomName) {
+                        blacklist.add(String(roomName).trim().toLowerCase());
+                    }
+                });
+            }
+
+            if (roomsRes && roomsRes.rowCount > 0) {
                 const roomList: ListRoom[] = [];
-                res.rows.forEach((row) => {
-                    roomList.push({
-                        name: row.room,
-                        racks: null
-                    });
+                roomsRes.rows.forEach((row) => {
+                    const roomName = row.room;
+                    if (roomName && !blacklist.has(String(roomName).trim().toLowerCase())) {
+                        roomList.push({
+                            name: roomName,
+                            racks: null
+                        });
+                    }
                 });
                 setAllRooms(roomList);
             }
+        }).catch((err) => {
+            console.error('Error fetching rooms:', err);
         });
     }, []);
 

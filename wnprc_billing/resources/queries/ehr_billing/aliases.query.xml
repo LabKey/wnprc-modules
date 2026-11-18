@@ -84,7 +84,7 @@
                 <column columnName="zip"/>
                 <column columnName="billing_contact_info"/>
                 <column columnName="comments">
-                    <columnTitle>Budget Notes re Lease/Use Fees</columnTitle>
+                    <columnTitle>Comments and Budget Notes re: Lease/Use Fees</columnTitle>
                 </column>
                 <column columnName="po_number"/>
                 <column columnName="po_amount">

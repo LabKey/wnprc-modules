@@ -15,10 +15,13 @@
  * limitations under the License.
  */
 %>
+<%@ page import="java.util.Arrays" %>
 <%@ page import="org.json.JSONArray" %>
 <%@ page import="org.json.JSONObject" %>
+<%@ page import="org.labkey.api.collections.LabKeyCollectors" %>
 <%@ page import="org.labkey.api.data.CompareType" %>
 <%@ page import="org.labkey.api.data.SimpleFilter" %>
+<%@ page import="org.labkey.api.util.HtmlString" %>
 <%@ page import="org.labkey.api.util.JsonUtil" %>
 <%@ page import="org.labkey.dbutils.api.SimpleQueryFactory" %>
 <%@ page import="org.labkey.dbutils.api.SimplerFilter" %>
@@ -189,7 +192,7 @@
         <h4>Pathology Unit Notes</h4>
         <hr class="sectionBar"/>
 
-        <div class="container"><%=unsafe(h(necropsy.optString("patho_notes", "-- none --")).toString().replaceAll("\n", "<br>"))%></div>
+        <div class="container"><%=Arrays.stream(necropsy.optString("patho_notes", "-- none --").split("\n", -1)).map(HtmlString::of).collect(LabKeyCollectors.joining(HtmlString.BR))%></div>
     </div>
 
     <div class="row">

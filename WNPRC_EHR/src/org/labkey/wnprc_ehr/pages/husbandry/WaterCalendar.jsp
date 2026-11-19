@@ -573,7 +573,7 @@
             return moment(dateString, "YYYY/MM/DD HH:mm:ss").format('YYYY-MM-DD HH:mm:ss');
         };
 
-        var husbandryAssignmentLookup = <%= unsafe(husbandryAssignmentLookup.toString()) %>;
+        var husbandryAssignmentLookup = <%= husbandryAssignmentLookup %>;
         WebUtils.VM.husbandryAssignmentLookup = husbandryAssignmentLookup;
         var $animalId = "<%= h(animalIds) %>";
 
@@ -593,7 +593,7 @@
             isSuperUser = true;
         }
 
-        var waterAccessControlled = <%= unsafe(userAccessWater.toString()) %>;
+        var waterAccessControlled = <%= userAccessWater %>;
         WebUtils.VM.waterAccessControlled = waterAccessControlled;
 
         let firstEntry = true;

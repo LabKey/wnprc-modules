@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 %>
+<%@ page import="org.json.JSONArray" %>
 <%@ page import="org.json.JSONObject" %>
 <%@ page import="org.labkey.api.data.CompareType" %>
 <%@ page import="org.labkey.api.data.SimpleFilter" %>
@@ -103,8 +104,8 @@
 
 <script type="text/javascript" nonce="<%=getScriptNonce()%>">
     (function() {
-        var biopsies = <%=unsafe(biopsies.toString())%>;
-        var necropsies = <%=unsafe(necropsies.toString())%>;
+        var biopsies = <%=new JSONArray(biopsies)%>;
+        var necropsies = <%=new JSONArray(necropsies)%>;
 
         var makeRowMapFn = function(type) {
 

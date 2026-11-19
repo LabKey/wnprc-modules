@@ -18,6 +18,7 @@
 <%@ page import="org.json.JSONArray" %>
 <%@ page import="org.json.JSONObject" %>
 <%@ page import="org.labkey.api.data.CompareType" %>
+<%@ page import="org.labkey.api.util.HtmlString" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.dbutils.api.SimpleQueryFactory" %>
 <%@ page import="org.labkey.dbutils.api.SimplerFilter" %>
@@ -25,12 +26,20 @@
 <%@ page import="org.labkey.wnprc_ehr.notification.NotificationToolkit" %>
 <%@ page import="org.labkey.api.util.JsonUtil" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
+<%!
+    // Default for fields with no value
+    private static final HtmlString NONE_SPECIFIED = HtmlString.unsafe("<em>Not Specified</em>");
+    private static final HtmlString NO_WEIGHT = HtmlString.unsafe("<em>No weight recorded</em>");
+
+    private HtmlString valueOrNone(JSONObject row, String key)
+    {
+        String value = row.optString(key, null);
+        return null == value ? NONE_SPECIFIED : h(value);
+    }
+%>
 <%
     JSONObject params = (JSONObject) getModelBean();
     SimpleQueryFactory queryFactory = new SimpleQueryFactory(getUser(), getContainer());
-
-    // Define a default when we don't have a value for a field
-    String NONE_SPECIFIED = "<em>Not Specified</em>";
 
     // Grab the Id
     String Id = params.getString("Id");
@@ -107,15 +116,15 @@
     %>
     <tr>
         <td>Dam:</td>
-        <td><%=unsafe(pdRecord.optString("dam", NONE_SPECIFIED))%></td>
+        <td><%=valueOrNone(pdRecord, "dam")%></td>
     </tr>
     <tr>
         <td>Sire:</td>
-        <td><%=unsafe(pdRecord.optString("sire", NONE_SPECIFIED))%></td>
+        <td><%=valueOrNone(pdRecord, "sire")%></td>
     </tr>
     <tr>
         <td>Conception:</td>
-        <td><%=unsafe(pdRecord.optString("conception", NONE_SPECIFIED))%></td>
+        <td><%=valueOrNone(pdRecord, "conception")%></td>
     </tr>
     <%
         }
@@ -163,7 +172,7 @@
             }
 
             if (weight.equals("")) {
-                weight = "<em>No weight recorded</em>";
+                weight = null;
             }
             else {
                 weight += " (multiple weights recorded)";
@@ -171,7 +180,7 @@
 
         }
         else if (weights.length() == 0 || weights.getJSONObject(0).getString("weight") == null) {
-            weight = "<em>No weight recorded</em>";
+            weight = null;
         }
         else {
             weight = weights.getJSONObject(0).getString("weight") + " kg";
@@ -181,7 +190,7 @@
 <table>
     <tr>
         <td>Necropsy Case Number:</td>
-        <td><%=unsafe(necropsy.optString("caseno", NONE_SPECIFIED))%></td>
+        <td><%=valueOrNone(necropsy, "caseno")%></td>
     </tr>
     <tr>
         <td>Task ID:</td>
@@ -193,23 +202,23 @@
     </tr>
     <tr>
         <td>Date of Necropsy:</td>
-        <td><%=unsafe(necropsy.optString("date", NONE_SPECIFIED))%></td>
+        <td><%=valueOrNone(necropsy, "date")%></td>
     </tr>
     <tr>
         <td>Weight:</td>
-        <td><%=unsafe(weight)%></td>
+        <td><%=null == weight ? NO_WEIGHT : h(weight)%></td>
     </tr>
     <tr>
         <td>Time of Death:</td>
-        <td><%=unsafe(necropsy.optString("timeofdeath", NONE_SPECIFIED))%></td>
+        <td><%=valueOrNone(necropsy, "timeofdeath")%></td>
     </tr>
     <tr>
         <td>Type of Death:</td>
-        <td><%=unsafe(cause.equals("") ? NONE_SPECIFIED : cause)%></td>
+        <td><%=cause.isEmpty() ? NONE_SPECIFIED : h(cause)%></td>
     </tr>
     <tr>
         <td>Grant #:</td>
-        <td><%=unsafe(necropsy.optString("account", NONE_SPECIFIED))%></td>
+        <td><%=valueOrNone(necropsy, "account")%></td>
     </tr>
     <tr>
         <td>Animal Replacement Fee:</td>
@@ -240,7 +249,7 @@
     </tr>
     <tr>
         <td>Manner of Death:</td>
-        <td><%=unsafe(necropsy.optString("mannerofdeath", NONE_SPECIFIED))%></td>
+        <td><%=valueOrNone(necropsy, "mannerofdeath")%></td>
     </tr>
     <%
         JSONArray animalDeath = queryFactory.selectRows("study", "deaths", idFilter);

@@ -16,11 +16,9 @@
  */
 %>
 <%@ page import="com.google.common.base.Joiner" %>
-<%@ page import="java.util.Arrays" %>
 <%@ page import="org.apache.commons.lang3.ObjectUtils" %>
 <%@ page import="org.json.JSONArray" %>
 <%@ page import="org.json.JSONObject" %>
-<%@ page import="org.labkey.api.collections.LabKeyCollectors" %>
 <%@ page import="org.labkey.api.data.CompareType" %>
 <%@ page import="org.labkey.api.util.HtmlString" %>
 <%@ page import="org.labkey.api.util.JsonUtil" %>
@@ -40,15 +38,10 @@
         return null == value ? defaultValue : h(value);
     }
 
-    private HtmlString multiline(String text)
-    {
-        return Arrays.stream(text.split("\n", -1)).map(HtmlString::of).collect(LabKeyCollectors.joining(HtmlString.BR));
-    }
-
     private HtmlString multilineOr(JSONObject row, String key, HtmlString defaultValue)
     {
         String value = row.optString(key, null);
-        return null == value ? defaultValue : multiline(value);
+        return null == value ? defaultValue : h(value, true);
     }
 %>
 
@@ -311,7 +304,7 @@
                     <td><%=h(organ_weight.optString("tissue_fs_meaning"))%></td>
                     <td><%=h(organ_weight.optString("qualifier"))%></td>
                     <td><%=h(organ_weight.optString("weight"))%>g</td>
-                    <td><%=multiline(organ_weight.optString("remark"))%></td>
+                    <td><%=h(organ_weight.optString("remark"), true)%></td>
                 </tr>
                 <%
                     }

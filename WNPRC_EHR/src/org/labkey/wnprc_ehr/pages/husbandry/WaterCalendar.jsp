@@ -26,8 +26,6 @@
 <%@ page import="org.labkey.security.xml.GroupEnumType" %>
 <%@ page import="org.labkey.webutils.api.json.JsonUtils" %>
 <%@ page import="java.util.List" %>
-
-<%@ page import="static java.lang.Integer.parseInt" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%!
     @Override

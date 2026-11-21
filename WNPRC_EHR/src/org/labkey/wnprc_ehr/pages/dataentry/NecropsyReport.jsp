@@ -20,6 +20,7 @@
 <%@ page import="org.json.JSONArray" %>
 <%@ page import="org.json.JSONObject" %>
 <%@ page import="org.labkey.api.data.CompareType" %>
+<%@ page import="org.labkey.api.util.HtmlString" %>
 <%@ page import="org.labkey.api.util.JsonUtil" %>
 <%@ page import="org.labkey.dbutils.api.SimpleQueryFactory" %>
 <%@ page import="org.labkey.dbutils.api.SimplerFilter" %>
@@ -27,6 +28,22 @@
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.List" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
+<%!
+    private static final HtmlString NOT_SPECIFIED = HtmlString.unsafe("<em>[not specified]</em>");
+    private static final HtmlString NONE = HtmlString.unsafe("<em>[none]</em>");
+
+    private HtmlString valueOr(JSONObject row, String key, HtmlString defaultValue)
+    {
+        String value = row.optString(key, null);
+        return null == value ? defaultValue : h(value);
+    }
+
+    private HtmlString multilineOr(JSONObject row, String key, HtmlString defaultValue)
+    {
+        String value = row.optString(key, null);
+        return null == value ? defaultValue : h(value, true);
+    }
+%>
 
 <style type="text/css">
     #report hr.sectionBar {
@@ -47,9 +64,6 @@
     SimpleQueryFactory queryFactory = new SimpleQueryFactory(getUser(), getContainer());
 
     SimplerFilter taskFilter = new SimplerFilter("taskid", CompareType.EQUAL, taskid);
-
-    String NOT_SPECIFIED = "<em>[not specified]</em>";
-    String NONE = "<em>[none]</em>";
 
     JSONArray necropsyRecords = queryFactory.selectRows("study", "necropsy", taskFilter);
 
@@ -82,27 +96,27 @@
     JSONArray bcs_scores     = queryFactory.selectRows("study", "bcs",                  taskFilter);
     JSONArray alopecias      = queryFactory.selectRows("study", "alopecia",             taskFilter);
 
-    String alopecia = NOT_SPECIFIED;
+    HtmlString alopecia = NOT_SPECIFIED;
     if (alopecias.length() == 1) {
-        alopecia = alopecias.getJSONObject(0).optString("score", NOT_SPECIFIED);
+        alopecia = valueOr(alopecias.getJSONObject(0), "score", NOT_SPECIFIED);
     }
     else if (alopecias.length() > 1) {
-        List<String> alopeciaStrings = new ArrayList<>();
+        List<HtmlString> alopeciaStrings = new ArrayList<>();
 
         for (JSONObject alo : JsonUtil.toJSONObjectList(alopecias)) {
-            alopeciaStrings.add(alo.optString("score", NOT_SPECIFIED));
+            alopeciaStrings.add(valueOr(alo, "score", NOT_SPECIFIED));
         }
 
-        alopecia = Joiner.on(", ").join(alopeciaStrings);
+        alopecia = HtmlString.join(alopeciaStrings, HtmlString.of(", "));
     }
 
     List<JSONObject> sortedMorphologies = JsonUtils.getSortedListFromJSONArray(morphologies, "remark");
 
     // Get the bcs score
-    String bcs_score;
+    HtmlString bcs_score;
     if (bcs_scores.length() > 0) {
         JSONObject scoreRec = bcs_scores.getJSONObject(0);
-        bcs_score = scoreRec.optString("score");
+        bcs_score = h(scoreRec.optString("score"));
     }
     else {
         bcs_score = NOT_SPECIFIED;
@@ -157,19 +171,19 @@
         <div class="col-xs-6">
                 <dl class="dl-horizontal">
                     <dt>Time of Death</dt>
-                    <dd class="dateWithTimeThatNeedsFormatting"><%=unsafe(necropsy.optString("timeofdeath", NOT_SPECIFIED))%></dd>
+                    <dd class="dateWithTimeThatNeedsFormatting"><%=valueOr(necropsy, "timeofdeath", NOT_SPECIFIED)%></dd>
 
                     <dt>Manner of Death</dt>
-                    <dd><%=unsafe(necropsy.optString("mannerofdeath", NOT_SPECIFIED))%></dd>
+                    <dd><%=valueOr(necropsy, "mannerofdeath", NOT_SPECIFIED)%></dd>
 
                     <dt>Cause of Death</dt>
-                    <dd><%=unsafe(necropsy.optString("causeofdeath", NOT_SPECIFIED))%></dd>
+                    <dd><%=valueOr(necropsy, "causeofdeath", NOT_SPECIFIED)%></dd>
 
                     <dt>Performed On</dt>
                     <dd class="dateWithTimeThatNeedsFormatting"><%=h(necropsy.optString("date", ""))%></dd>
 
                     <dt>Dam</dt>
-                    <dd><%=h(necropsy.optString("dam", NOT_SPECIFIED))%></dd>
+                    <dd><%=valueOr(necropsy, "dam", NOT_SPECIFIED)%></dd>
                 </dl>
         </div>
 
@@ -179,16 +193,16 @@
                 <dd><%=h(weight)%></dd>
 
                 <dt>Body Condition Score</dt>
-                <dd><%=unsafe(bcs_score)%></dd>
+                <dd><%=bcs_score%></dd>
 
                 <dt>Alopecia Score</dt>
-                <dd><%=unsafe(alopecia)%></dd>
+                <dd><%=alopecia%></dd>
 
                 <dt>Perfusion</dt>
-                <dd><%=unsafe(necropsy.optString("perfusion_area", NOT_SPECIFIED))%></dd>
+                <dd><%=valueOr(necropsy, "perfusion_area", NOT_SPECIFIED)%></dd>
 
                 <dt>Tissue Distribution</dt>
-                <dd><%=unsafe(necropsy.optString("tissue_distribution", NOT_SPECIFIED))%></dd>
+                <dd><%=valueOr(necropsy, "tissue_distribution", NOT_SPECIFIED)%></dd>
 
             </dl>
         </div>
@@ -200,7 +214,7 @@
         <hr class="sectionBar"/>
 
         <div class="container">
-            <%=unsafe(necropsy.optString("remark", NONE).replaceAll("\n", "<br>"))%>
+            <%=multilineOr(necropsy, "remark", NONE)%>
         </div>
     </div>
 
@@ -246,7 +260,7 @@
         <hr class="sectionBar"/>
 
         <div class="container">
-            <%=unsafe(necropsy.optString("grossdescription", NONE).replaceAll("\n", "<br>"))%>
+            <%=multilineOr(necropsy, "grossdescription", NONE)%>
         </div>
     </div>
 
@@ -255,7 +269,7 @@
         <hr class="sectionBar"/>
 
         <div class="container">
-            <%=unsafe(necropsy.optString("histologicaldescription", NONE).replaceAll("\n", "<br>"))%>
+            <%=multilineOr(necropsy, "histologicaldescription", NONE)%>
         </div>
     </div>
 
@@ -290,7 +304,7 @@
                     <td><%=h(organ_weight.optString("tissue_fs_meaning"))%></td>
                     <td><%=h(organ_weight.optString("qualifier"))%></td>
                     <td><%=h(organ_weight.optString("weight"))%>g</td>
-                    <td><%=unsafe(organ_weight.optString("remark").replaceAll("\n", "<br>"))%></td>
+                    <td><%=h(organ_weight.optString("remark"), true)%></td>
                 </tr>
                 <%
                     }

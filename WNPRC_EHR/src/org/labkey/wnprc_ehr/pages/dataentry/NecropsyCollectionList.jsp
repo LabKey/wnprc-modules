@@ -189,7 +189,7 @@
         <h4>Pathology Unit Notes</h4>
         <hr class="sectionBar"/>
 
-        <div class="container"><%=unsafe(h(necropsy.optString("patho_notes", "-- none --")).toString().replaceAll("\n", "<br>"))%></div>
+        <div class="container"><%=h(necropsy.optString("patho_notes", "-- none --"), true)%></div>
     </div>
 
     <div class="row">

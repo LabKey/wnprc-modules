@@ -26,8 +26,6 @@
 <%@ page import="org.labkey.security.xml.GroupEnumType" %>
 <%@ page import="org.labkey.webutils.api.json.JsonUtils" %>
 <%@ page import="java.util.List" %>
-
-<%@ page import="static java.lang.Integer.parseInt" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%!
     @Override
@@ -573,7 +571,7 @@
             return moment(dateString, "YYYY/MM/DD HH:mm:ss").format('YYYY-MM-DD HH:mm:ss');
         };
 
-        var husbandryAssignmentLookup = <%= unsafe(husbandryAssignmentLookup.toString()) %>;
+        var husbandryAssignmentLookup = <%= husbandryAssignmentLookup %>;
         WebUtils.VM.husbandryAssignmentLookup = husbandryAssignmentLookup;
         var $animalId = "<%= h(animalIds) %>";
 
@@ -593,7 +591,7 @@
             isSuperUser = true;
         }
 
-        var waterAccessControlled = <%= unsafe(userAccessWater.toString()) %>;
+        var waterAccessControlled = <%= userAccessWater %>;
         WebUtils.VM.waterAccessControlled = waterAccessControlled;
 
         let firstEntry = true;

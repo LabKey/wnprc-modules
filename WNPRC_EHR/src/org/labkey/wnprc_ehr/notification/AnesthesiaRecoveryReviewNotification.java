@@ -88,6 +88,7 @@ public class AnesthesiaRecoveryReviewNotification extends AbstractEHRNotificatio
             messageBody.append(notificationToolkit.createHyperlink("Click here to view all 'Review Required' recoveries</p><hr>", myRequiredReviewsObject.reviewRequiredRecoveriesURL));
         } else {
             notificationToolkit.sendEmptyNotificationRevamp(c, u, "Anesthesia Recovery Review");
+            return null;
         }
 
         // Returns message.

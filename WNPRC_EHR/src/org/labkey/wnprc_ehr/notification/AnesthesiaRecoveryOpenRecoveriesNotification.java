@@ -84,6 +84,7 @@ public class AnesthesiaRecoveryOpenRecoveriesNotification extends AbstractEHRNot
             messageBody.append(notificationToolkit.createHyperlink("Click here to view all unclosed recoveries</p><hr>", myRecoveriesObject.unclosedRecoveriesURL));
         } else {
             notificationToolkit.sendEmptyNotificationRevamp(c, u, "Anesthesia Recovery Open Recoveries");
+            return null;
         }
 
         // Returns message.
